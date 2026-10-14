@@ -144,7 +144,7 @@ button.chip:hover{background:rgba(14,16,19,.82)}
       <div id="ring" hidden></div>
       <div id="info" hidden></div>
       <canvas id="ghost" hidden></canvas>
-      <div class="hint">Drag to turn · Scroll to zoom · Hold a badge to move it</div>
+      <div class="hint">Drag to turn · Scroll to zoom · Select a badge, then drag it to move it</div>
       <div class="views" role="group" aria-label="Camera view">
         <button type="button" data-view="front" aria-pressed="true">Front</button>
         <button type="button" data-view="back" aria-pressed="false">Back</button>
@@ -841,11 +841,16 @@ glc.addEventListener('pointerdown',function(e){
   var hit=pick(e),cand=hit&&!state.armed?decalAt(e):null;
   drag={x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false,mode:'orbit',item:cand,timer:null};
   if(cand){
-    var dg=drag;
-    dg.timer=setTimeout(function(){
-      dg.mode='item';state.sel=cand.id;stage.classList.add('holding');setGuide(true);renderAll();
-      try{if(navigator.vibrate)navigator.vibrate(15)}catch(err){}
-    },420);
+    if(cand.id===state.sel){
+      /* already selected: drag it straight away, no hold needed */
+      drag.mode='item';stage.classList.add('holding');setGuide(true);renderAll();
+    }else{
+      var dg=drag;
+      dg.timer=setTimeout(function(){
+        dg.mode='item';state.sel=cand.id;stage.classList.add('holding');setGuide(true);renderAll();
+        try{if(navigator.vibrate)navigator.vibrate(15)}catch(err){}
+      },420);
+    }
   }
 });
 glc.addEventListener('pointermove',function(e){
@@ -869,6 +874,14 @@ function endDrag(e,cancel){
 }
 glc.addEventListener('pointerup',function(e){endDrag(e,false)});
 glc.addEventListener('pointercancel',function(e){endDrag(e,true)});
+glc.addEventListener('dragover',function(e){if(state.armed&&state.armed.mode==='new'){e.preventDefault();e.dataTransfer.dropEffect='copy';moveGhost(e);}});
+glc.addEventListener('drop',function(e){
+  e.preventDefault();
+  if(!state.armed||state.armed.mode!=='new')return;
+  var proto=state.armed.proto,hit=pick(e);
+  if(!hit){toast('Drop it on the garment, not the empty space around it.');disarm();return;}
+  placeNew(proto,hit);disarm();repaint();renderAll();
+});
 glc.addEventListener('wheel',function(e){e.preventDefault();T.dist=clamp(T.dist+e.deltaY*.003,2.4,6)},{passive:false});
 
 /* ---------- surface decals ---------- */
@@ -966,17 +979,22 @@ window.__syncDecals=function(){
   Object.keys(decals).forEach(function(k){if(!alive[k]){var m=decals[k];group.remove(m);m.geometry.dispose();delete decals[k];}});
 };
 
+/** Places a new item (badge/text/design) at a pick() hit. Returns the item, or null (and toasts why) if there was no room. */
+function placeNew(proto,hit){
+  var replaced=null;
+  if(proto.kind==='badge'){replaced=state.items.filter(function(i){return i.kind==='badge'});state.items=state.items.filter(function(i){return i.kind!=='badge'});}
+  var d=Object.assign({id:state.nextId++,x:hit.x,y:hit.y,side:hit.side,rot:0,pos:hit.point,nrm:hit.normal},proto);
+  state.items.push(d);
+  if(!buildDecal(d)){state.items.pop();if(replaced)state.items=state.items.concat(replaced);toast('No room at that spot. Tap a flatter area, away from the collar or hem.');return null;}
+  d._dirty=false;state.sel=d.id;toast(d.name+' placed on '+placeName(d).toLowerCase());
+  return d;
+}
 function tap(e){
   var hit=pick(e);
   if(state.armed){
     if(!hit)return;
     if(state.armed.mode==='new'){
-      var replaced=null;
-      if(state.armed.proto.kind==='badge'){replaced=state.items.filter(function(i){return i.kind==='badge'});state.items=state.items.filter(function(i){return i.kind!=='badge'});}
-      var d=Object.assign({id:state.nextId++,x:hit.x,y:hit.y,side:hit.side,rot:0,pos:hit.point,nrm:hit.normal},state.armed.proto);
-      state.items.push(d);
-      if(!buildDecal(d)){state.items.pop();if(replaced)state.items=state.items.concat(replaced);toast('No room at that spot. Tap a flatter area, away from the collar or hem.');return;}
-      d._dirty=false;state.sel=d.id;toast(d.name+' placed on '+placeName(d).toLowerCase());
+      if(!placeNew(state.armed.proto,hit))return;
     }else{
       var it=byId(state.armed.id);
       if(it){it.x=hit.x;it.y=hit.y;it.side=hit.side;it.pos=hit.point;it.nrm=hit.normal;it._dirty=true;}
@@ -987,7 +1005,7 @@ function tap(e){
   state.sel=d2?d2.id:null;renderAll();
 }
 function byId(id){for(var i=0;i<state.items.length;i++)if(state.items[i].id===id)return state.items[i];return null}
-function arm(a,label){state.armed=a;stage.classList.add('armed');$('#bannerText').textContent='Tap the garment to '+(a.mode==='new'?'place ':'move ')+label;$('#banner').hidden=false;drawGhost();setGuide(true);}
+function arm(a,label,verb){state.armed=a;stage.classList.add('armed');$('#bannerText').textContent=(verb||'Tap')+' the garment to '+(a.mode==='new'?'place ':'move ')+label;$('#banner').hidden=false;drawGhost();setGuide(true);}
 function disarm(){state.armed=null;stage.classList.remove('armed');$('#banner').hidden=true;$('#ghost').hidden=true;setGuide(false)}
 $('#cancelArm').addEventListener('click',disarm);
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&state.armed)disarm()});
@@ -1056,10 +1074,12 @@ function buildCards(){
   var bc=$('#badgeCards');
   BADGES.forEach(function(b){
     var proto={kind:'badge',shape:b.shape,name:b.name,size:96,c1:'#FFFFFF',c2:'#1F2A4D',label:'G'};
-    var btn=document.createElement('button');btn.type='button';btn.className='card';
+    var btn=document.createElement('button');btn.type='button';btn.className='card';btn.draggable=true;
     btn.innerHTML='<span class="thumb"></span><span class="nm">'+b.name+'</span><span class="meta">'+b.stock+' in stock</span>';
     btn.querySelector('.thumb').appendChild(thumb(proto,84));
     btn.addEventListener('click',function(){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase())});
+    btn.addEventListener('dragstart',function(e){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase(),'Drop');e.dataTransfer.effectAllowed='copy';try{e.dataTransfer.setData('text/plain',b.name)}catch(err){}});
+    btn.addEventListener('dragend',function(){if(state.armed&&state.armed.proto===proto)disarm()});
     bc.appendChild(btn);
   });
   var fb=$('#fontBtns');
