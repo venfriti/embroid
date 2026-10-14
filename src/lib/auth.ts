@@ -51,11 +51,13 @@ export async function login(email: string, password: string, ip: string): Promis
   const now = Date.now();
   // Reserve one of the eight attempts atomically before doing the expensive password check.
   // D1 batches serialize this count-and-insert against concurrent requests.
-  const [reservation] = await batch('live', [
+  const token = crypto.randomUUID();
+  const results = await batch('live', [
     ['DELETE FROM login_attempts WHERE at < ?', [now - 600000]],
-    ['INSERT INTO login_attempts(ip,at) SELECT ?,? WHERE (SELECT COUNT(*) FROM login_attempts WHERE ip=?) < 8', [ip, now, ip]],
+    ['INSERT INTO login_attempts(ip,at,token) SELECT ?,?,? WHERE (SELECT COUNT(*) FROM login_attempts WHERE ip=?) < 8', [ip, now, token, ip]],
+    ['SELECT token FROM login_attempts WHERE token=?', [token]],
   ]) as any[];
-  if (!reservation?.meta?.changes) return 'limited';
+  if (!results[2]?.results?.length) return 'limited';
   await ensureAdmin();
   const u = await first<any>('live', 'SELECT * FROM users WHERE email=?', [email.trim().toLowerCase()]);
   if (!u || !(await check(password, u.password_hash))) return 'bad';

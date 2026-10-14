@@ -1396,7 +1396,7 @@ async function save(reason,automatic){
   if(LINK.view){toast('This is a past order. Use "Use in new order" on the customer page to copy it.');return false;}
   if(!LINK.line){toast('Open this from an order line to save it to the order');return false;}
   if(!AUTOSAVE_READY){saveStatus('Loading mockup…');return false;}
-  if(SAVE_BUSY)return false;
+  if(SAVE_BUSY)return new Promise(function(resolve){function waitForSave(){if(SAVE_BUSY){setTimeout(waitForSave,50);return;}if(!hasUnsaved()){resolve(true);return;}save(reason,automatic).then(resolve)}waitForSave()});
   clearTimeout(SAVE_TIMER);SAVE_BUSY=true;
   var snap=snapshot(),key=JSON.stringify(snap),pic=previewPic();if(pic)snap.thumb=pic;
   var body={design:snap};if(reason)body.reason=reason;
