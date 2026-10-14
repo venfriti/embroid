@@ -8,7 +8,7 @@ export const nid = (p: string) => p + Date.now().toString(36) + Math.random().to
 export const kindName = (k: string) => k === 'school' ? 'School' : k === 'individual' ? 'Individual' : 'Business';
 
 const ORDER_SQL = `SELECT o.*, c.name customer,
- (SELECT COALESCE(SUM(qty*unit_price),0) FROM order_lines WHERE order_id=o.id) subtotal,
+ (SELECT COALESCE(SUM(qty*(unit_price+decor_price)),0) FROM order_lines WHERE order_id=o.id) subtotal,
  (SELECT COALESCE(SUM(qty),0) FROM order_lines WHERE order_id=o.id) pieces,
  (SELECT COUNT(*) FROM order_lines WHERE order_id=o.id) line_count,
  (SELECT COALESCE(SUM(amount),0) FROM payments WHERE order_id=o.id) paid
@@ -18,7 +18,21 @@ const fin = (o: any) => o && ({ ...o, total: o.subtotal - o.discount, balance: o
 export const orders = async (m: Mode, where = '', args: any[] = []) => (await all(m, `${ORDER_SQL} ${where} ORDER BY o.due`, args)).map(fin);
 export const order = async (m: Mode, id: string) => fin(await first(m, `${ORDER_SQL} WHERE o.id=?`, [id]));
 /** Lines without the heavy design JSON: `design` is 1/0 (a mockup is saved) and `thumb` is its small preview picture. */
-export const lines = (m: Mode, id: string) => all<any>(m, "SELECT id, order_id, line_no, item, detail, qty, unit_price, sizes, (design IS NOT NULL AND design!='null') design, json_extract(design,'$.thumb') thumb FROM order_lines WHERE order_id=? ORDER BY line_no", [id]);
+export const lines = (m: Mode, id: string) => all<any>(m, "SELECT id, order_id, line_no, item, detail, qty, unit_price, decor_price, sizes, (design IS NOT NULL AND design!='null') design, json_extract(design,'$.thumb') thumb FROM order_lines WHERE order_id=? ORDER BY line_no", [id]);
+/** Named, priced decorations per line (badges and lettering), read from the saved design JSON. Only lines with a decor_price are fetched. */
+export async function decorations(m: Mode, orderId: string): Promise<Record<number, { name: string; price: number }[]>> {
+  const rows = await all<any>(m, 'SELECT id, design FROM order_lines WHERE order_id=? AND decor_price>0', [orderId]);
+  const out: Record<number, { name: string; price: number }[]> = {};
+  for (const r of rows) {
+    if (!r.design) continue;
+    try {
+      const d = JSON.parse(r.design); const items = d?.byG?.[d.g];
+      if (Array.isArray(items)) out[r.id] = items.filter((it: any) => (Number(it.price) || 0) > 0)
+        .map((it: any) => ({ name: it.kind === 'text' ? `"${it.text}" lettering` : it.name, price: Number(it.price) || 0 }));
+    } catch { /* a line with unreadable design JSON just shows no decoration breakdown */ }
+  }
+  return out;
+}
 export const payments = (m: Mode, id: string) => all(m, 'SELECT * FROM payments WHERE order_id=? ORDER BY date', [id]);
 export const changes = (m: Mode, id: string) => all(m, 'SELECT * FROM order_changes WHERE order_id=? ORDER BY date DESC, id DESC', [id]);
 export const stageLog = (m: Mode, id: string) => all(m, 'SELECT * FROM stage_log WHERE order_id=? ORDER BY id DESC LIMIT 6', [id]);

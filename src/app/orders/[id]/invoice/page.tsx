@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getCtx } from '@/lib/auth';
-import { order, lines, payments, customer, naira, fmtDate } from '@/lib/q';
+import { order, lines, payments, decorations, customer, naira, fmtDate } from '@/lib/q';
 import { PrintBtns } from '@/components/DocBits';
 import { Link, Pay, day } from '@/components/ui';
 
@@ -8,9 +8,23 @@ const SHOW = 5;
 export default async function Invoice({ params }: { params: Promise<{ id: string }> }) {
   const { mode } = await getCtx(); const { id } = await params; const o = await order(mode, id); if (!o) notFound();
   const c = await customer(mode, o.customer_id); const ls = await lines(mode, o.id); const ps = await payments(mode, o.id);
+  const decors = await decorations(mode, o.id);
   const head = ls.slice(0, SHOW), rest = ls.slice(SHOW);
   const cell = (w: number) => ({ flex: `0 0 ${w}px`, textAlign: 'right' as const });
-  const row = (l: any) => <div key={l.id} style={{ display: 'flex', gap: 14, padding: '14px 0', borderBottom: '1px solid #E8ECF0', alignItems: 'flex-start' }}><span style={{ flex: 1 }}><b style={{ fontSize: 16 }}>{l.item}</b>{l.detail && <div style={{ fontSize: 14, color: '#4B5563' }}>{l.detail}</div>}</span><span style={cell(70)}>{l.qty}</span><span style={cell(110)}>{naira(l.unit_price)}</span><b style={{ ...cell(130), fontWeight: 600 }}>{naira(l.qty * l.unit_price)}</b></div>;
+  const row = (l: any) => (
+    <div key={l.id} style={{ padding: '14px 0', borderBottom: '1px solid #E8ECF0' }}>
+      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+        <span style={{ flex: 1 }}><b style={{ fontSize: 16 }}>{l.item}</b>{l.detail && <div style={{ fontSize: 14, color: '#4B5563' }}>{l.detail}</div>}</span>
+        <span style={cell(70)}>{l.qty}</span><span style={cell(110)}>{naira(l.unit_price)}</span><b style={{ ...cell(130), fontWeight: 600 }}>{naira(l.qty * l.unit_price)}</b>
+      </div>
+      {(decors[l.id] || []).map((dc, i) => (
+        <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginTop: 6, fontSize: 14, color: '#4B5563' }}>
+          <span style={{ flex: 1, paddingLeft: 16 }}>{dc.name}</span>
+          <span style={cell(70)} /><span style={cell(110)}>{naira(dc.price)}</span><span style={cell(130)}>{naira(dc.price * l.qty)}</span>
+        </div>
+      ))}
+    </div>
+  );
   const money = (a: string, b: string, o2: any = {}) => <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 17, ...o2 }}><span>{a}</span><span>{b}</span></div>;
   return (
     <main className="page" style={{ maxWidth: 860, padding: '24px 32px 48px', gap: 14 }}>
@@ -37,7 +51,7 @@ export default async function Invoice({ params }: { params: Promise<{ id: string
           <div style={{ display: 'flex', gap: 14, padding: '8px 0', borderBottom: '2px solid #1B2430', fontSize: 14, color: '#4B5563' }}><span style={{ flex: 1 }}>Item</span><span style={cell(70)}>Qty</span><span style={cell(110)}>Price</span><span style={cell(130)}>Amount</span></div>
           {head.map(row)}
           {rest.length > 0 && <>
-            <div className="screen-only" style={{ display: 'flex', gap: 14, padding: '14px 0', borderBottom: '1px solid #E8ECF0' }}><span style={{ flex: 1 }}><b style={{ fontSize: 16 }}>{rest.length} further {rest.length === 1 ? 'line' : 'lines'}</b><div style={{ fontSize: 14, color: '#4B5563' }}>Listed in full on the printed invoice</div></span><b style={{ ...cell(130), fontWeight: 600 }}>{naira(rest.reduce((t, l) => t + l.qty * l.unit_price, 0))}</b></div>
+            <div className="screen-only" style={{ display: 'flex', gap: 14, padding: '14px 0', borderBottom: '1px solid #E8ECF0' }}><span style={{ flex: 1 }}><b style={{ fontSize: 16 }}>{rest.length} further {rest.length === 1 ? 'line' : 'lines'}</b><div style={{ fontSize: 14, color: '#4B5563' }}>Listed in full on the printed invoice</div></span><b style={{ ...cell(130), fontWeight: 600 }}>{naira(rest.reduce((t, l) => t + l.qty * (l.unit_price + l.decor_price), 0))}</b></div>
             <div className="print-only">{rest.map(row)}</div>
           </>}
         </div>

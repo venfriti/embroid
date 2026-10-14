@@ -106,6 +106,7 @@ button.chip:hover{background:rgba(14,16,19,.82)}
 .foot{margin-top:auto;position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .foot .sum{display:flex;flex-direction:column;font-size:13px;color:var(--muted)}
 .foot .sum b{color:var(--text);font-size:15px}
+.save-status{font-size:13px;color:var(--muted)}
 .ok{color:#7FD8A4}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:#14171B;padding:12px 18px;border-radius:12px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:20}
 #nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:32px;text-align:center;color:var(--muted)}
@@ -130,7 +131,8 @@ button.chip:hover{background:rgba(14,16,19,.82)}
       <h1><span id="gName">Boys' sports tee</span> <small id="shirtName">· Red house</small></h1>
       <span class="ctx" id="gCtx">Greenfield Primary School · First term 2026 intake · 16 pieces</span>
     </div>
-    <button class="btn primary" type="button" id="saveBtn">Save to order</button>
+    <span class="save-status" id="saveStatus" role="status" aria-live="polite"></span>
+    <button class="btn primary" type="button" id="saveBtn">Save now</button>
   </header>
 
   <main class="split">
@@ -182,6 +184,7 @@ button.chip:hover{background:rgba(14,16,19,.82)}
         <label class="field" for="newText">Wording<input type="text" id="newText" value="GREENFIELD" maxlength="24" autocomplete="off"></label>
         <div class="field" style="flex:none">Style<div class="fonts" id="fontBtns"></div></div>
         <div class="field" style="flex:none">Thread colour<div class="sw" id="newTextSw"></div></div>
+        <label class="field" for="newTextPrice">Price<input type="number" id="newTextPrice" min="0" step="50" value="300"></label>
         <div class="row"><button class="btn primary" type="button" id="placeText">Place on garment</button></div>
       </div>
 
@@ -198,8 +201,8 @@ button.chip:hover{background:rgba(14,16,19,.82)}
       </div>
 
       <div class="foot">
-        <div class="sum"><b id="sumCount">4 decorations</b><span class="ok" id="sumStock">All badges in stock</span></div>
-        <button class="btn primary" type="button" id="saveBtn2">Save to order</button>
+        <div class="sum"><b id="sumCount">No decorations</b><span class="ok" id="sumStock">All badges in stock</span></div>
+        <button class="btn primary" type="button" id="saveBtn2">Save now</button>
       </div>
     </aside>
   </main>
@@ -213,6 +216,7 @@ button.chip:hover{background:rgba(14,16,19,.82)}
 var $=function(s){return document.querySelector(s)};
 var TEX=1024, G=512, SEG=220, SAFE=.05;
 var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
+var naira=function(n){return '₦'+Math.round(n||0).toLocaleString('en-NG')};
 var smooth=function(a,b,x){var t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 
 /* ---------- data ---------- */
@@ -226,8 +230,9 @@ var FONTS={
   serif:{n:'Serif',css:'"Playfair Display", Georgia, serif',w:700},
   varsity:{n:'Varsity',css:'"Bebas Neue", Impact, sans-serif',w:400}};
 var BADGES=[
-  {shape:'shield',name:'House crest',stock:200},{shape:'round',name:'Round house badge',stock:120},
-  {shape:'star',name:'Star badge',stock:64},{shape:'laurel',name:'Sports crest',stock:38}];
+  {shape:'shield',name:'House crest',stock:200,price:500},{shape:'round',name:'Round house badge',stock:120,price:400},
+  {shape:'star',name:'Star badge',stock:64,price:400},{shape:'laurel',name:'Sports crest',stock:38,price:450}];
+var TEXT_PRICE=300;
 
 var COLORS={
   tee:SHIRTS,
@@ -247,19 +252,11 @@ var SHAPES=[{k:'strip',n:'Full strip',i:'<rect x="9" y="2" width="10" height="26
 
 var state={guide:false,g:'tee',shirt:SHIRTS[0],gcol:{tee:SHIRTS[0],shorts:COLORS.shorts[0],trousers:COLORS.trousers[0],ankara:COLORS.ankara[0]},items:[],byG:{},sel:null,armed:null,nextId:1,tab:'badges',textFont:'varsity',textColor:'#FFFFFF',
   ank:{pat:'fans',cw:0,shape:'strip',w:56,scale:.6,angle:0,collar:true,cuffs:true,pocket:false}};
-function mkItem(o){return Object.assign({id:state.nextId++,rot:0,c1:'#FFFFFF',c2:'#1F2A4D',label:'G'},o)}
-state.byG.tee=[
-  mkItem({kind:'badge',shape:'shield',name:'House crest',side:'front',x:624,y:392,size:96}),
-  mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:300,size:120,text:'OKAFOR',font:'varsity'}),
-  mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:560,size:300,text:'10',font:'block'})];
-state.byG.shorts=[
-  mkItem({kind:'badge',shape:'laurel',name:'Sports crest',side:'front',x:700,y:420,size:64}),
-  mkItem({kind:'text',name:'Lettering',side:'back',x:318,y:440,size:80,text:'GPS',font:'varsity'})];
-state.byG.trousers=[
-  mkItem({kind:'badge',shape:'shield',name:'House crest',side:'front',x:606,y:262,size:60}),
-  mkItem({kind:'text',name:'Lettering',side:'back',x:410,y:360,size:70,text:'GPS',font:'varsity'})];
-state.byG.ankara=[
-  mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:300,size:64,text:'ADEYEMI',font:'varsity',c1:'#E3B23C',c2:'#1F2A4D'})];
+function mkItem(o){return Object.assign({id:state.nextId++,rot:0,c1:'#FFFFFF',c2:'#1F2A4D',label:'G',price:0},o)}
+state.byG.tee=[];
+state.byG.shorts=[];
+state.byG.trousers=[];
+state.byG.ankara=[];
 state.items=state.byG.tee;
 
 /* ---------- garment silhouettes (512 px design space; the plane is 2 x 2 world units) ---------- */
@@ -343,17 +340,20 @@ function zFor(gd,side,u,v,hh){
 
 /* ---------- canvases / textures per side ---------- */
 function mk(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c}
-var knit=mk(8,8),kx=knit.getContext('2d');
-kx.strokeStyle='rgba(0,0,0,.55)';kx.lineWidth=1.6;kx.lineJoin='round';kx.beginPath();kx.moveTo(0,0);kx.lineTo(4,6);kx.lineTo(8,0);kx.stroke();
-var knitB=mk(8,8),kb=knitB.getContext('2d');
-kb.strokeStyle='rgba(255,255,255,.9)';kb.lineWidth=2;kb.lineJoin='round';kb.beginPath();kb.moveTo(0,0);kb.lineTo(4,6);kb.lineTo(8,0);kb.stroke();
+/* jersey knit: columns of small V stitches. Fine enough to read as cloth, soft enough not to moire. */
+function knitTile(col,w){
+  var c=mk(6,8),x=c.getContext('2d');x.strokeStyle=col;x.lineWidth=w;x.lineJoin='round';x.lineCap='round';
+  x.beginPath();x.moveTo(.2,.8);x.lineTo(3,5.4);x.lineTo(5.8,.8);x.stroke();
+  return c;
+}
+var knit=knitTile('rgba(0,0,0,.34)',1.2),knitB=knitTile('rgba(255,255,255,.85)',1.7);
 /* twill (trousers, shorts) and linen (shirt) weaves, kept faint so they never moire */
 function weaveTile(n,col,fn){var c=mk(n,n),x=c.getContext('2d');x.fillStyle=col;x.strokeStyle=col;fn(x,n);return c}
 var twill=weaveTile(6,'rgba(0,0,0,.6)',function(x,n){x.lineWidth=1.5;x.beginPath();x.moveTo(-1,n+1);x.lineTo(n+1,-1);x.stroke()});
 var twillB=weaveTile(6,'rgba(255,255,255,.9)',function(x,n){x.lineWidth=2;x.beginPath();x.moveTo(-1,n+1);x.lineTo(n+1,-1);x.stroke()});
 var linen=weaveTile(8,'rgba(0,0,0,.5)',function(x,n){x.fillRect(0,1,n,1);x.fillRect(3,0,1,n);x.globalAlpha=.5;x.fillRect(0,5,n,1);x.fillRect(6,0,1,n)});
 var linenB=weaveTile(8,'rgba(255,255,255,.9)',function(x,n){x.fillRect(0,1,n,2);x.fillRect(3,0,2,n);x.globalAlpha=.5;x.fillRect(0,5,n,1);x.fillRect(6,0,1,n)});
-var WEAVES={knit:{c:knit,b:knitB,ca:.03,ba:.2},twill:{c:twill,b:twillB,ca:.03,ba:0},linen:{c:linen,b:linenB,ca:.02,ba:0}};
+var WEAVES={knit:{c:knit,b:knitB,ca:.04,ba:.14},twill:{c:twill,b:twillB,ca:.03,ba:0},linen:{c:linen,b:linenB,ca:.02,ba:0}};
 
 var sides={front:{},back:{}};
 Object.keys(sides).forEach(function(k){
@@ -427,19 +427,21 @@ var ART={
   }
 };
 function fontStr(f,px){return f.w+' '+px+'px '+f.css}
-function makeSprite(d){
-  var cv,c;
+function makeSprite(d,ss){
+  var cv,c,w,h;ss=ss||1;
   if(d.kind==='text'){
     var f=FONTS[d.font],px=Math.round(d.size*.9),m=mk(4,4).getContext('2d');m.font=fontStr(f,px);
-    var w=Math.ceil(m.measureText(d.text||' ').width+px*.45+8),h=Math.ceil(px*1.5);
-    cv=mk(w,h);c=cv.getContext('2d');c.font=fontStr(f,px);c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
+    w=Math.ceil(m.measureText(d.text||' ').width+px*.45+8);h=Math.ceil(px*1.5);
+    cv=mk(w*ss,h*ss);c=cv.getContext('2d');c.scale(ss,ss);c.font=fontStr(f,px);c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
     c.lineWidth=Math.max(2,px*.07);c.strokeStyle=d.c2;c.strokeText(d.text||'',w/2,h/2+px*.04);
     c.fillStyle=d.c1;c.fillText(d.text||'',w/2,h/2+px*.04);
   }else{
-    var S=Math.max(32,Math.round(d.size));cv=mk(S,S);c=cv.getContext('2d');
-    c.translate(S/2,S/2);var k=S/108;c.scale(k,k);ART[d.shape](c,d);
+    var S=Math.max(32,Math.round(d.size));cv=mk(S*ss,S*ss);c=cv.getContext('2d');
+    c.scale(ss,ss);c.translate(S/2,S/2);var k=S/108;c.scale(k,k);ART[d.shape](c,d);
   }
-  c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-atop';c.lineWidth=1;
+  c.setTransform(1,0,0,1,0,0);
+  if(ss>1)return cv;                 /* the thread-resolution copy gets its stitches from threadMaps() */
+  c.globalCompositeOperation='source-atop';c.lineWidth=1;
   var t;
   c.strokeStyle='rgba(255,255,255,.17)';c.beginPath();for(t=-cv.height;t<cv.width;t+=3.4){c.moveTo(t,0);c.lineTo(t+cv.height,cv.height)}c.stroke();
   c.strokeStyle='rgba(0,0,0,.16)';c.beginPath();for(t=-cv.height+1.7;t<cv.width;t+=3.4){c.moveTo(t,0);c.lineTo(t+cv.height,cv.height)}c.stroke();
@@ -447,12 +449,56 @@ function makeSprite(d){
 }
 function invalidate(d){d._sp=null;d._dirty=true}
 function sprite(d){if(!d._sp)d._sp=makeSprite(d);return d._sp}
-function bumpSprite(sp){
-  var b=mk(sp.width,sp.height),c=b.getContext('2d');c.drawImage(sp,0,0);
-  c.globalCompositeOperation='source-in';c.fillStyle='#fff';c.fillRect(0,0,b.width,b.height);
-  c.globalCompositeOperation='source-atop';c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=1;c.beginPath();
-  for(var t=-b.height;t<b.width;t+=3.4){c.moveTo(t,0);c.lineTo(t+b.height,b.height)}c.stroke();
-  return b;
+/* ---------- embroidery ----------
+   Every decoration is embroidered, so it gets stitched the way a machine would do it: satin thread laid in parallel
+   rows (the angle depends on the colour region, as it does when each colour is a separate fill), a border whose
+   stitches run across the edge, padding that raises the middle, and a tiny gap where each stitch ends.
+   The result is a colour map plus a normal map, so every thread catches light like a little cylinder. */
+function blur2d(a,W,H,r){
+  var o=new Float32Array(a.length),t=new Float32Array(a.length),x,y,sum,n=2*r+1;
+  for(y=0;y<H;y++){sum=0;for(x=-r;x<=r;x++)sum+=a[y*W+Math.min(W-1,Math.max(0,x))];
+    for(x=0;x<W;x++){t[y*W+x]=sum/n;sum+=a[y*W+Math.min(W-1,x+r+1)]-a[y*W+Math.max(0,x-r)];}}
+  for(x=0;x<W;x++){sum=0;for(y=-r;y<=r;y++)sum+=t[Math.min(H-1,Math.max(0,y))*W+x];
+    for(y=0;y<H;y++){o[y*W+x]=sum/n;sum+=t[Math.min(H-1,y+r+1)*W+x]-t[Math.max(0,y-r)*W+x];}}
+  return o;
+}
+function hash1(n){n=Math.sin(n*127.1+311.7)*43758.5453;return n-Math.floor(n)}
+var FILL_ANGLES=[38,128,82,162];
+function threadMaps(d,sp){
+  var ss=Math.max(1,Math.min(4,Math.floor(1100/Math.max(sp.width,sp.height))));
+  var art=makeSprite(d,ss),W=art.width,H=art.height,N=W*H,src=art.getContext('2d').getImageData(0,0,W,H).data;
+  var al=new Float32Array(N),i,x,y;
+  for(i=0;i<N;i++)al[i]=src[i*4+3]/255;
+  var rad=Math.max(2,Math.round(1.7*ss)),bl=blur2d(blur2d(al,W,H,rad),W,H,rad);
+  var pitch=Math.max(3.4,2*ss),hg=new Float32Array(N),out=new Uint8ClampedArray(N*4),angCache={};
+  for(y=0;y<H;y++)for(x=0;x<W;x++){
+    i=y*W+x;var a=al[i];
+    if(a<.02)continue;
+    var r=src[i*4],g=src[i*4+1],b=src[i*4+2],key=((r>>4)<<8)|((g>>4)<<4)|(b>>4),th=angCache[key];
+    if(th===undefined){th=FILL_ANGLES[Math.floor(hash1(key)*4)%4]*Math.PI/180;angCache[key]=th;}
+    var B=bl[i],gx=bl[Math.min(N-1,i+1)]-bl[Math.max(0,i-1)],gy=bl[Math.min(N-1,i+W)]-bl[Math.max(0,i-W)],gl=Math.sqrt(gx*gx+gy*gy);
+    var ring=B<.55&&gl>1e-4;
+    var ang=ring?Math.atan2(gy,gx):th,c=Math.cos(ang),sn=Math.sin(ang);
+    var u=x*c+y*sn,v=-x*sn+y*c,ti=Math.floor(v/pitch),f=v/pitch-ti;
+    var prof=Math.pow(Math.sin(Math.PI*Math.min(.999,Math.max(.001,f))),.7);
+    var hh=hash1(ti*7.13+key*.01+(ring?91:0)),L=(9+hash1(ti*3.7+key)*13)*ss,sj=(u+hh*60*ss)/L,fr=sj-Math.floor(sj);
+    if(fr<.05||fr>.95)prof*=.55;                 /* where one stitch ends and the next begins */
+    var pad=Math.min(1,Math.max(0,(B-.08)/.6));pad=pad*pad*(3-2*pad);
+    hg[i]=pad*.85+prof*.3+(ring?.1:0);
+    var sh=.66+.52*prof+(hh-.5)*.16;if(ring)sh*=.93;
+    out[i*4]=Math.min(255,r*sh);out[i*4+1]=Math.min(255,g*sh);out[i*4+2]=Math.min(255,b*sh);out[i*4+3]=src[i*4+3];
+  }
+  var nrm=new Uint8ClampedArray(N*4),K=5.4;
+  for(y=0;y<H;y++)for(x=0;x<W;x++){
+    i=y*W+x;
+    if(al[i]<.02){nrm[i*4]=128;nrm[i*4+1]=128;nrm[i*4+2]=255;nrm[i*4+3]=255;continue}
+    var hx=(hg[y*W+Math.min(W-1,x+1)]-hg[y*W+Math.max(0,x-1)])*.5,hy=(hg[Math.min(H-1,y+1)*W+x]-hg[Math.max(0,y-1)*W+x])*.5;
+    var nx=-hx*K,ny=hy*K,nl=Math.sqrt(nx*nx+ny*ny+1);
+    nrm[i*4]=(nx/nl*.5+.5)*255;nrm[i*4+1]=(ny/nl*.5+.5)*255;nrm[i*4+2]=(1/nl*.5+.5)*255;nrm[i*4+3]=255;
+  }
+  var cc=mk(W,H),nc=mk(W,H);
+  cc.getContext('2d').putImageData(new ImageData(out,W,H),0,0);nc.getContext('2d').putImageData(new ImageData(nrm,W,H),0,0);
+  return {col:cc,nrm:nc};
 }
 
 /* ---------- painting ---------- */
@@ -731,11 +777,23 @@ if(!renderer||!window.THREE){
 }
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.outputEncoding=THREE.sRGBEncoding;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.72;
 scene=new THREE.Scene();
 camera=new THREE.PerspectiveCamera(30,1,.1,50);
 group=new THREE.Group();scene.add(group);
-scene.add(new THREE.HemisphereLight(0xdfe6f0,0x1a1d22,.45));
+scene.add(new THREE.HemisphereLight(0xdfe6f0,0x1a1d22,.22));
+/* a small studio environment: soft sky, a few soft boxes. Gives thread and cloth something to reflect. */
+(function(){
+  try{
+    var es=new THREE.Scene(),gc=mk(4,256),gx=gc.getContext('2d'),gr=gx.createLinearGradient(0,0,0,256);
+    gr.addColorStop(0,'#d6deea');gr.addColorStop(.5,'#8a929e');gr.addColorStop(1,'#25282e');gx.fillStyle=gr;gx.fillRect(0,0,4,256);
+    var gt=new THREE.CanvasTexture(gc);gt.encoding=THREE.sRGBEncoding;
+    es.add(new THREE.Mesh(new THREE.SphereGeometry(10,32,16),new THREE.MeshBasicMaterial({map:gt,side:THREE.BackSide})));
+    [[4,4,6,5,3,0xffffff],[-5,2,4,3,5,0xdbe6ff],[0,5,-6,6,2,0xffffff]].forEach(function(b){
+      var m=new THREE.Mesh(new THREE.PlaneGeometry(b[3],b[4]),new THREE.MeshBasicMaterial({color:b[5],side:THREE.DoubleSide}));m.position.set(b[0],b[1],b[2]);m.lookAt(0,0,0);es.add(m);});
+    var pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(es,.03).texture;pm.dispose();
+  }catch(e){}
+})();
 var fit=3.9;
 var key=new THREE.DirectionalLight(0xfff1dc,1.9);key.position.set(2.5,3,4);scene.add(key);
 var fill=new THREE.DirectionalLight(0xbcd2ff,.55);fill.position.set(-3,1,2.5);scene.add(fill);
@@ -769,7 +827,7 @@ function geoFor(key,name){
   var s=sides[name];
   s.tex=new THREE.CanvasTexture(s.col);s.tex.encoding=THREE.sRGBEncoding;s.tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
   s.btex=new THREE.CanvasTexture(s.bmp);s.btex.anisotropy=8;
-  var mat=new THREE.MeshStandardMaterial({map:s.tex,bumpMap:s.btex,bumpScale:.25,alphaTest:.5,roughness:.94,metalness:0,side:THREE.FrontSide});
+  var mat=new THREE.MeshPhysicalMaterial({map:s.tex,bumpMap:s.btex,bumpScale:.25,alphaTest:.5,roughness:.9,metalness:0,envMapIntensity:.3,sheen:new THREE.Color(0x000000),side:THREE.FrontSide});
   s.mesh=new THREE.Mesh(new THREE.BufferGeometry(),mat);if(name==='back')s.mesh.rotation.y=Math.PI;
   s.mesh.updateMatrix();group.add(s.mesh);
   /* plain inner liner so the inside of the garment shows fabric, not the print */
@@ -790,10 +848,10 @@ applyGarment('tee');
 
 /* ---------- camera rig ---------- */
 var VIEWS={front:{yaw:0,dist:3.9},back:{yaw:Math.PI,dist:3.9},left:{yaw:-.95,dist:3.5},right:{yaw:.95,dist:3.5}};
-var T={yaw:0,pitch:0,dist:3.9},C={yaw:0,pitch:0,dist:3.9},curView='front';
+var T={yaw:0,pitch:0,dist:3.9,px:0,py:0},C={yaw:0,pitch:0,dist:3.9,px:0,py:0},curView='front';
 function setView(name){
   var v=VIEWS[name];curView=name;
-  T.yaw=v.yaw+Math.PI*2*Math.round((T.yaw-v.yaw)/(Math.PI*2));T.dist=v.dist;T.pitch=0;
+  T.yaw=v.yaw+Math.PI*2*Math.round((T.yaw-v.yaw)/(Math.PI*2));T.dist=v.dist;T.pitch=0;T.px=0;T.py=0;
   document.querySelectorAll('.views button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===name))});
 }
 document.querySelectorAll('.views button').forEach(function(b){b.addEventListener('click',function(){setView(b.dataset.view)})});
@@ -882,7 +940,16 @@ glc.addEventListener('drop',function(e){
   if(!hit){toast('Drop it on the garment, not the empty space around it.');disarm();return;}
   placeNew(proto,hit);disarm();repaint();renderAll();
 });
-glc.addEventListener('wheel',function(e){e.preventDefault();T.dist=clamp(T.dist+e.deltaY*.003,2.4,6)},{passive:false});
+/* scroll zooms toward the pointer, so a badge or a stitch can be inspected up close */
+glc.addEventListener('wheel',function(e){
+  e.preventDefault();
+  var r=glc.getBoundingClientRect(),nx=((e.clientX-r.left)/r.width)*2-1,ny=-(((e.clientY-r.top)/r.height)*2-1);
+  var half=function(d){var h=d/3.9*fit*Math.tan(Math.PI/12);return {h:h,w:h*r.width/r.height}};
+  var a=half(T.dist),nd=clamp(T.dist+e.deltaY*.003,1,6),b=half(nd);
+  T.px+=nx*(a.w-b.w);T.py+=ny*(a.h-b.h);T.dist=nd;
+  if(nd>=3.9){T.px=0;T.py=0}
+  var lim=clamp((3.9-nd)/2.9,0,1)*.9;T.px=clamp(T.px,-lim,lim);T.py=clamp(T.py,-lim,lim);
+},{passive:false});
 
 /* ---------- surface decals ---------- */
 function change(d,fn){var keep={x:d.x,y:d.y,size:d.size,rot:d.rot,text:d.text,font:d.font,pos:d.pos&&d.pos.clone()};fn();invalidate(d);
@@ -961,15 +1028,16 @@ function buildDecal(d){
   var g=decalGeometry(d),m=decals[d.id],sp=sprite(d);
   if(!g){if(m)m.visible=false;return false;}
   if(!m){
-    m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({transparent:true,alphaTest:.25,roughness:.5,metalness:0,polygonOffset:true,polygonOffsetFactor:-6,polygonOffsetUnits:-6}));
+    m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({transparent:true,alphaTest:.25,roughness:.42,metalness:0,polygonOffset:true,polygonOffsetFactor:-6,polygonOffsetUnits:-6}));
     m.userData.id=d.id;m.renderOrder=2;group.add(m);decals[d.id]=m;
   }else{m.geometry.dispose();m.geometry=g;}
   m.visible=true;
   if(m.userData.sp!==sp){
-    ['map','bumpMap'].forEach(function(k){if(m.material[k])m.material[k].dispose()});
-    var t=new THREE.CanvasTexture(sp);t.encoding=THREE.sRGBEncoding;t.anisotropy=renderer.capabilities.getMaxAnisotropy();
-    var bt=new THREE.CanvasTexture(bumpSprite(sp));
-    m.material.map=t;m.material.bumpMap=bt;m.material.bumpScale=1.1;m.material.needsUpdate=true;m.userData.sp=sp;
+    ['map','normalMap'].forEach(function(k){if(m.material[k])m.material[k].dispose()});
+    var tm=threadMaps(d,sp),mx=renderer.capabilities.getMaxAnisotropy();
+    var t=new THREE.CanvasTexture(tm.col);t.encoding=THREE.sRGBEncoding;t.anisotropy=mx;
+    var nt=new THREE.CanvasTexture(tm.nrm);nt.anisotropy=mx;
+    m.material.map=t;m.material.normalMap=nt;m.material.bumpMap=null;m.material.needsUpdate=true;m.userData.sp=sp;
   }
   return true;
 }
@@ -1050,10 +1118,11 @@ var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').mat
 function frame(){
   requestAnimationFrame(frame);
   var t=clock.getElapsedTime(),k=.14;
-  C.yaw+=(T.yaw-C.yaw)*k;C.pitch+=(T.pitch-C.pitch)*k;C.dist+=(T.dist-C.dist)*k;
+  C.yaw+=(T.yaw-C.yaw)*k;C.pitch+=(T.pitch-C.pitch)*k;C.dist+=(T.dist-C.dist)*k;C.px+=(T.px-C.px)*k;C.py+=(T.py-C.py)*k;
   var idle=(!drag&&!state.armed&&!reduce)?Math.sin(t*.7)*.05:0;
   group.rotation.y=C.yaw+idle;group.rotation.x=C.pitch;group.position.y=reduce?0:Math.sin(t*1.1)*.012;
-  camera.position.set(0,.05,C.dist/3.9*fit);camera.lookAt(0,0,0);
+  camera.position.set(C.px,.05+C.py,C.dist/3.9*fit);camera.lookAt(C.px,C.py,0);
+  var rel=.04+.17*clamp((3.9-C.dist)/2.3,0,1);sides.front.mesh.material.bumpScale=rel;sides.back.mesh.material.bumpScale=rel;
   group.updateMatrixWorld(true);camera.updateMatrixWorld(true);
   renderer.render(scene,camera);updateOverlay();
 }
@@ -1073,9 +1142,9 @@ function svg(p,s){return '<svg width="'+(s||20)+'" height="'+(s||20)+'" viewBox=
 function buildCards(){
   var bc=$('#badgeCards');
   BADGES.forEach(function(b){
-    var proto={kind:'badge',shape:b.shape,name:b.name,size:96,c1:'#FFFFFF',c2:'#1F2A4D',label:'G'};
+    var proto={kind:'badge',shape:b.shape,name:b.name,size:96,c1:'#FFFFFF',c2:'#1F2A4D',label:'G',price:b.price};
     var btn=document.createElement('button');btn.type='button';btn.className='card';btn.draggable=true;
-    btn.innerHTML='<span class="thumb"></span><span class="nm">'+b.name+'</span><span class="meta">'+b.stock+' in stock</span>';
+    btn.innerHTML='<span class="thumb"></span><span class="nm">'+b.name+'</span><span class="meta">'+b.stock+' in stock · '+naira(b.price)+'</span>';
     btn.querySelector('.thumb').appendChild(thumb(proto,84));
     btn.addEventListener('click',function(){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase())});
     btn.addEventListener('dragstart',function(e){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase(),'Drop');e.dataTransfer.effectAllowed='copy';try{e.dataTransfer.setData('text/plain',b.name)}catch(err){}});
@@ -1094,12 +1163,17 @@ function shade2(h){var c=new THREE.Color(h);return c.multiplyScalar(.3)}
 function buildColours(){
   var ss=$('#shirtSw');ss.innerHTML='';
   COLORS[state.g].forEach(function(s){
-    var b=document.createElement('button');b.type='button';b.innerHTML='<i style="background:'+s.c+'"></i>'+s.n;
-    b.addEventListener('click',function(){state.gcol[state.g]=s;state.shirt=s;$('#shirtName').textContent='· '+s.n;syncLiner();repaint();renderShirt()});ss.appendChild(b);
+    var b=document.createElement('button');b.type='button';b.innerHTML='<i style="background:'+s.c+'"></i>'+esc(s.n);
+    b.addEventListener('click',function(){state.gcol[state.g]=s;state.shirt=s;$('#shirtName').textContent='· '+s.n;syncLiner();repaint();renderShirt();scheduleAutosave()});ss.appendChild(b);
   });
   renderShirt();
 }
-function syncLiner(){var c=shade2(state.shirt.c);sides.front.liner.material.color.set(c);sides.back.liner.material.color.set(c)}
+/* a soft fuzzy edge light, the way cloth catches light at grazing angles. Kept subtle so the colour still matches the swatch. */
+var SHEEN={knit:.11,twill:.06,linen:.08};
+function syncLiner(){var c=shade2(state.shirt.c);sides.front.liner.material.color.set(c);sides.back.liner.material.color.set(c);
+  var sc=new THREE.Color(state.shirt.c).lerp(new THREE.Color(0xffffff),.55).multiplyScalar(SHEEN[CG.weave]||.3);
+  sides.front.mesh.material.sheen.copy(sc);sides.back.mesh.material.sheen.copy(sc);
+}
 function renderShirt(){var L=COLORS[state.g];document.querySelectorAll('#shirtSw button').forEach(function(b,i){b.setAttribute('aria-pressed',String(L[i]===state.shirt))})}
 
 /* ---------- Ankara centre panel controls ---------- */
@@ -1183,8 +1257,9 @@ function swatches(host,list,get,set){
 }
 $('#placeText').addEventListener('click',function(){
   var t=$('#newText').value.trim();if(!t){toast('Type the wording first');return;}
+  var price=Math.max(0,Math.floor(Number($('#newTextPrice').value)||0));
   state.sel=null;renderAll();
-  arm({mode:'new',proto:{kind:'text',name:'Lettering',text:t,font:state.textFont,size:120,c1:state.textColor,c2:'#1F2A4D'}},'“'+t+'”');
+  arm({mode:'new',proto:{kind:'text',name:'Lettering',text:t,font:state.textFont,size:120,c1:state.textColor,c2:'#1F2A4D',price:price}},'“'+t+'”');
 });
 
 function showTab(t){
@@ -1199,11 +1274,12 @@ function renderInspector(){
   var d=byId(state.sel),el=$('#inspector');
   if(!d){el.hidden=true;el.innerHTML='';return;}
   el.hidden=false;
-  var html='<div class="insp-head"><div><strong>'+(d.kind==='text'?'“'+(d.text||'')+'”':d.name)+'</strong><div class="where" id="inspWhere">'+placeName(d)+'</div></div>'
+   var html='<div class="insp-head"><div><strong>'+(d.kind==='text'?'“'+esc(d.text||'')+'”':esc(d.name||''))+'</strong><div class="where" id="inspWhere">'+placeName(d)+'</div></div>'
    +'<div class="row"><button class="btn" type="button" id="iMove">Move</button><button class="btn danger" type="button" id="iDel" aria-label="Delete">'+svg(ICON.trash,18)+'</button></div></div>';
   if(d.kind==='text'){
     html+='<label class="field" for="iText">Wording<input type="text" id="iText" maxlength="24" autocomplete="off"></label><div class="fonts" id="iFonts"></div>';
   }
+  html+='<label class="field" for="iPrice">Price, added to the invoice<input type="number" id="iPrice" min="0" step="50" value="'+(d.price||0)+'"></label>';
   html+='<div class="range"><label for="iSize">Size</label><input type="range" id="iSize" min="'+(d.kind==='text'?40:30)+'" max="'+(d.kind==='text'?360:360)+'" value="'+d.size+'"><output id="iSizeO">'+d.size+'</output></div>'
    +'<div class="range"><label for="iRot">Rotate</label><input type="range" id="iRot" min="-180" max="180" value="'+d.rot+'"><output id="iRotO">'+d.rot+'°</output></div>'
    +'<div class="field" style="flex:none">'+(d.kind==='text'?'Thread colour':'Main colour')+'<div class="sw" id="iC1"></div></div>'
@@ -1215,6 +1291,7 @@ function renderInspector(){
   function touch(){invalidate(d);repaint();renderLayers();renderInfo();if($('#inspWhere'))$('#inspWhere').textContent=placeName(d)}
   $('#iSize').addEventListener('input',function(e){var v=+e.target.value;if(change(d,function(){d.size=v})){$('#iSizeO').textContent=d.size;touch()}else{e.target.value=d.size}});
   $('#iRot').addEventListener('input',function(e){var v=+e.target.value;if(change(d,function(){d.rot=v})){$('#iRotO').textContent=d.rot+'°';touch()}else{e.target.value=d.rot}});
+  $('#iPrice').addEventListener('input',function(e){d.price=Math.max(0,Math.floor(Number(e.target.value)||0));renderLayers();renderInfo()});
   function sw(id,key){var h=$(id);(function draw(){swatches(h,THREADS,function(){return d[key]},function(c){d[key]=c;touch();draw()})})()}
   sw('#iC1','c1');sw('#iC2','c2');
   el.querySelectorAll('.nudge button').forEach(function(b){b.addEventListener('click',function(){var n=b.dataset.n.split(',');if(change(d,function(){d.x=clamp(d.x+ +n[0],0,TEX);d.y=clamp(d.y+ +n[1],0,TEX)}))touch()})});
@@ -1241,7 +1318,7 @@ function renderLayers(){
   if(!state.items.length&&!CG.panel){host.innerHTML='<p style="margin:0;color:var(--muted)">Nothing added yet. Pick a badge, text or design above.</p>';}
   state.items.forEach(function(d){
     var b=document.createElement('button');b.type='button';b.className='layer';if(d.id===state.sel)b.setAttribute('aria-current','true');
-    b.innerHTML='<span class="t"></span><span class="l"><b>'+(d.kind==='text'?'“'+esc(d.text||'')+'”':d.name)+'</b><span>'+placeName(d)+'</span></span>';
+     b.innerHTML='<span class="t"></span><span class="l"><b>'+(d.kind==='text'?'“'+esc(d.text||'')+'”':esc(d.name||''))+'</b><span>'+placeName(d)+'</span></span>';
     b.querySelector('.t').appendChild(thumb(d,36));
     b.addEventListener('click',function(){
       state.sel=d.id;renderAll();
@@ -1249,7 +1326,9 @@ function renderLayers(){
     });
     host.appendChild(b);
   });
-  var n=state.items.length;$('#sumCount').textContent=n+' decoration'+(n===1?'':'s');
+  var n=state.items.length,tot=state.items.reduce(function(s,d){return s+(d.price||0)},0);
+  $('#sumCount').textContent=n+' decoration'+(n===1?'':'s')+(tot>0?' · '+naira(tot)+' a piece':'');
+  scheduleAutosave();
 }
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function renderInfo(){
@@ -1257,7 +1336,7 @@ function renderInfo(){
   if(!d){el.hidden=true;return;}
   var sp=sprite(d),cm=Math.round(sp.width*.118*10)/10,rows='';
   function r(a,b){rows+='<div class="r"><span>'+a+'</span><span>'+b+'</span></div>'}
-  r('Placed',placeName(d));r('Side',d.side==='front'?'Front':'Back');r('Width','≈ '+cm+' cm');
+  r('Placed',placeName(d));r('Side',d.side==='front'?'Front':'Back');r('Width','≈ '+cm+' cm');r('Price',naira(d.price)+' a piece');
   if(d.kind==='badge'){var st=0;BADGES.forEach(function(b){if(b.shape===d.shape)st=b.stock});r('Stock',st+' · needs '+CG.pieces);r('Method','Embroidered patch')}
   else if(d.kind==='text'){r('Lettering',FONTS[d.font].n);r('Method','Embroidered')}
   else r('Method','Embroidered, thread only');
@@ -1268,7 +1347,19 @@ function renderInfo(){
 function renderAll(){renderInspector();renderLayers();renderInfo()}
 
 var LINK={order:null,line:null,view:false,customer:null};
+var ORDER_STAGE=null,CAN_SAVE=false,AUTOSAVE_READY=false,SAVED_KEY=null,SAVE_TIMER=null,SAVE_BUSY=false;
 function snapshot(){return JSON.parse(JSON.stringify({g:state.g,gcol:state.gcol,byG:state.byG,ank:state.ank,nextId:state.nextId},function(k,v){return k.charAt(0)==='_'?undefined:v}))}
+function snapshotKey(){return JSON.stringify(snapshot())}
+function saveStatus(text){var el=$('#saveStatus');if(el)el.textContent=text}
+function hasUnsaved(){return AUTOSAVE_READY&&snapshotKey()!==SAVED_KEY}
+function scheduleAutosave(){
+  if(!AUTOSAVE_READY||!hasUnsaved())return;
+  if(ORDER_STAGE==='Draft'&&CAN_SAVE){
+    saveStatus('Unsaved changes · saving…');clearTimeout(SAVE_TIMER);
+    SAVE_TIMER=setTimeout(function(){save('',true)},350);
+  }else if(!CAN_SAVE)saveStatus('Demo · changes are not saved');
+  else saveStatus('Unsaved changes · save before leaving');
+}
 function restoreDesign(d){
   disarm();
   Object.keys(decals).forEach(function(k){var m=decals[k];group.remove(m);m.geometry.dispose();delete decals[k];});
@@ -1301,20 +1392,38 @@ function previewPic(){
     return c.toDataURL('image/jpeg',0.72);
   }catch(e){return null}
 }
-function save(){
-  if(LINK.view){toast('This is a past order. Use "Use in new order" on the customer page to copy it.');return;}
-  if(!LINK.line){toast('Open this from an order line to save it to the order');return;}
-  var snap=snapshot();var pic=previewPic();if(pic)snap.thumb=pic;
-  fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({design:snap})})
-   .then(function(r){return r.json().then(function(j){return{r:r,j:j}})})
-   .then(function(x){
-     if(x.r.status===403&&x.j.demo)toast("This is the demo. Changes aren't saved. Sign in to save.");
-     else if(!x.r.ok)toast(x.j.error||'Could not save');
-     else toast('Saved to the order line · '+state.items.length+' decorations on '+CG.n.toLowerCase());
-   }).catch(function(){toast('Could not reach the server')});
+async function save(reason,automatic){
+  if(LINK.view){toast('This is a past order. Use "Use in new order" on the customer page to copy it.');return false;}
+  if(!LINK.line){toast('Open this from an order line to save it to the order');return false;}
+  if(!AUTOSAVE_READY){saveStatus('Loading mockup…');return false;}
+  if(SAVE_BUSY)return false;
+  clearTimeout(SAVE_TIMER);SAVE_BUSY=true;
+  var snap=snapshot(),key=JSON.stringify(snap),pic=previewPic();if(pic)snap.thumb=pic;
+  var body={design:snap};if(reason)body.reason=reason;
+  var ok=false,retryReason=null;
+  saveStatus('Saving…');
+  try{
+    var r=await fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(r.status===403&&j.demo){CAN_SAVE=false;saveStatus('Demo · changes are not saved');if(!automatic)toast("This is the demo. Changes aren't saved. Sign in to save.");}
+    else if(r.status===400&&j.reason_needed){ORDER_STAGE='Confirmed';document.querySelectorAll('#saveBtn,#saveBtn2').forEach(function(b){b.textContent='Save changes'});if(automatic)saveStatus('Order confirmed · save changes and give a reason');else{retryReason=window.prompt('This order is confirmed, and the decoration price has changed. Why?')||'';if(!retryReason.trim())saveStatus('Not saved. A reason is needed for this price change.');}}
+    else if(!r.ok){saveStatus('Not saved · retry with the button');if(!automatic)toast(j.error||'Could not save');}
+    else{SAVED_KEY=key;ok=true;saveStatus('Saved');if(!automatic)toast('Saved to the order line · '+state.items.length+' decorations on '+CG.n.toLowerCase());}
+  }catch(e){saveStatus('Not saved · check your connection and retry');if(!automatic)toast('Could not reach the server');}
+  SAVE_BUSY=false;
+  if(retryReason&&retryReason.trim())return save(retryReason.trim(),false);
+  if(ok&&hasUnsaved())scheduleAutosave();
+  return ok;
 }
-$('#saveBtn').addEventListener('click',save);$('#saveBtn2').addEventListener('click',save);
-$('#backBtn').addEventListener('click',function(){if(LINK.view&&LINK.customer)location.href='/customers/'+LINK.customer;else if(LINK.order)location.href='/orders/'+LINK.order;else toast('Open this from an order line')});
+$('#saveBtn').addEventListener('click',function(){save()});$('#saveBtn2').addEventListener('click',function(){save()});
+function goBack(){if(LINK.view&&LINK.customer)location.href='/customers/'+LINK.customer;else if(LINK.order)location.href='/orders/'+LINK.order;else toast('Open this from an order line')}
+$('#backBtn').addEventListener('click',function(){
+  if(LINK.view||!hasUnsaved()){goBack();return;}
+  if(ORDER_STAGE==='Draft'&&CAN_SAVE){save('',true).then(function(ok){if(ok)goBack();else toast('The mockup is not saved yet. Stay here and retry.');});return;}
+  if(window.confirm('There are unsaved mockup changes. Leave without saving?'))goBack();
+});
+document.addEventListener('visibilitychange',function(){if(document.hidden&&hasUnsaved()&&ORDER_STAGE==='Draft'&&CAN_SAVE)save('',true)});
+window.addEventListener('beforeunload',function(e){if(hasUnsaved()){e.preventDefault();e.returnValue='';}});
 $('#fsBtn').addEventListener('click',function(){
   try{
     if(document.fullscreenElement){document.exitFullscreen()}
@@ -1331,14 +1440,16 @@ if(document.fonts&&document.fonts.load){
    .then(function(){state.items.forEach(function(d){invalidate(d)});repaint();renderAll()}).catch(function(){});
 }
 frame();
-window.__studio={state:state,setView:setView,T:T,snapshot:snapshot,previewPic:previewPic};
+window.__studio={threadMaps:threadMaps,sprite:sprite,state:state,setView:setView,T:T,snapshot:snapshot,previewPic:previewPic};
 (function(){
   var q=new URLSearchParams(location.search);LINK.order=q.get('order');LINK.line=q.get('line');LINK.view=q.get('view')==='1';LINK.customer=q.get('customer');
-  if(LINK.view){var bb=$('#backBtn');if(bb&&LINK.customer)bb.lastChild.nodeValue='Back to customer';['saveBtn','saveBtn2'].forEach(function(id){var b=$('#'+id);if(b)b.style.display='none'});}
+  if(LINK.view){var bb=$('#backBtn');if(bb&&LINK.customer)bb.lastChild.nodeValue='Back to customer';['saveBtn','saveBtn2','saveStatus'].forEach(function(id){var b=$('#'+id);if(b)b.style.display='none'});}
   if(!LINK.order||!LINK.line)return;
   fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line).then(function(r){return r.ok?r.json():null}).then(function(j){
     if(!j)return;
     window.__ctx=[j.customer,j.order_name,j.qty+' pieces'].join(' · ');
+    ORDER_STAGE=j.order_stage;CAN_SAVE=j.mode==='live'&&!LINK.view;
+    document.querySelectorAll('#saveBtn,#saveBtn2').forEach(function(b){b.textContent=ORDER_STAGE==='Draft'?'Save now':'Save changes'});
     var key=pickGarment(j.item),fallback=false;
     if(!key){key='tee';fallback=true;}
     if(j.design){restoreDesign(j.design);}
@@ -1348,6 +1459,11 @@ window.__studio={state:state,setView:setView,T:T,snapshot:snapshot,previewPic:pr
       if(m){state.gcol[state.g]=m;state.shirt=m;syncLiner();repaint();renderShirt();}
     }
     garmentChrome();
+    SAVED_KEY=snapshotKey();AUTOSAVE_READY=true;
+    if(LINK.view)saveStatus('Read only');
+    else if(!CAN_SAVE)saveStatus('Demo · changes are not saved');
+    else if(ORDER_STAGE==='Draft')saveStatus('Draft · changes save automatically');
+    else saveStatus('Confirmed order · save changes before leaving');
     if(fallback)toast('No 3D model for '+j.item+' yet. Showing the sports tee.');
     else if(LINK.view)toast('Viewing the mockup from '+j.order_name+'. Copy it from the customer page.');
     else if(j.design)toast('Opened the saved mockup');

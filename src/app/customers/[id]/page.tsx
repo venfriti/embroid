@@ -15,12 +15,12 @@ export default async function Profile({ params, searchParams }: { params: Promis
   const draft = os.filter(o => o.stage === 'Draft').sort((a, b) => (b.updated || '').localeCompare(a.updated || ''))[0];
   const hist = os.filter(o => o.stage !== 'Draft').sort((a, b) => (a.stage === 'Collected' ? 1 : 0) - (b.stage === 'Collected' ? 1 : 0) || (a.due || '').localeCompare(b.due || ''));
   const shown = hist.slice(0, 6);
-  const rows = await all<any>(mode, `SELECT l.id line_id, l.order_id, l.item, l.detail, l.unit_price price, (l.design IS NOT NULL AND l.design!='null') has_design, json_extract(l.design,'$.thumb') thumb FROM order_lines l JOIN orders o ON o.id=l.order_id WHERE o.customer_id=? AND o.stage!='Draft' AND l.detail IS NOT NULL ORDER BY o.placed DESC, l.id DESC`, [c.id]);
+  const rows = await all<any>(mode, `SELECT l.id line_id, l.order_id, l.item, l.detail, l.unit_price price, l.decor_price, (l.design IS NOT NULL AND l.design!='null') has_design, json_extract(l.design,'$.thumb') thumb FROM order_lines l JOIN orders o ON o.id=l.order_id WHERE o.customer_id=? AND o.stage!='Draft' AND l.detail IS NOT NULL ORDER BY o.placed DESC, l.id DESC`, [c.id]);
   // one card per garment + colour: the newest line, preferring one that has a saved 3D mockup
   const seen = new Map<string, any>();
   for (const r of rows) { const k = r.item + '|' + r.detail; const cur = seen.get(k); if (!cur || (!cur.has_design && r.has_design)) seen.set(k, cur ? { ...r, price: cur.price } : r); }
   const past = [...seen.values()].sort((a, b) => Number(!!b.has_design) - Number(!!a.has_design)).slice(0, 6); // mockups first, then newest
-  const designs = await Promise.all(past.map(async d => ({ ...d, price: (await priceFor(mode, c.id, d.item)) ?? d.price })));
+  const designs = await Promise.all(past.map(async d => ({ ...d, price: ((await priceFor(mode, c.id, d.item)) ?? d.price) + (d.decor_price || 0) })));
   const contact = [['Contact person', c.contact], ['Phone', c.phone], ['Email', c.email], ['Delivery address', c.address]];
   const notes = String(c.notes || '').split(/\n+/).map((x: string) => x.trim()).filter(Boolean);
   const row = { width: '100%', minHeight: 56, boxSizing: 'border-box' as const, padding: '8px 16px 8px 12px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' as const, textDecoration: 'none', background: '#FFFFFF', color: '#1B2430' };

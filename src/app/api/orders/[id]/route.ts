@@ -18,7 +18,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     stmts.push(['UPDATE orders SET stage=? WHERE id=?', [b.stage, id]], ['INSERT INTO stage_log(order_id,at,by,from_stage,to_stage) VALUES(?,?,?,?,?)', [id, new Date().toISOString(), g.ctx.user?.name, o.stage, b.stage]]);
     await batch('live', stmts);
   }
-  if (b.discount !== undefined) await run('live', 'UPDATE orders SET discount=? WHERE id=?', [Math.max(0, Math.floor(Number(b.discount)) || 0), id]);
+  if (b.discount !== undefined) {
+    const discount = Number(b.discount);
+    if (!Number.isSafeInteger(discount) || discount < 0) return Response.json({ error: 'Discount must be a whole amount of zero or more' }, { status: 400 });
+    const saved = await run('live', 'UPDATE orders SET discount=? WHERE id=? AND ? <= (SELECT COALESCE(SUM(qty*(unit_price+decor_price)),0) FROM order_lines WHERE order_id=?)', [discount, id, discount, id]);
+    if (!saved.meta.changes) return Response.json({ error: 'Discount cannot be more than the order total' }, { status: 400 });
+  }
   if (b.due) await run('live', 'UPDATE orders SET due=? WHERE id=?', [b.due, id]);
   await run('live', 'UPDATE orders SET updated=? WHERE id=?', [new Date().toISOString(), id]);
   return Response.json({ ok: true });

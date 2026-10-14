@@ -14,7 +14,7 @@ export default async function Sheet({ params }: { params: Promise<{ id: string }
   for (const l of ls) for (const r of by.get(l.item)?.stock_per_piece || []) need[r.item] = (need[r.item] || 0) + r.qty * l.qty;
   const mats = (pred: (t: string) => boolean) => Object.entries(need).map(([name, q]) => { const s = st.find(x => x.name === name); return { name, qty: Math.round(q * 100) / 100, unit: s?.unit || '', type: s?.type || '', short: s && s.available < 0 ? Math.min(Math.round(q * 100) / 100, Math.round(-s.available * 100) / 100) : 0 }; }).filter(m => pred(m.type));
   const pull = mats(t => t === 'Fabric'), trims = mats(t => t !== 'Fabric');
-  const slines = ls.map(l => { const g = by.get(l.item); return { thumb: l.thumb, id: l.id, line_no: l.line_no, item: l.item, detail: l.detail, qty: l.qty, unit_price: l.unit_price, sizes: parse(l.sizes), placements: (g?.placements || []).map((p: any, i: number) => ({ no: p.no || i + 1, what: p.what, place: p.place, method: p.method })),
+  const slines = ls.map(l => { const g = by.get(l.item); return { thumb: l.thumb, id: l.id, line_no: l.line_no, item: l.item, detail: l.detail, qty: l.qty, unit_price: l.unit_price, decor_price: l.decor_price, sizes: parse(l.sizes), placements: (g?.placements || []).map((p: any, i: number) => ({ no: p.no || i + 1, what: p.what, place: p.place, method: p.method })),
     short: (g?.stock_per_piece || []).filter(r => { const s = st.find(x => x.name === r.item); return s && s.type !== 'Fabric' && s.available < 0; }).map(r => `${r.item} short by ${-st.find(x => x.name === r.item)!.available}. Order more.`) }; });
   return (
     <main className="page" style={{ maxWidth: 'none', padding: '20px 32px 48px', gap: 14 }}>

@@ -9,13 +9,16 @@ export async function POST(req: Request) {
   const open = (await orders('live', 'WHERE o.customer_id=?', [b.customer_id])).filter(o => o.balance > 0 && o.stage !== 'Draft');
   let split: { id: string; amount: number }[] = [];
   if (Array.isArray(b.allocations)) {
+    const totals = new Map<string, number>();
     for (const a of b.allocations) {
       const amt = Math.floor(Number(a.amount)); if (!(amt > 0)) continue;
       const o = open.find(x => x.id === a.order_id);
       if (!o) return Response.json({ error: 'An order in the split is not owing anything' }, { status: 400 });
-      if (amt > o.balance) return Response.json({ error: `${o.name} only owes ₦${o.balance.toLocaleString('en-NG')}` }, { status: 400 });
-      split.push({ id: o.id, amount: amt });
+      const total = (totals.get(o.id) || 0) + amt;
+      if (!Number.isSafeInteger(total) || total > o.balance) return Response.json({ error: `${o.name} only owes ₦${o.balance.toLocaleString('en-NG')}` }, { status: 400 });
+      totals.set(o.id, total);
     }
+    split = [...totals].map(([id, amount]) => ({ id, amount }));
     if (!split.length) return Response.json({ error: 'Enter an amount against at least one order' }, { status: 400 });
   } else {
     let left = Math.floor(Number(b.amount));
@@ -25,6 +28,11 @@ export async function POST(req: Request) {
   }
   const stmts: any[] = split.map(s => ['INSERT INTO payments(order_id,date,method,amount,ref,note,by) VALUES(?,?,?,?,?,?,?)', [s.id, b.date || today(), b.method || 'Transfer', s.amount, b.ref || null, b.note || null, g.ctx.user?.name || null]]);
   for (const s of split) stmts.push(['UPDATE orders SET updated=? WHERE id=?', [new Date().toISOString(), s.id]]);
-  await batch('live', stmts);
+  try {
+    await batch('live', stmts);
+  } catch (err) {
+    if (String(err).includes('Payment exceeds order balance')) return Response.json({ error: 'The remaining balance changed. Refresh and try again.' }, { status: 400 });
+    throw err;
+  }
   return Response.json({ ok: true });
 }

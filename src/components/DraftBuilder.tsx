@@ -6,7 +6,7 @@ import { send } from '@/lib/client';
 import { Mockup, studioUrl, h1, h2 } from './ui';
 
 const n = (x: number) => '₦' + Math.round(x).toLocaleString('en-NG');
-export type DLine = { id: number; item: string; detail: string | null; qty: number; unit_price: number; sizes: string | null; design: unknown; thumb?: string | null };
+export type DLine = { id: number; item: string; detail: string | null; qty: number; unit_price: number; decor_price: number; sizes: string | null; design: unknown; thumb?: string | null };
 type G = { name: string; sizes: number[]; placements: { place: string; what: string; method: string }[]; recipe: { item: string; qty: number; unit: string; onHand: number; avail: number }[] };
 const LBL = { display: 'flex', flexDirection: 'column', gap: 6, fontSize: 14, color: '#3F4A58', minWidth: 0 } as const;
 const INP = { width: '100%', boxSizing: 'border-box', minHeight: 46, padding: '0 12px', fontSize: 16, color: '#1B2430', background: '#FFFFFF', border: '1px solid #C5CCD5', borderRadius: 10 } as const;
@@ -22,7 +22,7 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
   const cur = (l: DLine) => local[l.id] || l;
   const L = lines.map(cur); const l = L.find(x => x.id === sel) || null;
   useEffect(() => { if (sel === null && lines[0]) setSel(lines[0].id); }, [lines, sel]);
-  const total = L.reduce((s, x) => s + x.qty * x.unit_price, 0), pieces = L.reduce((s, x) => s + x.qty, 0);
+  const total = L.reduce((s, x) => s + x.qty * (x.unit_price + x.decor_price), 0), pieces = L.reduce((s, x) => s + x.qty, 0);
   const g = l ? garments[l.item] : undefined;
   const shortOf = (x: DLine) => (garments[x.item]?.recipe || []).filter(rc => x.qty * rc.qty > rc.avail).map(rc => Math.ceil(x.qty * rc.qty - rc.avail));
 
@@ -75,7 +75,7 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
                 <span style={{ fontSize: 13, color: '#3F4A58' }}>{[x.detail, `${x.qty} pcs`].filter(Boolean).join(' · ')}</span>
                 {sh.length > 0 && <span style={{ alignSelf: 'flex-start', marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, color: '#8A1C13', background: '#FDECEA', border: '1px solid #E8A29B', padding: '2px 8px', borderRadius: 6 }}>Stock short by {Math.max(...sh)}</span>}
               </span>
-              <span style={{ fontWeight: 700, fontSize: 15 }}>{n(x.qty * x.unit_price)}</span>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>{n(x.qty * (x.unit_price + x.decor_price))}</span>
             </button>); })}
           <button type="button" disabled={busy} onClick={() => add()} style={{ width: '100%', textAlign: 'left', minHeight: 56, padding: '0 18px', fontSize: 15, fontWeight: 600, color: '#0E5C63', background: '#fff', border: 0, cursor: 'pointer' }}>+ &nbsp;Add line</button>
         </div>
@@ -127,8 +127,8 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
             <div style={{ borderTop: '1px solid #E8ECF0', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
               {(g?.recipe || []).map(rc => { const need = Math.round(l.qty * rc.qty * 100) / 100; const okk = need <= rc.avail; return <span key={rc.item} style={{ fontSize: 15, color: okk ? '#14532D' : '#8A1C13' }}>{okk ? '✓' : '⚠'} {rc.item}: {rc.onHand} {rc.unit} on hand, {need} needed{okk ? '' : `. Short by ${Math.round((need - rc.avail) * 100) / 100}`}</span>; })}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginTop: 8 }}>
-                <span style={{ fontSize: 15, color: '#4B5563' }}>{l.qty} × <input type="number" min="0" value={l.unit_price} onChange={e => push({ ...l, unit_price: Math.max(0, Math.floor(Number(e.target.value) || 0)) })} aria-label="Price each" style={{ width: 100, minHeight: 36, fontSize: 15, padding: '0 8px', border: '1px solid #C5CCD5', borderRadius: 8 }} /> {prices[l.item] === l.unit_price ? 'from price book' : `(price book ${prices[l.item] != null ? n(prices[l.item]) : 'none'})`}</span>
-                <b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 20 }}>{n(l.qty * l.unit_price)}</b>
+                <span style={{ fontSize: 15, color: '#4B5563' }}>{l.qty} × <input type="number" min="0" value={l.unit_price} onChange={e => push({ ...l, unit_price: Math.max(0, Math.floor(Number(e.target.value) || 0)) })} aria-label="Price each" style={{ width: 100, minHeight: 36, fontSize: 15, padding: '0 8px', border: '1px solid #C5CCD5', borderRadius: 8 }} /> {prices[l.item] === l.unit_price ? 'from price book' : `(price book ${prices[l.item] != null ? n(prices[l.item]) : 'none'})`}{l.decor_price > 0 ? ` + ${n(l.decor_price)} decoration` : ''}</span>
+                <b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 20 }}>{n(l.qty * (l.unit_price + l.decor_price))}</b>
               </div>
             </div>
           </div>

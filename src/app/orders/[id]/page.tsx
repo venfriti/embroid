@@ -55,10 +55,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                   <span style={{ flex: '1 1 160px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <span style={{ fontWeight: 600, fontSize: 15 }}>{l.item}</span>
                     {l.detail && <span style={{ fontSize: 13, color: '#4B5563' }}>{l.detail}</span>}
+                    {l.decor_price > 0 && <span style={{ fontSize: 12, color: '#4B5563' }}>+{naira(l.decor_price)} decoration</span>}
                   </span>
                   <span style={{ flex: '0 0 64px', textAlign: 'right', fontSize: 15 }}>{l.qty}</span>
-                  <span style={{ flex: '0 0 88px', textAlign: 'right', fontSize: 15 }}>{naira(l.unit_price)}</span>
-                  <span style={{ flex: '0 0 104px', textAlign: 'right', fontSize: 15, fontWeight: 600 }}>{naira(l.qty * l.unit_price)}</span>
+                  <span style={{ flex: '0 0 88px', textAlign: 'right', fontSize: 15 }}>{naira(l.unit_price + l.decor_price)}</span>
+                  <span style={{ flex: '0 0 104px', textAlign: 'right', fontSize: 15, fontWeight: 600 }}>{naira(l.qty * (l.unit_price + l.decor_price))}</span>
                   <Chev />
                 </Link>
               </div>

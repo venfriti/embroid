@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
-import { cfEnv, first, run } from './db';
+import { batch, cfEnv, first, run } from './db';
 
 export type Ctx = { mode: 'demo' | 'live'; user: { id: number; email: string; name: string } | null };
 
@@ -49,12 +49,16 @@ export async function getCtx(): Promise<Ctx> {
 
 export async function login(email: string, password: string, ip: string): Promise<'ok' | 'bad' | 'limited'> {
   const now = Date.now();
-  await run('live', 'DELETE FROM login_attempts WHERE at < ?', [now - 600000]);
-  const n = (await first<{ c: number }>('live', 'SELECT COUNT(*) c FROM login_attempts WHERE ip=?', [ip]))!.c;
-  if (n >= 8) return 'limited';
+  // Reserve one of the eight attempts atomically before doing the expensive password check.
+  // D1 batches serialize this count-and-insert against concurrent requests.
+  const [reservation] = await batch('live', [
+    ['DELETE FROM login_attempts WHERE at < ?', [now - 600000]],
+    ['INSERT INTO login_attempts(ip,at) SELECT ?,? WHERE (SELECT COUNT(*) FROM login_attempts WHERE ip=?) < 8', [ip, now, ip]],
+  ]) as any[];
+  if (!reservation?.meta?.changes) return 'limited';
   await ensureAdmin();
   const u = await first<any>('live', 'SELECT * FROM users WHERE email=?', [email.trim().toLowerCase()]);
-  if (!u || !(await check(password, u.password_hash))) { await run('live', 'INSERT INTO login_attempts(ip,at) VALUES(?,?)', [ip, now]); return 'bad'; }
+  if (!u || !(await check(password, u.password_hash))) return 'bad';
   await run('live', 'DELETE FROM login_attempts WHERE ip=?', [ip]);
   const tok = await new SignJWT({ uid: u.id }).setProtectedHeader({ alg: 'HS256' }).setExpirationTime('14d').sign(await secret());
   (await cookies()).set('session', tok, { httpOnly: true, sameSite: 'lax', secure: true, path: '/', maxAge: 14 * 86400 });

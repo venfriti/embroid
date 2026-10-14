@@ -7,7 +7,7 @@ import { Silhouette, h2 } from './ui';
 
 const n = (x: number) => '₦' + Math.round(x).toLocaleString('en-NG');
 type Need = { item: string; per: number; unit: string; avail: number; warn: number | null };
-export type RLine = { id: number; item: string; detail: string; qty: number; old: number; now: number | null; needs: Need[] };
+export type RLine = { id: number; item: string; detail: string; qty: number; old: number; now: number | null; decor: number; needs: Need[] };
 const LBL = { display: 'flex', flexDirection: 'column', gap: 6, fontSize: 15, color: '#3F4A58' } as const;
 const INP = { width: '100%', boxSizing: 'border-box', minHeight: 46, padding: '0 12px', fontSize: 16, color: '#1B2430', background: '#fff', border: '1px solid #C5CCD5', borderRadius: 10 } as const;
 const pill = (bg: string, c: string, t: string, key?: string) => <span key={key} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 500, color: c, background: bg, padding: '2px 8px', borderRadius: 6 }}>{t}</span>;
@@ -17,10 +17,11 @@ export function ReorderScreen({ from, fromName, lines, suggestedName }: { from: 
   const [q, setQ] = useState<Record<number, number>>(Object.fromEntries(lines.map(l => [l.id, l.qty])));
   const [on, setOn] = useState<Record<number, boolean>>(Object.fromEntries(lines.map(l => [l.id, true])));
   const [all, setAll] = useState(false); const [name, setName] = useState(suggestedName); const [due, setDue] = useState('');
-  const price = (l: RLine) => l.now ?? l.old;
+  const garmentPrice = (l: RLine) => l.now ?? l.old;
+  const price = (l: RLine) => garmentPrice(l) + (l.decor || 0);
   const sel = lines.filter(l => on[l.id]); const pieces = sel.reduce((t, l) => t + q[l.id], 0);
-  const before = lines.reduce((t, l) => t + l.qty * l.old, 0), total = sel.reduce((t, l) => t + q[l.id] * price(l), 0);
-  const rises = lines.filter(l => on[l.id] && price(l) > l.old).length, rise = sel.reduce((t, l) => t + q[l.id] * Math.max(0, price(l) - l.old), 0);
+  const before = lines.reduce((t, l) => t + l.qty * (l.old + (l.decor || 0)), 0), total = sel.reduce((t, l) => t + q[l.id] * price(l), 0);
+  const rises = lines.filter(l => on[l.id] && garmentPrice(l) > l.old).length, rise = sel.reduce((t, l) => t + q[l.id] * Math.max(0, garmentPrice(l) - l.old), 0);
   // Stock: what the ticked lines would take, against what is free
   const need: Record<string, { per: number; unit: string; avail: number; warn: number | null; take: number }> = {};
   for (const l of sel) for (const nd of l.needs) { const e = (need[nd.item] ||= { per: 0, unit: nd.unit, avail: nd.avail, warn: nd.warn, take: 0 }); e.take += q[l.id] * nd.per; }
@@ -45,7 +46,7 @@ export function ReorderScreen({ from, fromName, lines, suggestedName }: { from: 
             </span>
           </div>
         </div>
-        {shown.map(l => { const sh = short(l); const up = price(l) > l.old; const stripe = sh.length ? '#C0392B' : up ? '#E8A317' : '#E3E8ED'; return (
+        {shown.map(l => { const sh = short(l); const up = garmentPrice(l) > l.old; const stripe = sh.length ? '#C0392B' : up ? '#E8A317' : '#E3E8ED'; return (
           <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px 12px 14px', borderTop: '1px solid #E8ECF0', borderLeft: `3px solid ${stripe}`, opacity: on[l.id] ? 1 : .55 }}>
             <input type="checkbox" checked={on[l.id]} onChange={e => setOn({ ...on, [l.id]: e.target.checked })} aria-label={`Include ${l.item}`} style={{ width: 26, height: 26, accentColor: '#0E5C63', flex: '0 0 auto' }} />
             <span style={{ flex: '0 0 48px', width: 48, height: 48, borderRadius: 10, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Silhouette item={l.item} detail={l.detail} size={36} /></span>

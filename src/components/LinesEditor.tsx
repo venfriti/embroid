@@ -6,7 +6,7 @@ import { send } from '@/lib/client';
 import { h2 } from './ui';
 
 const n = (x: number) => '₦' + Math.round(x).toLocaleString('en-NG');
-type Line = { id: number; line_no: number; item: string; detail: string | null; qty: number; unit_price: number; design: string | null };
+type Line = { id: number; line_no: number; item: string; detail: string | null; qty: number; unit_price: number; decor_price: number; design: string | null };
 type Need = { item: string; per: number; unit: string; avail: number };
 const LBL = { display: 'flex', flexDirection: 'column', gap: 6, fontSize: 15, color: '#3F4A58', minWidth: 0 } as const;
 const INP = { width: '100%', boxSizing: 'border-box', minHeight: 46, padding: '0 12px', fontSize: 16, color: '#1B2430', background: '#FFFFFF', border: '1px solid #C5CCD5', borderRadius: 10 } as const;
@@ -26,7 +26,7 @@ export function LinesEditor({ orderId, confirmed, lines, selected, needs, subtot
     const j: any = await send(`/api/orders/${orderId}/lines`, { line_id: l.id, qty: remove ? 0 : q, unit_price: p, reason: why }, 'PATCH');
     setBusy(false); if (j.ok) { open(null); r.refresh(); }
   };
-  const dQty = l ? q - l.qty : 0, dTotal = l ? q * p - l.qty * l.unit_price : 0;
+  const dQty = l ? q - l.qty : 0, dTotal = l ? q * (p + l.decor_price) - l.qty * (l.unit_price + l.decor_price) : 0;
   return (
     <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
       <div style={{ flex: '1 1 560px', minWidth: 0, background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, overflow: 'hidden' }}>
@@ -39,7 +39,8 @@ export function LinesEditor({ orderId, confirmed, lines, selected, needs, subtot
             <span style={{ flex: '0 0 24px', color: '#4B5563' }}>{x.line_no}</span>
             <span style={{ flex: 1, minWidth: 0 }}><b style={{ fontWeight: 600 }}>{x.item}</b>{x.detail && <span style={{ color: '#4B5563', fontSize: 14, marginLeft: 10 }}>{x.detail}</span>}</span>
             {changed[x.id] != null && <span style={{ fontSize: 12, fontWeight: 500, color: '#5A3A00', background: '#FDE9B0', padding: '2px 8px', borderRadius: 6 }}>Was {changed[x.id]}</span>}
-            <span style={{ flex: '0 0 56px', textAlign: 'right' }}>{x.qty}</span><span style={{ flex: '0 0 90px', textAlign: 'right' }}>{n(x.unit_price)}</span><span style={{ flex: '0 0 100px', textAlign: 'right', fontWeight: 600 }}>{n(x.qty * x.unit_price)}</span>
+            {x.decor_price > 0 && <span style={{ fontSize: 12, fontWeight: 500, color: '#0A4449', background: '#DCEBED', padding: '2px 8px', borderRadius: 6 }}>+{n(x.decor_price)} decoration</span>}
+            <span style={{ flex: '0 0 56px', textAlign: 'right' }}>{x.qty}</span><span style={{ flex: '0 0 90px', textAlign: 'right' }}>{n(x.unit_price)}</span><span style={{ flex: '0 0 100px', textAlign: 'right', fontWeight: 600 }}>{n(x.qty * (x.unit_price + x.decor_price))}</span>
             <span style={{ flex: '0 0 110px', display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <a href={`/studio/index.html?order=${orderId}&line=${x.id}&item=${encodeURIComponent(x.item)}`} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 14 }}>{x.design ? 'Mockup ✓' : 'Mockup'}</a>
               <button type="button" onClick={() => open(on ? null : x)} style={{ background: 'none', border: 0, padding: 0, color: '#0E5C63', fontWeight: 600, fontSize: 14, textDecoration: 'underline', cursor: 'pointer' }}>{on ? 'Editing' : 'Edit'}</button>
@@ -57,8 +58,9 @@ export function LinesEditor({ orderId, confirmed, lines, selected, needs, subtot
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
             <label style={{ ...LBL, flex: '1 1 100px' }}>Quantity<input type="number" min="0" style={INP} value={qty} onChange={e => setQty(e.target.value)} /></label>
             <label style={{ ...LBL, flex: '1 1 110px' }}>Price each<input type="number" min="0" style={INP} value={price} onChange={e => setPrice(e.target.value)} /></label>
-            <div style={{ ...LBL, flex: '1 1 110px' }}>Line total<span style={{ minHeight: 46, display: 'flex', alignItems: 'center', fontSize: 20, fontWeight: 700, color: '#1B2430' }}>{n(q * p)}</span></div>
+            <div style={{ ...LBL, flex: '1 1 110px' }}>Line total<span style={{ minHeight: 46, display: 'flex', alignItems: 'center', fontSize: 20, fontWeight: 700, color: '#1B2430' }}>{n(q * (p + (l?.decor_price || 0)))}</span></div>
           </div>
+          {l && l.decor_price > 0 && <p style={{ margin: 0, fontSize: 14, color: '#4B5563' }}>Plus {n(l.decor_price)} a piece for its saved decorations, set in the 3D studio.</p>}
           {confirmed && <label style={LBL}>Why is it changing? (required)<input style={INP} value={why} onChange={e => setWhy(e.target.value)} placeholder="e.g. Parent called, two more girls" /></label>}
           {(dQty !== 0 || dTotal !== 0) && (
             <div style={{ background: '#E8EDF1', borderRadius: 10, padding: '12px 14px', fontSize: 15, lineHeight: 1.4, color: '#3F4A58', display: 'flex', flexDirection: 'column', gap: 4 }}>

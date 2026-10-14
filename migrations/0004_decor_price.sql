@@ -1,0 +1,1 @@
+ALTER TABLE order_lines ADD COLUMN decor_price INTEGER NOT NULL DEFAULT 0;

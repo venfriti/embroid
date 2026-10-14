@@ -11,7 +11,7 @@ export default async function Reorder({ params, searchParams }: { params: Promis
   const sp = await searchParams; const from = past.find(o => o.id === sp.from) || [...past].sort((a, b) => b.line_count - a.line_count)[0];
   const gs = await garmentList(mode), st = await stock(mode);
   const ls = from ? await lines(mode, from.id) : [];
-  const rows = await Promise.all(ls.map(async (l: any) => ({ id: l.id, item: l.item, detail: l.detail || '', qty: l.qty, old: l.unit_price, now: await priceFor(mode, id, l.item),
+  const rows = await Promise.all(ls.map(async (l: any) => ({ id: l.id, item: l.item, detail: l.detail || '', qty: l.qty, old: l.unit_price, decor: l.decor_price || 0, now: await priceFor(mode, id, l.item),
     needs: (gs.find(g => g.name === l.item)?.stock_per_piece || []).map(r => { const s = st.find(x => x.name === r.item); return { item: r.item, per: r.qty, unit: s?.unit || '', avail: s?.available ?? 0, warn: s?.warn_below ?? null }; }) })));
   const month = (d?: string | null) => d ? `${MON[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}` : '';
   const stagePill = (st: string) => <span style={{ fontSize: 12, fontWeight: 500, padding: '2px 8px', borderRadius: 6, background: st === 'Collected' ? '#E6EAEE' : st === 'Ready' ? '#DCF1E3' : '#DCEBED', color: st === 'Collected' ? '#4B5563' : st === 'Ready' ? '#14532D' : '#0A4449' }}>{st === 'Collected' ? 'Delivered' : st}</span>;
