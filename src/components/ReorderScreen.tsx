@@ -36,7 +36,7 @@ export function ReorderScreen({ from, fromName, lines, suggestedName }: { from: 
     <>
       <div style={{ flex: '2 1 560px', minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, overflow: 'hidden' }}>
         <div style={{ padding: '14px 18px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div><div style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 22 }}>{fromName}</div><div style={{ color: '#4B5563' }}>{shown.length} of {lines.length} {lines.length === 1 ? 'line' : 'lines'} shown · {sel.length} ticked</div></div>
+          <div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 22 }}>{fromName}</div><div style={{ color: '#4B5563' }}>{shown.length} of {lines.length} {lines.length === 1 ? 'line' : 'lines'} shown · {sel.length} ticked</div></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span style={{ color: '#3F4A58' }}>Start quantities from</span>
             <span style={{ display: 'inline-flex', border: '1px solid #C5CCD5', borderRadius: 10, overflow: 'hidden' }}>
@@ -67,13 +67,13 @@ export function ReorderScreen({ from, fromName, lines, suggestedName }: { from: 
         {hidden.length > 0 && <button type="button" onClick={() => setAll(!all)} style={{ width: '100%', minHeight: 52, textAlign: 'left', padding: '0 18px', fontSize: 16, fontWeight: 600, color: '#0E5C63', background: '#fff', border: 0, borderTop: '1px solid #E8ECF0', cursor: 'pointer' }}>{all ? 'Show fewer lines' : `Show ${hidden.length} more ${hidden.length === 1 ? 'line' : 'lines'} · ${n(hidden.reduce((t, l) => t + (on[l.id] ? q[l.id] * price(l) : 0), 0))} · ${hidden.reduce((t, l) => t + (on[l.id] ? q[l.id] : 0), 0)} pieces`}</button>}
       </div>
       <div style={{ flex: '1 1 340px', maxWidth: 400, minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 22 }}>New draft order</div>
+        <div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 22 }}>New draft order</div>
         <label style={LBL}>Name<input style={INP} value={name} onChange={e => setName(e.target.value)} /></label>
         <label style={LBL}>Due date<input type="date" style={INP} value={due} onChange={e => setDue(e.target.value)} /></label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 6, fontSize: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#3F4A58' }}><span>Last time, {lines.length} {lines.length === 1 ? 'line' : 'lines'}</span><span>{n(before)}</span></div>
           {rises > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: '#5A3A00' }}><span>Price rises on {rises} {rises === 1 ? 'line' : 'lines'}</span><span>+{n(rise)}</span></div>}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}><b>At today&apos;s prices</b><b style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontSize: 30 }}>{n(total)}</b></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}><b>At today&apos;s prices</b><b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 30 }}>{n(total)}</b></div>
           <div style={{ fontSize: 14, color: '#4B5563' }}>{sel.length} {sel.length === 1 ? 'line' : 'lines'} · {pieces} pieces</div>
         </div>
         {stockRows.length > 0 && (

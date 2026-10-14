@@ -40,7 +40,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         <div style={{ flex: '1.6 1 520px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ ...tile, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #E8ECF0' }}>
-              <h2 style={{ ...h2, flex: 1, fontSize: 18 }}>Lines <span style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontWeight: 400, fontSize: 14, color: '#4B5563' }}>· {shown.length === ls.length ? ls.length : `${shown.length} of ${ls.length}`}</span></h2>
+              <h2 style={{ ...h2, flex: 1, fontSize: 18 }}>Lines <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 400, fontSize: 14, color: '#4B5563' }}>· {shown.length === ls.length ? ls.length : `${shown.length} of ${ls.length}`}</span></h2>
               <span style={{ flex: '0 0 64px', textAlign: 'right', fontSize: 13, color: '#4B5563' }}>Qty</span>
               <span style={{ flex: '0 0 88px', textAlign: 'right', fontSize: 13, color: '#4B5563' }}>Each</span>
               <span style={{ flex: '0 0 104px', textAlign: 'right', fontSize: 13, color: '#4B5563' }}>Total</span>
@@ -68,7 +68,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}><h2 style={{ ...h2, fontSize: 18 }}>Payment</h2><Pay o={o} /></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <span style={{ fontSize: 13, color: '#4B5563' }}>Balance left</span>
-              <span style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 32, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{naira(Math.max(0, o.balance))}</span>
+              <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 32, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{naira(Math.max(0, o.balance))}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ height: 8, borderRadius: 4, background: '#D5DBE2', overflow: 'hidden' }} aria-hidden="true"><div style={{ width: `${pct}%`, height: 8, background: o.balance <= 0 ? '#2F855A' : '#B77900' }} /></div>

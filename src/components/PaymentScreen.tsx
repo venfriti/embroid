@@ -36,7 +36,7 @@ export function PaymentScreen({ customerId, customerName, thisId, orders, today,
   return (
     <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
       <div style={{ flex: '1 1 420px', minWidth: 0, background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, boxSizing: 'border-box', padding: '22px 22px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 20 }}>Payment details</div>
+        <div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 20 }}>Payment details</div>
         <label style={LBL}>Amount received
           <span style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 64, padding: '0 16px', border: '2px solid #0E5C63', borderRadius: 12, background: '#fff' }}>
             <span style={{ fontSize: 26, fontWeight: 700 }}>₦</span>
@@ -59,7 +59,7 @@ export function PaymentScreen({ customerId, customerName, thisId, orders, today,
       <div style={{ flex: '1.3 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, overflow: 'hidden' }}>
           <div style={{ padding: '14px 18px 10px' }}>
-            <div style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 20 }}>Where the money goes</div>
+            <div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 20 }}>Where the money goes</div>
             <div style={{ fontSize: 15, color: '#3F4A58' }}>This order is paid first. Anything left over goes to the oldest unpaid order. Change the amounts if you need to.</div>
           </div>
           {orders.map(o => { const a = alloc[o.id], on = a > 0, this_ = o.id === thisId; const after = o.balance - a; return (
@@ -82,8 +82,8 @@ export function PaymentScreen({ customerId, customerName, thisId, orders, today,
         </div>
         <div style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <div><div style={{ fontSize: 13, color: '#4B5563' }}>{customerName} owes now</div><div style={{ fontSize: 26, fontWeight: 700, color: '#6B7684', textDecoration: 'line-through', fontFamily: "'Bricolage Grotesque', system-ui, sans-serif" }}>{n(owedAll)}</div></div>
-            <div><div style={{ fontSize: 13, color: '#4B5563' }}>After this payment</div><div style={{ fontSize: 32, fontWeight: 700, fontFamily: "'Bricolage Grotesque', system-ui, sans-serif" }}>{n(owedAll - applied)}</div></div>
+            <div><div style={{ fontSize: 13, color: '#4B5563' }}>{customerName} owes now</div><div style={{ fontSize: 26, fontWeight: 700, color: '#6B7684', textDecoration: 'line-through', fontFamily: "'Poppins', system-ui, sans-serif" }}>{n(owedAll)}</div></div>
+            <div><div style={{ fontSize: 13, color: '#4B5563' }}>After this payment</div><div style={{ fontSize: 32, fontWeight: 700, fontFamily: "'Poppins', system-ui, sans-serif" }}>{n(owedAll - applied)}</div></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 15 }}>
               {orders.filter(o => alloc[o.id] > 0).map(o => <span key={o.id}>{o.name} {o.balance - alloc[o.id] === 0 ? chip('#DCF1E3', '#14532D', 'Paid in full') : chip('#FDE9B0', '#5A3A00', `${n(o.balance - alloc[o.id])} left`)}</span>)}
             </div>

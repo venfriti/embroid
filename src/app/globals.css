@@ -1,11 +1,11 @@
 :root{--teal:#0E5C63;--teal-d:#0A4449;--ink:#1B2430;--mut:#4B5563;--line:#DDE2E8;--bg:#F4F6F8;--red:#8A1C13;--amber:#5A3A00}
-*{box-sizing:border-box}html,body{min-height:100vh}body{margin:0;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:'Figtree',system-ui,sans-serif;font-size:16px}
-h1,h2{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0}h1{font-size:30px;line-height:1.1}h2{font-size:20px}
+*{box-sizing:border-box}html,body{min-height:100vh}body{margin:0;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,sans-serif;font-size:16px}
+h1,h2{font-family:'Poppins',system-ui,sans-serif;letter-spacing:-.02em;margin:0}h1{font-size:30px;line-height:1.1}h2{font-size:20px}
 a{color:var(--teal)}a:hover{color:var(--teal-d)}
 button,input,select,textarea{font-family:inherit;font-size:16px}
 :focus-visible{outline:3px solid #E8A317;outline-offset:2px}
 header.top{background:#fff;border-bottom:1px solid var(--line);padding:0 32px;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:12px;font:700 20px 'Bricolage Grotesque',system-ui;text-decoration:none;color:var(--ink)}
+.brand{display:flex;align-items:center;gap:12px;font:700 20px 'Poppins',system-ui;text-decoration:none;color:var(--ink)}
 .logo{width:36px;height:36px;border-radius:10px;background:var(--teal);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
 nav.main{display:flex;gap:4px}nav.main a{padding:22px 14px 19px;font-weight:500;font-size:15px;color:#3F4A58;text-decoration:none;border-bottom:3px solid transparent}
 nav.main a.on{font-weight:600;color:var(--teal);border-color:var(--teal)}

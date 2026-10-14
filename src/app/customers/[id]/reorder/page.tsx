@@ -20,7 +20,7 @@ export default async function Reorder({ params, searchParams }: { params: Promis
     <main className="page" style={{ maxWidth: 'none', padding: '20px 32px 48px', gap: 14 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <Link href={`/customers/${id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, textDecoration: 'none' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>{c.name}</Link>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}><h1 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 34, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Reorder from a past order</h1><span style={{ fontSize: 16, color: '#4B5563' }}>Pick an order, untick what you don&apos;t need, change quantities. Prices are today&apos;s, not last time&apos;s.</span></div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}><h1 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 34, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Reorder from a past order</h1><span style={{ fontSize: 16, color: '#4B5563' }}>Pick an order, untick what you don&apos;t need, change quantities. Prices are today&apos;s, not last time&apos;s.</span></div>
       </div>
       {!from ? <p style={{ color: '#4B5563' }}>No past orders to copy yet.</p> : (
         <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>

@@ -153,7 +153,7 @@ src/app/api/**/route.ts      write endpoints
 - Colour is never the only signal. Status chips carry words, such as "Short by 9", "Running low" and "Draft".
 - Visible focus rings on everything interactive. Icons that stand alone have labels.
 - Colours come from the tokens in `src/app/globals.css`: teal `#0E5C63` for actions, amber for caution, red for shortages and debts, green for paid and delivered.
-- Type is Bricolage Grotesque for headings and Figtree for text.
+- Type is Poppins throughout, for headings and text.
 - Currency is shown as `₦` with thousands separators.
 - The top bar is the same everywhere: Customers, Orders, Stock, Reports, Setup, and the profile circle. The demo banner appears above it in demo mode.
 - Buttons that save use the shared `useSave` hook. It disables the button while saving, refreshes the page on success, and turns a demo refusal into the standard message instead of an error.

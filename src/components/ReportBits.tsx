@@ -17,7 +17,7 @@ export function ReportHead({ title, sub, children }: { title: string; sub: strin
     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <Link href="/reports" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, textDecoration: 'none' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>Reports</Link>
-        <h1 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{title}</h1>
+        <h1 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{title}</h1>
         <span style={{ fontSize: 15, color: '#4B5563' }}>{sub}</span>
       </div>
       <div className="noprint" style={{ display: 'flex', gap: 12 }}>{children}</div>

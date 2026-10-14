@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 
-export const H: CSSProperties = { fontFamily: "'Bricolage Grotesque', system-ui, sans-serif" };
+export const H: CSSProperties = { fontFamily: "'Poppins', system-ui, sans-serif" };
 export const h1: CSSProperties = { margin: 0, ...H, fontWeight: 700, fontSize: 40, lineHeight: 1.1, letterSpacing: '-0.02em' };
 export const h2: CSSProperties = { margin: 0, ...H, fontWeight: 600, fontSize: 20 };
 export const eyebrow: CSSProperties = { fontSize: 13, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0E5C63' };

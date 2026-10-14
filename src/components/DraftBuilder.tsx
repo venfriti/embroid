@@ -54,13 +54,13 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Link href={`/customers/${customerId}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, textDecoration: 'none' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>{customer}</Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <h1 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 34, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{name}</h1>
+            <h1 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 34, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{name}</h1>
             <span style={{ fontSize: 13, fontWeight: 600, color: '#4B5563', background: '#E6EAEE', padding: '3px 10px', borderRadius: 999 }}>Draft</span>
           </div>
           <span style={{ fontSize: 15, color: '#4B5563' }}>{saving ? 'Saving…' : 'Draft saved automatically'}{due ? ` · Due ${due}` : ''}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{ textAlign: 'right' }}><div style={{ fontSize: 13, color: '#4B5563' }}>Order total</div><div style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.05 }}>{n(total)}</div></div>
+          <div style={{ textAlign: 'right' }}><div style={{ fontSize: 13, color: '#4B5563' }}>Order total</div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.05 }}>{n(total)}</div></div>
           <button type="button" disabled={busy || L.length === 0} onClick={confirmOrder} style={{ minHeight: 52, padding: '0 26px', fontSize: 16, fontWeight: 600, color: '#fff', background: L.length ? '#0E5C63' : '#8AA7AA', border: 0, borderRadius: 12, cursor: 'pointer' }}>Review and confirm</button>
         </div>
       </div>
@@ -83,7 +83,7 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
         {l ? (
           <div style={{ flex: '2 1 560px', minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '20px 22px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 24 }}>{l.item}</h2>
+              <h2 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 24 }}>{l.item}</h2>
               <span style={{ display: 'flex', gap: 10 }}>
                 <button type="button" disabled={busy} onClick={() => add(l)} style={{ minHeight: 42, padding: '0 16px', fontSize: 14, fontWeight: 600, color: '#0E5C63', background: '#fff', border: '2px solid #0E5C63', borderRadius: 10, cursor: 'pointer' }}>Copy as new line</button>
                 <button type="button" disabled={busy} onClick={remove} style={{ minHeight: 42, padding: '0 16px', fontSize: 14, fontWeight: 600, color: '#8A1C13', background: '#fff', border: '1px solid #E8A29B', borderRadius: 10, cursor: 'pointer' }}>Remove</button>
@@ -128,7 +128,7 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
               {(g?.recipe || []).map(rc => { const need = Math.round(l.qty * rc.qty * 100) / 100; const okk = need <= rc.avail; return <span key={rc.item} style={{ fontSize: 15, color: okk ? '#14532D' : '#8A1C13' }}>{okk ? '✓' : '⚠'} {rc.item}: {rc.onHand} {rc.unit} on hand, {need} needed{okk ? '' : `. Short by ${Math.round((need - rc.avail) * 100) / 100}`}</span>; })}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginTop: 8 }}>
                 <span style={{ fontSize: 15, color: '#4B5563' }}>{l.qty} × <input type="number" min="0" value={l.unit_price} onChange={e => push({ ...l, unit_price: Math.max(0, Math.floor(Number(e.target.value) || 0)) })} aria-label="Price each" style={{ width: 100, minHeight: 36, fontSize: 15, padding: '0 8px', border: '1px solid #C5CCD5', borderRadius: 8 }} /> {prices[l.item] === l.unit_price ? 'from price book' : `(price book ${prices[l.item] != null ? n(prices[l.item]) : 'none'})`}</span>
-                <b style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontSize: 28 }}>{n(l.qty * l.unit_price)}</b>
+                <b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 28 }}>{n(l.qty * l.unit_price)}</b>
               </div>
             </div>
           </div>

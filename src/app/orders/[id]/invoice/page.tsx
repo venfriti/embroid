@@ -17,15 +17,15 @@ export default async function Invoice({ params }: { params: Promise<{ id: string
       <div className="noprint" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Link href={`/orders/${o.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, textDecoration: 'none' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>{o.name}</Link>
-          <h1 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Invoice</h1>
+          <h1 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Invoice</h1>
           <span style={{ fontSize: 16, color: '#4B5563' }}>Made from the order. It updates itself when lines or payments change.</span>
         </div>
         <div style={{ display: 'flex', gap: 10 }}><PrintBtns /></div>
       </div>
       <article style={{ background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '40px 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-          <div><div style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 28 }}>[Shop name]</div><div style={{ fontSize: 14, color: '#4B5563' }}>[Shop address] · [Phone] · [Email]</div></div>
-          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}><span style={{ fontSize: 13, letterSpacing: '.1em', color: '#4B5563' }}>INVOICE</span><b style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontSize: 26 }}>{o.invoice_no}</b><Pay o={o} /></div>
+          <div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 28 }}>[Shop name]</div><div style={{ fontSize: 14, color: '#4B5563' }}>[Shop address] · [Phone] · [Email]</div></div>
+          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}><span style={{ fontSize: 13, letterSpacing: '.1em', color: '#4B5563' }}>INVOICE</span><b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 26 }}>{o.invoice_no}</b><Pay o={o} /></div>
         </div>
         <div style={{ display: 'flex', gap: 44, flexWrap: 'wrap', fontSize: 14 }}>
           <div><div style={{ color: '#4B5563' }}>Billed to</div><b style={{ fontSize: 16 }}>{c.name}</b><div style={{ color: '#4B5563', fontSize: 16 }}>{c.address || '—'}</div></div>
@@ -51,7 +51,7 @@ export default async function Invoice({ params }: { params: Promise<{ id: string
             {o.discount > 0 && money('Discount', '−' + naira(o.discount))}
             {money('Total', naira(o.total))}
             {money('Paid', '−' + naira(o.paid), { color: '#14532D' })}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderTop: '2px solid #1B2430', paddingTop: 10, marginTop: 4 }}><b style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontSize: 22 }}>Balance due</b><b style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontSize: 26 }}>{naira(o.balance)}</b></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderTop: '2px solid #1B2430', paddingTop: 10, marginTop: 4 }}><b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 22 }}>Balance due</b><b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 26 }}>{naira(o.balance)}</b></div>
           </div>
         </div>
       </article>

@@ -32,7 +32,7 @@ export default async function Owed() {
             <span style={{ flex: '0 0 150px', textAlign: 'right', fontSize: 18, fontWeight: 700 }}>{naira(r.owed)}</span>
           </Link>
         ))}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 16px 24px', background: '#F4F6F8', color: '#3F4A58' }}><span>Total across {rows.length} {rows.length === 1 ? 'customer' : 'customers'}</span><span style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 24, color: '#1B2430' }}>{naira(total)}</span></div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 16px 24px', background: '#F4F6F8', color: '#3F4A58' }}><span>Total across {rows.length} {rows.length === 1 ? 'customer' : 'customers'}</span><span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 24, color: '#1B2430' }}>{naira(total)}</span></div>
       </div>
     </main>
   );

@@ -18,7 +18,7 @@ export default async function Item({ params, searchParams }: { params: Promise<{
     if (need > 0) waiting.push({ id: o.id, name: o.name, customer: o.customer, due: o.due, need: Math.round(need * 100) / 100 });
   }
   const bad = s.available < 0;
-  const tile = (l: string, v: string, sub: string, red = false) => <div style={{ flex: '1 1 220px', boxSizing: 'border-box', background: red ? '#FFF4F2' : '#fff', border: `1px solid ${red ? '#F1D0CB' : '#DDE2E8'}`, borderRadius: 14, padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 15, color: '#3F4A58' }}>{l}</span><span style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 32, lineHeight: 1.1, color: red ? '#8A1C13' : '#1B2430' }}>{v}</span><span style={{ fontSize: 14, color: '#4B5563' }}>{sub}</span></div>;
+  const tile = (l: string, v: string, sub: string, red = false) => <div style={{ flex: '1 1 220px', boxSizing: 'border-box', background: red ? '#FFF4F2' : '#fff', border: `1px solid ${red ? '#F1D0CB' : '#DDE2E8'}`, borderRadius: 14, padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 15, color: '#3F4A58' }}>{l}</span><span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 32, lineHeight: 1.1, color: red ? '#8A1C13' : '#1B2430' }}>{v}</span><span style={{ fontSize: 14, color: '#4B5563' }}>{sub}</span></div>;
   const lastCount = all.find(m => m.kind === 'Counted')?.date;
   const per = gs.map(g => `${g.stock_per_piece!.find(r => r.item === s.name)!.qty} ${u || ''} per ${g.name.toLowerCase()}`);
   const SEC = { fontSize: 13, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: '#4B5563' } as const;
@@ -40,7 +40,7 @@ export default async function Item({ params, searchParams }: { params: Promise<{
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 560px', minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '20px 22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-            <h2 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 22 }}>History</h2>
+            <h2 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 22 }}>History</h2>
             <span style={{ display: 'flex', gap: 6 }}>{[['all', 'All'], ['arrivals', 'Arrivals'], ['used', 'Used'], ['reserved', 'Reserved']].map(([key, t]) => <Link key={key} href={`/stock/${s.id}${key === 'all' ? '' : '?k=' + key}`} style={{ fontSize: 13, fontWeight: 600, padding: '3px 12px', borderRadius: 999, textDecoration: 'none', background: k === key ? '#DCEBED' : '#E6EAEE', color: k === key ? '#0A4449' : '#4B5563' }}>{t}</Link>)}</span>
           </div>
           <div style={{ display: 'flex', gap: 14, padding: '8px 0', borderBottom: '2px solid #E1E6EB', fontSize: 13, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: '#4B5563' }}><span style={{ flex: '0 0 84px' }}>When</span><span style={{ flex: '0 0 110px' }}>What</span><span style={{ flex: 1 }}>Where from or what for</span><span style={{ flex: '0 0 90px', textAlign: 'right' }}>Change</span><span style={{ flex: '0 0 90px', textAlign: 'right' }}>On hand</span></div>

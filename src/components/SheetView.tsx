@@ -24,7 +24,7 @@ export function SheetView({ orderId, name, customer, invoice, due, pieces, lineC
   return (
     <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
       <div className="noprint" style={{ flex: '0 0 316px', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <b style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontSize: 20 }}>On the sheet</b>
+        <b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 20 }}>On the sheet</b>
         <Toggle on={pic} set={setPic} title="Picture of each line" sub="Garment with numbered placements" />
         <Toggle on={sz} set={setSz} title="Size breakdown" />
         <Toggle on={boxes} set={setBoxes} title="Tick boxes for each step" />
@@ -43,7 +43,7 @@ export function SheetView({ orderId, name, customer, invoice, due, pieces, lineC
         </div>
         <article style={{ background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '14px 26px 22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '3px solid #1B2430', paddingBottom: 10 }}>
-            <div><div style={{ fontSize: 13, letterSpacing: '.08em', color: '#4B5563', fontWeight: 600 }}>PRODUCTION SHEET{view !== 'Whole order' ? ` · ${view.toUpperCase()}` : ''}</div><div style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 28, lineHeight: 1.1 }}>{name}</div><div style={{ color: '#4B5563' }}>{customer}</div></div>
+            <div><div style={{ fontSize: 13, letterSpacing: '.08em', color: '#4B5563', fontWeight: 600 }}>PRODUCTION SHEET{view !== 'Whole order' ? ` · ${view.toUpperCase()}` : ''}</div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 28, lineHeight: 1.1 }}>{name}</div><div style={{ color: '#4B5563' }}>{customer}</div></div>
             <div style={{ display: 'flex', gap: 30 }}>
               <div><div style={{ fontSize: 14, color: '#4B5563' }}>Order</div><b style={{ fontSize: 18 }}>{invoice}</b></div>
               <div><div style={{ fontSize: 14, color: '#4B5563' }}>Due</div><b style={{ fontSize: 18 }}>{due}</b></div>

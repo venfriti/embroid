@@ -51,7 +51,7 @@ export function LinesEditor({ orderId, confirmed, lines, selected, needs, subtot
       {l && (
         <div style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderTop: '4px solid #0E5C63', borderRadius: 14, boxSizing: 'border-box', padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-            <span style={{ fontFamily: "'Bricolage Grotesque', system-ui, sans-serif", fontWeight: 700, fontSize: 20 }}>Line {l.line_no} · {l.item}</span><span style={{ fontSize: 14, color: '#4B5563' }}>{l.detail}</span>
+            <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 20 }}>Line {l.line_no} · {l.item}</span><span style={{ fontSize: 14, color: '#4B5563' }}>{l.detail}</span>
           </div>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
             <label style={{ ...LBL, flex: '1 1 100px' }}>Quantity<input type="number" min="0" style={INP} value={qty} onChange={e => setQty(e.target.value)} /></label>
