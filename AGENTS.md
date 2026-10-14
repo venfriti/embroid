@@ -1,5 +1,11 @@
 # AGENTS.md
 
+## Guidance discovery
+
+Codex combines repository guidance from the project root down to the current working directory. Keep shared project rules in this root file. Add a nested `AGENTS.md` only when a directory needs more specific guidance; the closer file takes precedence for that directory. When multiple applicable files exist, read them from the root down and follow the most specific applicable instruction where guidance differs. A directory-level `AGENTS.override.md` replaces the `AGENTS.md` in that same directory.
+
+Global personal defaults belong in `~/.codex/AGENTS.md`, not in this project file. Codex uses the first non-empty global guidance file it finds at the home level.
+
 Guidelines for anyone, human or agent, working in this codebase. Read this before changing anything. Follow it unless the owner says otherwise.
 
 ## What this is

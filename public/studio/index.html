@@ -158,7 +158,6 @@ button.chip:hover{background:rgba(14,16,19,.82)}
  <button type="button" role="tab" id="tab-panel" data-tab="panel" aria-selected="false" hidden>Centre panel</button>
         <button type="button" role="tab" id="tab-badges" data-tab="badges" aria-selected="true">Badges</button>
         <button type="button" role="tab" id="tab-text" data-tab="text" aria-selected="false">Text</button>
-        <button type="button" role="tab" id="tab-designs" data-tab="designs" aria-selected="false">Designs</button>
         <button type="button" role="tab" id="tab-garment" data-tab="garment" aria-selected="false">Garment</button>
       </div>
 
@@ -174,7 +173,7 @@ button.chip:hover{background:rgba(14,16,19,.82)}
       </div>
 
       <div class="sec" id="pane-badges" role="tabpanel" aria-labelledby="tab-badges">
-        <h2>Pick a badge, then tap the garment</h2>
+        <h2>Pick the logo, then tap the garment to place it</h2>
         <div class="cards" id="badgeCards"></div>
       </div>
 
@@ -184,11 +183,6 @@ button.chip:hover{background:rgba(14,16,19,.82)}
         <div class="field" style="flex:none">Style<div class="fonts" id="fontBtns"></div></div>
         <div class="field" style="flex:none">Thread colour<div class="sw" id="newTextSw"></div></div>
         <div class="row"><button class="btn primary" type="button" id="placeText">Place on garment</button></div>
-      </div>
-
-      <div class="sec" id="pane-designs" role="tabpanel" aria-labelledby="tab-designs" hidden>
-        <h2>Pick a design, then tap the garment</h2>
-        <div class="cards" id="designCards"></div>
       </div>
 
       <div class="sec" id="pane-garment" role="tabpanel" aria-labelledby="tab-garment" hidden>
@@ -234,9 +228,6 @@ var FONTS={
 var BADGES=[
   {shape:'shield',name:'House crest',stock:200},{shape:'round',name:'Round house badge',stock:120},
   {shape:'star',name:'Star badge',stock:64},{shape:'laurel',name:'Sports crest',stock:38}];
-var DESIGNS=[
-  {shape:'chevrons',name:'Chevron band',size:300},{shape:'stripes',name:'Sleeve stripes',size:240},
-  {shape:'ankara',name:'Ankara flower',size:210},{shape:'diamonds',name:'Diamond row',size:280}];
 
 var COLORS={
   tee:SHIRTS,
@@ -251,14 +242,14 @@ var CWAYS=[
   {n:'Royal',a:'#17398A',b:'#F2B31E',c:'#F1E8D2'},{n:'Sunset',a:'#C8321E',b:'#F6A21E',c:'#2A1658'},{n:'Forest',a:'#1D6A43',b:'#F0C23A',c:'#16241C'},
   {n:'Earth',a:'#7E441A',b:'#E8B65A',c:'#1E1A16'},{n:'Ocean',a:'#0B6E7A',b:'#F2E3B5',c:'#E2552F'},{n:'Plum',a:'#5B1F6B',b:'#F4C542',c:'#EE6A8D'}];
 var SHAPES=[{k:'strip',n:'Full strip',i:'<rect x="9" y="2" width="10" height="26" rx="1"/>'},{k:'bib',n:'Chest bib',i:'<path d="M5 2h18v13q0 6-9 13q-9-7-9-13z"/>'},
-  {k:'yoke',n:'V yoke',i:'<path d="M2 2h24l-7 10-5 16-5-16z"/>'},{k:'side',n:'Off-centre',i:'<rect x="13" y="2" width="10" height="26" rx="1"/><path d="M8 2v26" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2" fill="none"/>'}];
+  {k:'yoke',n:'V yoke',i:'<path d="M2 2h24l-7 10-5 16-5-16z"/>'},{k:'side',n:'Off-centre',i:'<rect x="13" y="2" width="10" height="26" rx="1"/><path d="M8 2v26" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2" fill="none"/>'},
+  {k:'flap',n:'Chest flap',i:'<path d="M6 4h16v16l-8 6-8-6z"/>'}];
 
 var state={guide:false,g:'tee',shirt:SHIRTS[0],gcol:{tee:SHIRTS[0],shorts:COLORS.shorts[0],trousers:COLORS.trousers[0],ankara:COLORS.ankara[0]},items:[],byG:{},sel:null,armed:null,nextId:1,tab:'badges',textFont:'varsity',textColor:'#FFFFFF',
   ank:{pat:'fans',cw:0,shape:'strip',w:56,scale:.6,angle:0,collar:true,cuffs:true,pocket:false}};
 function mkItem(o){return Object.assign({id:state.nextId++,rot:0,c1:'#FFFFFF',c2:'#1F2A4D',label:'G'},o)}
 state.byG.tee=[
   mkItem({kind:'badge',shape:'shield',name:'House crest',side:'front',x:624,y:392,size:96}),
-  mkItem({kind:'badge',shape:'laurel',name:'Sports crest',side:'front',x:176,y:408,size:72,rot:-36}),
   mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:300,size:120,text:'OKAFOR',font:'varsity'}),
   mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:560,size:300,text:'10',font:'block'})];
 state.byG.shorts=[
@@ -601,6 +592,7 @@ function panelPath(c,A){
   if(A.shape==='strip'){c.rect(m*(256-h),m*90,m*A.w,m*420)}
   else if(A.shape==='side'){c.rect(m*(256+12),m*90,m*A.w*1.25,m*420)}
   else if(A.shape==='bib'){var wb=h*1.7;c.moveTo(m*(256-wb),m*90);c.lineTo(m*(256+wb),m*90);c.lineTo(m*(256+wb),m*260);c.quadraticCurveTo(m*(256+wb),m*300,m*256,m*344);c.quadraticCurveTo(m*(256-wb),m*300,m*(256-wb),m*260);c.closePath()}
+  else if(A.shape==='flap'){var f=A.w/56,fx=326,fy=227,fp=[[-26,-31],[26,-31],[26,17],[0,31],[-26,17]].map(function(p){return [fx+p[0]*f,fy+p[1]*f]});fp.forEach(function(p,i){c[i?'lineTo':'moveTo'](m*p[0],m*p[1])});c.closePath()}
   else{var wy=h*2.6;c.moveTo(m*(256-wy),m*92);c.lineTo(m*(256+wy),m*92);c.lineTo(m*(256+wy*.62),m*200);c.lineTo(m*256,m*312);c.lineTo(m*(256-wy*.62),m*200);c.closePath()}
 }
 function polyPath(c,pts){c.beginPath();pts.forEach(function(p,i){c[i?'lineTo':'moveTo'](p[0]*2,p[1]*2)});c.closePath()}
@@ -979,9 +971,11 @@ function tap(e){
   if(state.armed){
     if(!hit)return;
     if(state.armed.mode==='new'){
+      var replaced=null;
+      if(state.armed.proto.kind==='badge'){replaced=state.items.filter(function(i){return i.kind==='badge'});state.items=state.items.filter(function(i){return i.kind!=='badge'});}
       var d=Object.assign({id:state.nextId++,x:hit.x,y:hit.y,side:hit.side,rot:0,pos:hit.point,nrm:hit.normal},state.armed.proto);
       state.items.push(d);
-      if(!buildDecal(d)){state.items.pop();toast('No room at that spot. Tap a flatter area, away from the collar or hem.');return;}
+      if(!buildDecal(d)){state.items.pop();if(replaced)state.items=state.items.concat(replaced);toast('No room at that spot. Tap a flatter area, away from the collar or hem.');return;}
       d._dirty=false;state.sel=d.id;toast(d.name+' placed on '+placeName(d).toLowerCase());
     }else{
       var it=byId(state.armed.id);
@@ -1059,7 +1053,7 @@ var ICON={
 function svg(p,s){return '<svg width="'+(s||20)+'" height="'+(s||20)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'}
 
 function buildCards(){
-  var bc=$('#badgeCards'),dc=$('#designCards');
+  var bc=$('#badgeCards');
   BADGES.forEach(function(b){
     var proto={kind:'badge',shape:b.shape,name:b.name,size:96,c1:'#FFFFFF',c2:'#1F2A4D',label:'G'};
     var btn=document.createElement('button');btn.type='button';btn.className='card';
@@ -1067,14 +1061,6 @@ function buildCards(){
     btn.querySelector('.thumb').appendChild(thumb(proto,84));
     btn.addEventListener('click',function(){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase())});
     bc.appendChild(btn);
-  });
-  DESIGNS.forEach(function(b){
-    var proto={kind:'design',shape:b.shape,name:b.name,size:b.size,c1:'#FFFFFF',c2:'#E3B23C'};
-    var btn=document.createElement('button');btn.type='button';btn.className='card';
-    btn.innerHTML='<span class="thumb"></span><span class="nm">'+b.name+'</span><span class="meta">Thread only</span>';
-    btn.querySelector('.thumb').appendChild(thumb(proto,84));
-    btn.addEventListener('click',function(){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase())});
-    dc.appendChild(btn);
   });
   var fb=$('#fontBtns');
   Object.keys(FONTS).forEach(function(k){
@@ -1185,7 +1171,7 @@ function showTab(t){
   if(t==='panel'&&!CG.panel)t='badges';
   state.tab=t;
   document.querySelectorAll('.tabs button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.tab===t))});
-  ['panel','badges','text','designs','garment'].forEach(function(k){$('#pane-'+k).hidden=k!==t});
+  ['panel','badges','text','garment'].forEach(function(k){$('#pane-'+k).hidden=k!==t});
 }
 document.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab)})});
 
