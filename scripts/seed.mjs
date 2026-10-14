@@ -46,9 +46,15 @@ for (const g of D.garments) ins('garments', { name: g.name, json: JSON.stringify
 for (const h of D.houses_greenfield) ins('houses', { customer_id: 'c1', house: h.house, colour: h.colour, jersey: h.jersey, badge: h.badge });
 for (const c of D.crests_greenfield) ins('crests', { customer_id: 'c1', name: c.name, used_on: c.used_on, badge: c.badge });
 // Saved 3D mockups for a few demo lines (made in the studio; keyed "order:line_no"). Each carries a small preview picture.
+// decor_price mirrors what the save-design API computes: the sum of each decoration's price, for the garment the design is actually on.
 if (fs.existsSync('data/demo-designs.json')) {
   const designs = JSON.parse(fs.readFileSync('data/demo-designs.json', 'utf8'));
-  for (const [k, d] of Object.entries(designs)) { const [oid, no] = k.split(':'); out.push(`UPDATE order_lines SET design=${q(JSON.stringify(d))} WHERE order_id=${q(oid)} AND line_no=${Number(no)};`); }
+  for (const [k, d] of Object.entries(designs)) {
+    const [oid, no] = k.split(':');
+    const items = d.byG?.[d.g];
+    const decor = Array.isArray(items) ? items.reduce((s, it) => s + (Number(it.price) || 0), 0) : 0;
+    out.push(`UPDATE order_lines SET design=${q(JSON.stringify(d))}, decor_price=${q(decor)} WHERE order_id=${q(oid)} AND line_no=${Number(no)};`);
+  }
 }
 fs.writeFileSync('data/demo-seed.sql', out.join('\n') + '\n');
 console.log('wrote data/demo-seed.sql with', out.length, 'statements');
