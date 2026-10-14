@@ -415,30 +415,40 @@ export function UseDesign({ customerId, item, detail, price, fromOrder, fromLine
   }}>Use in new order</button>;
 }
 
+/** The 3D studio's own four garment models. Matches pickGarment() in public/studio/index.html, so whichever
+ * catalog item we seed the line with is guaranteed to open on the right model, not fall back to the tee. */
+const STUDIO_GARMENTS: { label: string; match: RegExp; fallback: string }[] = [
+  { label: 'Top', match: /tee|shirt|polo|jersey|top/i, fallback: 'Top' },
+  { label: 'Shorts', match: /short/i, fallback: 'Shorts' },
+  { label: 'Trousers', match: /trouser|pant/i, fallback: 'Trousers' },
+  { label: 'Ankara', match: /ankara/i, fallback: 'Ankara shirt' },
+];
 /** Sketch a brand new design live with the customer: starts a one-line draft and jumps straight into the 3D studio,
- * skipping the usual order name, due date and quantity so there's nothing between "pick a garment" and showing it to them. */
+ * skipping the usual order name, due date and quantity so there's nothing between "pick a garment" and showing it to them.
+ * Four explicit buttons rather than a dropdown over the full price list, which mixes in accessories (cap badges, ties)
+ * that have no 3D model, and could be submitted without the staff member meaning to pick one. */
 export function NewDesignButton({ customerId, items }: { customerId: string; items: { item: string; price: number }[] }) {
   const r = useRouter(); const s = useSave(); const [open, setOpen] = useState(false);
   const btn = { textDecoration: 'none', minHeight: 44, padding: '0 16px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 8, cursor: 'pointer' } as const;
+  const go = async (g: typeof STUDIO_GARMENTS[number]) => {
+    const found = items.find(i => g.match.test(i.item));
+    const item = found?.item ?? g.fallback, price = found?.price ?? 0;
+    const j = await s.run('/api/orders', { customer_id: customerId, name: `New design · ${item}` }); if (!j.ok) return;
+    const k = await s.run(`/api/orders/${j.id}/lines`, { item, qty: 1, unit_price: price }); if (!k.ok) return;
+    r.push(studioUrl(j.id, k.id, item));
+  };
   return (
     <>
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} style={btn}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E5C63" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>New design
       </button>
       {open && (
-        <form style={{ flexBasis: '100%', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 10, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }} onSubmit={async e => {
-          e.preventDefault(); const item = String(new FormData(e.currentTarget).get('item') || '').trim(); if (!item) return;
-          const j = await s.run('/api/orders', { customer_id: customerId, name: `New design · ${item}` }); if (!j.ok) return;
-          const price = items.find(i => i.item === item)?.price ?? 0;
-          const k = await s.run(`/api/orders/${j.id}/lines`, { item, qty: 1, unit_price: price }); if (!k.ok) return;
-          r.push(studioUrl(j.id, k.id, item));
-        }}>
-          <label className="f" style={{ flex: '1 1 220px' }}>Garment<select className="i" name="item" required defaultValue="">
-            <option value="" disabled>Pick a garment</option>
-            {items.map(i => <option key={i.item} value={i.item}>{i.item}</option>)}
-          </select></label>
-          <button className="btn pri" disabled={s.busy}>Open the 3D studio</button>
-        </form>
+        <div style={{ flexBasis: '100%', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 10, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 14, color: '#4B5563' }}>Garment</span>
+          {STUDIO_GARMENTS.map(g => (
+            <button key={g.label} type="button" disabled={s.busy} onClick={() => go(g)} style={{ minHeight: 44, padding: '0 18px', fontSize: 14, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 8, cursor: 'pointer' }}>{g.label}</button>
+          ))}
+        </div>
       )}
     </>
   );
