@@ -24,7 +24,7 @@ export default async function Invoice({ params }: { params: Promise<{ id: string
       </div>
       <article style={{ background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '40px 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-          <div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 28 }}>[Shop name]</div><div style={{ fontSize: 14, color: '#4B5563' }}>[Shop address] · [Phone] · [Email]</div></div>
+          <div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 28 }}>Embroid</div><div style={{ fontSize: 14, color: '#4B5563' }}>[Shop address] · [Phone] · [Email]</div></div>
           <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}><span style={{ fontSize: 13, letterSpacing: '.1em', color: '#4B5563' }}>INVOICE</span><b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 26 }}>{o.invoice_no}</b><Pay o={o} /></div>
         </div>
         <div style={{ display: 'flex', gap: 44, flexWrap: 'wrap', fontSize: 14 }}>

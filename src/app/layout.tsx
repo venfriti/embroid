@@ -21,7 +21,7 @@ export default async function Root({ children }: { children: React.ReactNode }) 
               <span style={{ width: 36, height: 36, borderRadius: 10, background: '#0E5C63', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 8h3M10 8h4M17 8h3M4 16h3M10 16h4M17 16h3" /><path d="M12 3v18" strokeDasharray="2 3" /></svg>
               </span>
-              <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 20, letterSpacing: '-0.01em' }}>[Shop name]</span>
+              <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 20, letterSpacing: '-0.01em' }}>Embroid</span>
             </Link>
             <Nav />
           </div>

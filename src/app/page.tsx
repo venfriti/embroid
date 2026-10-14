@@ -1,6 +1,7 @@
 import { getCtx } from '@/lib/auth';
 import { customers, orders, kindName } from '@/lib/q';
 import { Link, h1, h2, eyebrow, lede, btnSm, Pill, Chev, Initial, DueBadge, ago, day } from '@/components/ui';
+import { CustomerSearch } from '@/components/CustomerSearch';
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { mode } = await getCtx(); const q = ((await searchParams).q || '').trim();
@@ -23,11 +24,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           <p style={lede}>Find a school or person to see their past orders and saved designs, or add someone new.</p>
         </div>
         <form action="/" style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-          <div style={{ flex: '1 1 480px', minWidth: 0, position: 'relative' }}>
-            <label htmlFor="customer-search" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>Search customers</label>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3F4A58" strokeWidth="2" strokeLinecap="round" aria-hidden="true" style={{ position: 'absolute', left: 20, top: 20 }}><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
-            <input id="customer-search" name="q" defaultValue={q} type="search" placeholder="Search school or customer name" style={{ width: '100%', boxSizing: 'border-box', height: 64, padding: '0 20px 0 56px', fontSize: 20, color: '#1B2430', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 14 }} />
-          </div>
+          <CustomerSearch defaultValue={q} />
           <Link href="/customers/new" style={{ flex: '0 0 auto', height: 64, padding: '0 28px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 18, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 14, textDecoration: 'none', boxSizing: 'border-box' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
             New customer

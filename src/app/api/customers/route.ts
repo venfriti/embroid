@@ -1,6 +1,14 @@
-import { requireLive } from '@/lib/auth';
+import { getCtx, requireLive } from '@/lib/auth';
 import { run } from '@/lib/db';
-import { nid, today } from '@/lib/q';
+import { nid, today, customers, kindName } from '@/lib/q';
+
+export async function GET(req: Request) {
+  const { mode } = await getCtx();
+  const q = new URL(req.url).searchParams.get('q') || '';
+  const list = (await customers(mode, q)).slice(0, 8);
+  return Response.json({ ok: true, customers: list.map((c: any) => ({ id: c.id, name: c.name, kind: kindName(c.kind), phone: c.phone })) });
+}
+
 export async function POST(req: Request) {
   const g = await requireLive(); if ('res' in g) return g.res;
   const b = (await req.json() as any); const name = String(b.name || '').trim();
