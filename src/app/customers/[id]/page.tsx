@@ -3,7 +3,7 @@ import { getCtx } from '@/lib/auth';
 import { customer, naira, orders, priceFor, kindName } from '@/lib/q';
 import { all } from '@/lib/db';
 import { NewBlankOrder, UseDesign } from '@/components/Forms';
-import { Link, H, h1, h2, Pill, DueBadge, Pay, stripe, ago, btnSm, Silhouette } from '@/components/ui';
+import { Link, H, h1, h2, Pill, DueBadge, Pay, stripe, ago, btnSm, Mockup, studioUrl } from '@/components/ui';
 
 const chev = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7684" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: '0 0 auto' }}><path d="M9 6l6 6-6 6" /></svg>;
 export default async function Profile({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ start?: string }> }) {
@@ -15,7 +15,11 @@ export default async function Profile({ params, searchParams }: { params: Promis
   const draft = os.filter(o => o.stage === 'Draft').sort((a, b) => (b.updated || '').localeCompare(a.updated || ''))[0];
   const hist = os.filter(o => o.stage !== 'Draft').sort((a, b) => (a.stage === 'Collected' ? 1 : 0) - (b.stage === 'Collected' ? 1 : 0) || (a.due || '').localeCompare(b.due || ''));
   const shown = hist.slice(0, 6);
-  const past = await all<any>(mode, `SELECT l.item, l.detail, MAX(l.unit_price) price FROM order_lines l JOIN orders o ON o.id=l.order_id WHERE o.customer_id=? AND o.stage!='Draft' AND l.detail IS NOT NULL GROUP BY l.item, l.detail ORDER BY MAX(o.placed) DESC LIMIT 6`, [c.id]);
+  const rows = await all<any>(mode, `SELECT l.id line_id, l.order_id, l.item, l.detail, l.unit_price price, (l.design IS NOT NULL AND l.design!='null') has_design, json_extract(l.design,'$.thumb') thumb FROM order_lines l JOIN orders o ON o.id=l.order_id WHERE o.customer_id=? AND o.stage!='Draft' AND l.detail IS NOT NULL ORDER BY o.placed DESC, l.id DESC`, [c.id]);
+  // one card per garment + colour: the newest line, preferring one that has a saved 3D mockup
+  const seen = new Map<string, any>();
+  for (const r of rows) { const k = r.item + '|' + r.detail; const cur = seen.get(k); if (!cur || (!cur.has_design && r.has_design)) seen.set(k, cur ? { ...r, price: cur.price } : r); }
+  const past = [...seen.values()].sort((a, b) => Number(!!b.has_design) - Number(!!a.has_design)).slice(0, 6); // mockups first, then newest
   const designs = await Promise.all(past.map(async d => ({ ...d, price: (await priceFor(mode, c.id, d.item)) ?? d.price })));
   const contact = [['Contact person', c.contact], ['Phone', c.phone], ['Email', c.email], ['Delivery address', c.address]];
   const notes = String(c.notes || '').split(/\n+/).map((x: string) => x.trim()).filter(Boolean);
@@ -91,13 +95,18 @@ export default async function Profile({ params, searchParams }: { params: Promis
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12 }}>
                 {designs.map((d, i) => (
                   <div key={i} style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <div style={{ height: 64, borderRadius: 8, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Silhouette item={d.item} detail={d.detail} size={44} /></div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <span style={{ fontWeight: 500, fontSize: 14 }}>{d.item}</span>
-                      <span style={{ fontSize: 12, color: '#4B5563' }}>{d.detail}</span>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1B2430', paddingTop: 4 }}>{naira(d.price)}</span>
-                    </div>
-                    <UseDesign customerId={c.id} item={d.item} detail={d.detail} price={d.price} />
+                    <a href={studioUrl(d.order_id, d.line_id, d.item, { view: true, customer: c.id })} aria-label={`Open the 3D mockup of ${d.item}, ${d.detail}`} style={{ display: 'flex', flexDirection: 'column', gap: 8, color: 'inherit', textDecoration: 'none' }}>
+                      <div style={{ position: 'relative', height: 64, borderRadius: 8, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Mockup thumb={d.thumb} item={d.item} detail={d.detail} size={d.thumb ? 56 : 44} />
+                        <span style={{ position: 'absolute', right: 6, bottom: 4, fontSize: 11, fontWeight: 500, color: '#0E5C63', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 6, padding: '1px 6px' }}>{d.has_design ? 'Open 3D mockup' : 'View in 3D'}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span style={{ fontWeight: 500, fontSize: 14 }}>{d.item}</span>
+                        <span style={{ fontSize: 12, color: '#4B5563' }}>{d.detail}</span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#1B2430', paddingTop: 4 }}>{naira(d.price)}</span>
+                      </div>
+                    </a>
+                    <UseDesign customerId={c.id} item={d.item} detail={d.detail} price={d.price} fromOrder={d.order_id} fromLine={d.line_id} />
                   </div>
                 ))}
               </div>

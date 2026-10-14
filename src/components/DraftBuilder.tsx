@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { send } from '@/lib/client';
-import { Silhouette, h1, h2 } from './ui';
+import { Mockup, studioUrl, h1, h2 } from './ui';
 
 const n = (x: number) => '₦' + Math.round(x).toLocaleString('en-NG');
-export type DLine = { id: number; item: string; detail: string | null; qty: number; unit_price: number; sizes: string | null; design: string | null };
+export type DLine = { id: number; item: string; detail: string | null; qty: number; unit_price: number; sizes: string | null; design: unknown; thumb?: string | null };
 type G = { name: string; sizes: number[]; placements: { place: string; what: string; method: string }[]; recipe: { item: string; qty: number; unit: string; onHand: number; avail: number }[] };
 const LBL = { display: 'flex', flexDirection: 'column', gap: 6, fontSize: 14, color: '#3F4A58', minWidth: 0 } as const;
 const INP = { width: '100%', boxSizing: 'border-box', minHeight: 46, padding: '0 12px', fontSize: 16, color: '#1B2430', background: '#FFFFFF', border: '1px solid #C5CCD5', borderRadius: 10 } as const;
@@ -120,8 +120,8 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
               </div>
               <div style={{ flex: '1 1 240px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: '#4B5563' }}>Preview</div>
-                <div style={{ height: 220, borderRadius: 12, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Silhouette item={l.item} detail={l.detail} size={170} /></div>
-                <a href={`/studio/index.html?order=${orderId}&line=${l.id}&item=${encodeURIComponent(l.item)}`} target="_blank" rel="noreferrer" style={{ minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 15, color: '#0E5C63', border: '2px solid #0E5C63', borderRadius: 10, textDecoration: 'none' }}>{l.design ? 'Open saved 3D mockup' : 'Open 3D mockup'}</a>
+                <div style={{ height: 220, borderRadius: 12, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Mockup thumb={l.thumb} item={l.item} detail={l.detail} size={l.thumb ? 200 : 170} /></div>
+                <a href={studioUrl(orderId, l.id, l.item)} target="_blank" rel="noreferrer" style={{ minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 15, color: '#0E5C63', border: '2px solid #0E5C63', borderRadius: 10, textDecoration: 'none' }}>{l.design ? 'Open saved 3D mockup' : 'Open 3D mockup'}</a>
               </div>
             </div>
             <div style={{ borderTop: '1px solid #E8ECF0', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>

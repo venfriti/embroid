@@ -212,7 +212,7 @@ button.chip:hover{background:rgba(14,16,19,.82)}
 </div>
 <div id="toast" hidden></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/studio/three.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -1261,12 +1261,14 @@ function renderInfo(){
 }
 function renderAll(){renderInspector();renderLayers();renderInfo()}
 
-var LINK={order:null,line:null};
+var LINK={order:null,line:null,view:false,customer:null};
 function snapshot(){return JSON.parse(JSON.stringify({g:state.g,gcol:state.gcol,byG:state.byG,ank:state.ank,nextId:state.nextId},function(k,v){return k.charAt(0)==='_'?undefined:v}))}
 function restoreDesign(d){
   disarm();
   Object.keys(decals).forEach(function(k){var m=decals[k];group.remove(m);m.geometry.dispose();delete decals[k];});
-  if(d.byG)Object.keys(d.byG).forEach(function(k){state.byG[k]=d.byG[k]});
+  // a saved design is plain JSON, so turn positions and normals back into vectors
+  function vec(o){return o&&typeof o.clone!=='function'?new THREE.Vector3(o.x,o.y,o.z):o}
+  if(d.byG)Object.keys(d.byG).forEach(function(k){d.byG[k].forEach(function(it){it.pos=vec(it.pos);it.nrm=vec(it.nrm)});state.byG[k]=d.byG[k]});
   if(d.gcol)Object.assign(state.gcol,d.gcol);
   if(d.ank)Object.assign(state.ank,d.ank);
   if(d.nextId)state.nextId=Math.max(state.nextId,d.nextId);
@@ -1277,15 +1279,27 @@ function restoreDesign(d){
 }
 function pickGarment(item){
   var t=(item||'').toLowerCase();
+  if(/trouser|pant/.test(t))return 'trousers';
   if(/ankara/.test(t))return 'ankara';
   if(/short/.test(t))return 'shorts';
-  if(/trouser|pant/.test(t))return 'trousers';
   if(/tee|shirt|polo|jersey|top/.test(t))return 'tee';
   return null;
 }
+function previewPic(){
+  try{
+    renderer.render(scene,camera);
+    var c=document.createElement('canvas');c.width=c.height=160;var x=c.getContext('2d');
+    x.fillStyle='#EEF1F4';x.fillRect(0,0,160,160);
+    var w=glc.width,h=glc.height,k=Math.min(160/w,160/h)*1.45;
+    x.drawImage(glc,(160-w*k)/2,(160-h*k)/2,w*k,h*k);
+    return c.toDataURL('image/jpeg',0.72);
+  }catch(e){return null}
+}
 function save(){
+  if(LINK.view){toast('This is a past order. Use "Use in new order" on the customer page to copy it.');return;}
   if(!LINK.line){toast('Open this from an order line to save it to the order');return;}
-  fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({design:snapshot()})})
+  var snap=snapshot();var pic=previewPic();if(pic)snap.thumb=pic;
+  fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({design:snap})})
    .then(function(r){return r.json().then(function(j){return{r:r,j:j}})})
    .then(function(x){
      if(x.r.status===403&&x.j.demo)toast("This is the demo. Changes aren't saved. Sign in to save.");
@@ -1294,7 +1308,7 @@ function save(){
    }).catch(function(){toast('Could not reach the server')});
 }
 $('#saveBtn').addEventListener('click',save);$('#saveBtn2').addEventListener('click',save);
-$('#backBtn').addEventListener('click',function(){if(LINK.order)location.href='/orders/'+LINK.order;else toast('Open this from an order line')});
+$('#backBtn').addEventListener('click',function(){if(LINK.view&&LINK.customer)location.href='/customers/'+LINK.customer;else if(LINK.order)location.href='/orders/'+LINK.order;else toast('Open this from an order line')});
 $('#fsBtn').addEventListener('click',function(){
   try{
     if(document.fullscreenElement){document.exitFullscreen()}
@@ -1311,9 +1325,10 @@ if(document.fonts&&document.fonts.load){
    .then(function(){state.items.forEach(function(d){invalidate(d)});repaint();renderAll()}).catch(function(){});
 }
 frame();
-window.__studio={state:state,setView:setView,T:T};
+window.__studio={state:state,setView:setView,T:T,snapshot:snapshot,previewPic:previewPic};
 (function(){
-  var q=new URLSearchParams(location.search);LINK.order=q.get('order');LINK.line=q.get('line');
+  var q=new URLSearchParams(location.search);LINK.order=q.get('order');LINK.line=q.get('line');LINK.view=q.get('view')==='1';LINK.customer=q.get('customer');
+  if(LINK.view){var bb=$('#backBtn');if(bb&&LINK.customer)bb.lastChild.nodeValue='Back to customer';['saveBtn','saveBtn2'].forEach(function(id){var b=$('#'+id);if(b)b.style.display='none'});}
   if(!LINK.order||!LINK.line)return;
   fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line).then(function(r){return r.ok?r.json():null}).then(function(j){
     if(!j)return;
@@ -1328,8 +1343,9 @@ window.__studio={state:state,setView:setView,T:T};
     }
     garmentChrome();
     if(fallback)toast('No 3D model for '+j.item+' yet. Showing the sports tee.');
+    else if(LINK.view)toast('Viewing the mockup from '+j.order_name+'. Copy it from the customer page.');
     else if(j.design)toast('Opened the saved mockup');
-  }).catch(function(){});
+  }).catch(function(e){console.error('studio link failed',e)});
 })();
 })();
 </script>

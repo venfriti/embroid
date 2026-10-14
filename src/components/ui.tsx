@@ -59,4 +59,15 @@ export function Silhouette({ item, detail, size = 68 }: { item: string; detail?:
 }
 
 
+/** Link into the 3D studio for one order line. `view` opens a past line read-only, to copy into a new order. */
+export const studioUrl = (orderId: string, lineId: number | string, item: string, opts: { view?: boolean; customer?: string } = {}) =>
+  `/studio/index.html?order=${orderId}&line=${lineId}&item=${encodeURIComponent(item)}${opts.view ? '&view=1' : ''}${opts.customer ? `&customer=${opts.customer}` : ''}`;
+
+/** The saved mockup picture if there is one, otherwise the plain silhouette. */
+export function Mockup({ thumb, item, detail, size = 68 }: { thumb?: string | null; item: string; detail?: string | null; size?: number }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  if (thumb) return <img src={thumb} alt={`Saved 3D mockup of ${item}`} width={size} height={size} style={{ width: size, height: size, objectFit: 'contain', borderRadius: 6 }} />;
+  return <Silhouette item={item} detail={detail} size={size} />;
+}
+
 export { Link };

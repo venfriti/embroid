@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { send } from '@/lib/client';
 
@@ -401,11 +401,19 @@ export function NewBlankOrder({ customerId, start }: { customerId: string; start
 }
 
 /** "Use in new order" on a saved design: starts a draft with that garment on it. */
-export function UseDesign({ customerId, item, detail, price }: { customerId: string; item: string; detail: string; price: number }) {
+export function UseDesign({ customerId, item, detail, price, fromOrder, fromLine }: { customerId: string; item: string; detail: string; price: number; fromOrder?: string; fromLine?: number }) {
   const r = useRouter(); const s = useSave();
   return <button type="button" disabled={s.busy} style={{ minHeight: 44, fontSize: 14, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 10, cursor: 'pointer' }} onClick={async () => {
     const j = await s.run('/api/orders', { customer_id: customerId, name: 'New order' }); if (!j.ok) return;
-    const k = await s.run(`/api/orders/${j.id}/lines`, { item, detail, qty: 1, unit_price: price }); if (k.ok) r.push(`/orders/${j.id}`);
+    const k = await s.run(`/api/orders/${j.id}/lines`, { item, detail, qty: 1, unit_price: price }); if (!k.ok) return;
+    // carry the saved 3D mockup over to the new line so it opens exactly as it was made
+    if (fromOrder && fromLine && k.id) {
+      try {
+        const src: any = await fetch(`/api/orders/${fromOrder}/lines/${fromLine}`).then(x => x.ok ? x.json() : null);
+        if (src?.design) await fetch(`/api/orders/${j.id}/lines/${k.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ design: src.design }) });
+      } catch { /* the line still exists without the mockup */ }
+    }
+    r.push(`/orders/${j.id}`);
   }}>Use in new order</button>;
 }
 
@@ -420,7 +428,7 @@ export function StageStepper({ id, stage }: { id: string; stage: string }) {
       <ol style={{ flex: '1 1 520px', minWidth: 0, margin: 0, padding: 0, listStyle: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
         {steps.map((st, i) => {
           const done = i < at, cur = i === at;
-          return (<>
+          return (<Fragment key={st}>
             {i > 0 && <li key={'b' + i} aria-hidden="true" style={{ flex: '1 1 24px', minWidth: 16, height: 3, borderRadius: 2, background: i <= at ? '#0E5C63' : '#D5DBE2' }} />}
             <li key={st} aria-current={cur ? 'step' : undefined} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button type="button" onClick={() => go(st)} aria-label={`Move to ${labels[i]}`} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}>
@@ -430,7 +438,7 @@ export function StageStepper({ id, stage }: { id: string; stage: string }) {
                 <span style={{ fontSize: 15, fontWeight: cur ? 700 : done ? 600 : 500, color: cur ? '#0E5C63' : done ? '#1B2430' : '#4B5563' }}>{labels[i]}</span>
               </button>
             </li>
-          </>);
+          </Fragment>);
         })}
       </ol>
       {next && <button type="button" disabled={s.busy} onClick={() => go(steps[at + 1])} style={{ minHeight: 48, padding: '0 22px', fontSize: 15, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 12, cursor: 'pointer' }}>{next}</button>}

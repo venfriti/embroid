@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getCtx } from '@/lib/auth';
 import { order, lines, payments, naira, fmtDate } from '@/lib/q';
 import { StageStepper, PriceAdjust } from '@/components/Forms';
-import { Link, h1, h2, Pay, Silhouette, Chev, day, daysFrom } from '@/components/ui';
+import { Link, h1, h2, Pay, Mockup, studioUrl, Chev, day, daysFrom } from '@/components/ui';
 import Builder from './Builder';
 
 const SHOW = 5;
@@ -47,17 +47,21 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               <span style={{ flex: '0 0 20px' }} />
             </div>
             {shown.map(l => (
-              <Link key={l.id} href={`/orders/${o.id}/lines?line=${l.id}`} style={{ width: '100%', minHeight: 64, boxSizing: 'border-box', padding: '8px 16px 8px 20px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', textDecoration: 'none', background: '#FFFFFF', borderBottom: '1px solid #E8ECF0', color: '#1B2430' }}>
-                <span style={{ flex: '0 0 auto', width: 48, height: 48, borderRadius: 10, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Silhouette item={l.item} detail={l.detail} size={36} /></span>
-                <span style={{ flex: '1 1 160px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <span style={{ fontWeight: 600, fontSize: 15 }}>{l.item}</span>
-                  {l.detail && <span style={{ fontSize: 13, color: '#4B5563' }}>{l.detail}</span>}
-                </span>
-                <span style={{ flex: '0 0 64px', textAlign: 'right', fontSize: 15 }}>{l.qty}</span>
-                <span style={{ flex: '0 0 88px', textAlign: 'right', fontSize: 15 }}>{naira(l.unit_price)}</span>
-                <span style={{ flex: '0 0 104px', textAlign: 'right', fontSize: 15, fontWeight: 600 }}>{naira(l.qty * l.unit_price)}</span>
-                <Chev />
-              </Link>
+              <div key={l.id} style={{ display: 'flex', alignItems: 'stretch', background: '#FFFFFF', borderBottom: '1px solid #E8ECF0' }}>
+                <a href={studioUrl(o.id, l.id, l.item)} aria-label={`Open the 3D mockup of ${l.item}`} title="Open in the 3D studio" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '8px 0 8px 20px' }}>
+                  <span style={{ position: 'relative', width: 48, height: 48, borderRadius: 10, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center', outline: l.design ? '2px solid #0E5C63' : 'none' }}><Mockup thumb={l.thumb} item={l.item} detail={l.detail} size={l.thumb ? 44 : 36} /></span>
+                </a>
+                <Link href={`/orders/${o.id}/lines?line=${l.id}`} style={{ flex: '1 1 auto', minWidth: 0, minHeight: 64, boxSizing: 'border-box', padding: '8px 16px 8px 12px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', textDecoration: 'none', color: '#1B2430' }}>
+                  <span style={{ flex: '1 1 160px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ fontWeight: 600, fontSize: 15 }}>{l.item}</span>
+                    {l.detail && <span style={{ fontSize: 13, color: '#4B5563' }}>{l.detail}</span>}
+                  </span>
+                  <span style={{ flex: '0 0 64px', textAlign: 'right', fontSize: 15 }}>{l.qty}</span>
+                  <span style={{ flex: '0 0 88px', textAlign: 'right', fontSize: 15 }}>{naira(l.unit_price)}</span>
+                  <span style={{ flex: '0 0 104px', textAlign: 'right', fontSize: 15, fontWeight: 600 }}>{naira(l.qty * l.unit_price)}</span>
+                  <Chev />
+                </Link>
+              </div>
             ))}
             <Link href={`/orders/${o.id}/lines`} style={{ width: '100%', minHeight: 48, padding: '0 20px', display: 'flex', alignItems: 'center', fontSize: 15, fontWeight: 600, color: '#0E5C63', textDecoration: 'none', boxSizing: 'border-box' }}>{ls.length > SHOW ? `Show all ${ls.length} lines` : 'Edit lines'}</Link>
           </div>

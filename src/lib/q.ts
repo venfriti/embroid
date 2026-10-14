@@ -17,7 +17,8 @@ const fin = (o: any) => o && ({ ...o, total: o.subtotal - o.discount, balance: o
 
 export const orders = async (m: Mode, where = '', args: any[] = []) => (await all(m, `${ORDER_SQL} ${where} ORDER BY o.due`, args)).map(fin);
 export const order = async (m: Mode, id: string) => fin(await first(m, `${ORDER_SQL} WHERE o.id=?`, [id]));
-export const lines = (m: Mode, id: string) => all(m, 'SELECT * FROM order_lines WHERE order_id=? ORDER BY line_no', [id]);
+/** Lines without the heavy design JSON: `design` is 1/0 (a mockup is saved) and `thumb` is its small preview picture. */
+export const lines = (m: Mode, id: string) => all<any>(m, "SELECT id, order_id, line_no, item, detail, qty, unit_price, sizes, (design IS NOT NULL AND design!='null') design, json_extract(design,'$.thumb') thumb FROM order_lines WHERE order_id=? ORDER BY line_no", [id]);
 export const payments = (m: Mode, id: string) => all(m, 'SELECT * FROM payments WHERE order_id=? ORDER BY date', [id]);
 export const changes = (m: Mode, id: string) => all(m, 'SELECT * FROM order_changes WHERE order_id=? ORDER BY date DESC, id DESC', [id]);
 export const stageLog = (m: Mode, id: string) => all(m, 'SELECT * FROM stage_log WHERE order_id=? ORDER BY id DESC LIMIT 6', [id]);
