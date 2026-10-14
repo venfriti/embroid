@@ -5,6 +5,7 @@
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "r2_buckets": [{ "binding": "NOTE_FILES", "bucket_name": "uniform-cf-note-files" }],
   "routes": [{ "pattern": "embroid.venfriti.com", "custom_domain": true }],
   "d1_databases": [
     { "binding": "DEMO_DB", "database_name": "uniform-demo", "database_id": "c7d7bb14-e1af-4b7b-bde0-487fc87f95fd", "migrations_dir": "migrations" },

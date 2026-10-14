@@ -2,12 +2,13 @@ import { notFound } from 'next/navigation';
 import { getCtx } from '@/lib/auth';
 import { customer, naira, orders, priceFor, kindName } from '@/lib/q';
 import { all } from '@/lib/db';
-import { NewBlankOrder, UseDesign } from '@/components/Forms';
+import NotesPanel from '@/components/NotesPanel';
+import { NewBlankOrder, UseDesign, NewDesignButton } from '@/components/Forms';
 import { Link, H, h1, h2, Pill, DueBadge, Pay, stripe, ago, btnSm, Mockup, studioUrl } from '@/components/ui';
 
 const chev = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7684" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: '0 0 auto' }}><path d="M9 6l6 6-6 6" /></svg>;
-export default async function Profile({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ start?: string }> }) {
-  const start = !!(await searchParams).start;
+export default async function Profile({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ start?: string; tab?: string }> }) {
+  const query = await searchParams; const start = !!query.start; const showNotes = query.tab === 'notes';
   const { mode } = await getCtx(); const { id } = await params; const c = await customer(mode, id); if (!c) notFound();
   const os = await orders(mode, 'WHERE o.customer_id=?', [c.id]);
   const owedOrders = os.filter(o => o.balance > 0 && o.stage !== 'Draft');
@@ -21,8 +22,11 @@ export default async function Profile({ params, searchParams }: { params: Promis
   for (const r of rows) { const k = r.item + '|' + r.detail; const cur = seen.get(k); if (!cur || (!cur.has_design && r.has_design)) seen.set(k, cur ? { ...r, price: cur.price } : r); }
   const past = [...seen.values()].sort((a, b) => Number(!!b.has_design) - Number(!!a.has_design)).slice(0, 6); // mockups first, then newest
   const designs = await Promise.all(past.map(async d => ({ ...d, price: ((await priceFor(mode, c.id, d.item)) ?? d.price) + (d.decor_price || 0) })));
+  const catalog = await all<any>(mode, 'SELECT item FROM prices ORDER BY item');
+  const catalogItems = await Promise.all(catalog.map(async i => ({ item: i.item, price: (await priceFor(mode, c.id, i.item)) ?? 0 })));
   const contact = [['Contact person', c.contact], ['Phone', c.phone], ['Email', c.email], ['Delivery address', c.address]];
-  const notes = String(c.notes || '').split(/\n+/).map((x: string) => x.trim()).filter(Boolean);
+  const noteRows = await all<any>(mode, "SELECT * FROM notes WHERE customer_id=? ORDER BY created_at DESC", [c.id]);
+  const profileNotes = await Promise.all(noteRows.map(async n => ({ ...n, attachments: await all<any>(mode, 'SELECT * FROM note_attachments WHERE note_id=? ORDER BY created_at', [n.id]), events: await all<any>(mode, 'SELECT id,action,body,detail,at,by FROM note_events WHERE note_id=? ORDER BY id', [n.id]) })));
   const row = { width: '100%', minHeight: 56, boxSizing: 'border-box' as const, padding: '8px 16px 8px 12px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' as const, textDecoration: 'none', background: '#FFFFFF', color: '#1B2430' };
   const tile = { background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, padding: '14px 18px 18px', display: 'flex', flexDirection: 'column' as const, gap: 10 };
   return (
@@ -63,7 +67,11 @@ export default async function Profile({ params, searchParams }: { params: Promis
         </section>
       )}
 
-      <section style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start' }}>
+      <nav aria-label="Customer profile sections" style={{ display: 'flex', gap: 8, borderBottom: '1px solid #DDE2E8' }}>
+        <Link href={`/customers/${c.id}`} aria-current={!showNotes ? 'page' : undefined} style={{ padding: '10px 14px', minHeight: 44, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', fontWeight: 600, borderBottom: !showNotes ? '3px solid #0E5C63' : '3px solid transparent' }}>Overview</Link>
+        <Link href={`/customers/${c.id}?tab=notes`} aria-current={showNotes ? 'page' : undefined} style={{ padding: '10px 14px', minHeight: 44, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', fontWeight: 600, borderBottom: showNotes ? '3px solid #0E5C63' : '3px solid transparent' }}>Notes <span style={{ marginLeft: 7, color: '#4B5563', fontWeight: 400 }}>({profileNotes.filter(n => !n.removed_at).length})</span></Link>
+      </nav>
+      {showNotes ? <section style={{ maxWidth: 850, width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}><h2 style={h2}>Customer notes</h2><p style={{ margin: 0, color: '#4B5563', fontSize: 14 }}>Keep preferences and details that help with future orders.</p><NotesPanel scope="customer" owner={c.id} notes={profileNotes} demo={mode === 'demo'} /></section> : <section style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start' }}>
         <div style={{ flex: '1.8 1 560px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -86,12 +94,15 @@ export default async function Profile({ params, searchParams }: { params: Promis
             </div>
           </div>
 
-          {designs.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-                <h2 style={h2}>Saved designs</h2>
-                <span style={{ fontSize: 13, color: '#4B5563' }}>Reuse a garment spec exactly as it was made</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+                  <h2 style={h2}>Saved designs</h2>
+                  <span style={{ fontSize: 13, color: '#4B5563' }}>Reuse a garment spec exactly as it was made</span>
+                </div>
+                <NewDesignButton customerId={c.id} items={catalogItems} />
               </div>
+              {designs.length === 0 && <p style={{ margin: 0, color: '#4B5563', fontSize: 14 }}>Nothing saved yet. Start a new design to sketch one live with the customer.</p>}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12 }}>
                 {designs.map((d, i) => (
                   <div key={i} style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -111,7 +122,6 @@ export default async function Profile({ params, searchParams }: { params: Promis
                 ))}
               </div>
             </div>
-          )}
           {owedOrders.length > 0 && <Link href={`/orders/${[...owedOrders].sort((x, y) => (x.due || '').localeCompare(y.due || ''))[0].id}/payment`} style={{ ...btnSm, alignSelf: 'flex-start', minHeight: 48, padding: '0 22px', fontSize: 14, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 8 }}>Record a payment</Link>}
         </div>
 
@@ -123,14 +133,8 @@ export default async function Profile({ params, searchParams }: { params: Promis
               {c.payment_terms && <div style={{ display: 'flex', flexDirection: 'column', gap: 2, gridColumn: '1 / -1' }}><span style={{ fontSize: 12, color: '#4B5563' }}>Payment terms</span><span style={{ fontWeight: 500 }}>{c.payment_terms}{c.deposit_pct ? ` · ${c.deposit_pct}% deposit before cutting` : ''}</span></div>}
             </div>
           </div>
-          {notes.length > 0 && (
-            <div style={tile}>
-              <h2 style={h2}>Notes for next time</h2>
-              <ul style={{ margin: 0, padding: '0 0 0 20px', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14, lineHeight: 1.45 }}>{notes.map((n: string, i: number) => <li key={i}>{n}</li>)}</ul>
-            </div>
-          )}
         </div>
-      </section>
+      </section>}
     </main>
   );
 }

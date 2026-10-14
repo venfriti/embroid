@@ -11,6 +11,7 @@ Orders, invoices and stock for an embroidery and uniform shop.
 ```
 npm install
 npx wrangler login
+npx wrangler r2 bucket create uniform-cf-note-files
 npx wrangler d1 create uniform-demo      # copy the database_id it prints into wrangler.jsonc (DEMO_DB)
 npx wrangler d1 create uniform-live      # same for LIVE_DB
 npx wrangler d1 migrations apply DEMO_DB --remote
@@ -39,7 +40,9 @@ Before the first run, copy `.dev.vars.example` to `.dev.vars` and set a test log
 - Back up the live data now and then: `npx wrangler d1 export LIVE_DB --remote --output=backup.sql`
 
 ## What works
-Customers (search, new, profile, edit prices per school) · orders (new, lines, stages with who moved it, discount, edit after confirming with a logged reason) · reorder from a past order at today's prices · invoice (print or PDF) · production sheet (print) · record payment (oldest order first) · stock list, item history, add delivery, new stock item, reserved stock worked out from open orders and each garment's recipe · money owed report · setup: prices, garments (places, sizes, stock per piece), houses and crests · 3D studio opened from each order line, with the mockup saved on the line.
+Customers (search, new, profile, edit prices per school, dated notes with private PDF/image attachments and edit/removal history) · orders (new, lines, stages with who moved it, discount, edit after confirming with a logged reason, dated notes with attachments) · reorder from a past order at today's prices · invoice (print or PDF) · production sheet (print) · record payment (oldest order first) · stock list, item history, add delivery, new stock item, reserved stock worked out from open orders and each garment's recipe · money owed report · setup: prices, garments (places, sizes, stock per piece), houses and crests · 3D studio opened from each order line, with the mockup saved on the line.
+
+Note attachments are stored in the private `uniform-cf-note-files` R2 bucket. The `0007_customer_order_notes.sql` migration creates note/history tables and copies existing customer and order text notes into them. Apply migrations to both D1 databases before deploying. Attachments accept PDF, JPG, PNG and WebP files up to 10 MB.
 
 ## More logins
 ```

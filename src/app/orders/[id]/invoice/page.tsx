@@ -18,9 +18,9 @@ export default async function Invoice({ params }: { params: Promise<{ id: string
         <span style={cell(70)}>{l.qty}</span><span style={cell(110)}>{naira(l.unit_price)}</span><b style={{ ...cell(130), fontWeight: 600 }}>{naira(l.qty * l.unit_price)}</b>
       </div>
       {(decors[l.id] || []).map((dc, i) => (
-        <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginTop: 6, fontSize: 14, color: '#4B5563' }}>
-          <span style={{ flex: 1, paddingLeft: 16 }}>{dc.name}</span>
-          <span style={cell(70)} /><span style={cell(110)}>{naira(dc.price)}</span><span style={cell(130)}>{naira(dc.price * l.qty)}</span>
+        <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginTop: 8 }}>
+          <span style={{ flex: 1 }}><b style={{ fontSize: 16 }}>{dc.name}</b></span>
+          <span style={cell(70)}>{l.qty}</span><span style={cell(110)}>{naira(dc.price)}</span><b style={{ ...cell(130), fontWeight: 600 }}>{naira(dc.price * l.qty)}</b>
         </div>
       ))}
     </div>

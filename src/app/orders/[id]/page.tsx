@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getCtx } from '@/lib/auth';
-import { order, lines, payments, naira, fmtDate } from '@/lib/q';
+import { order, customer, lines, payments, naira, fmtDate } from '@/lib/q';
+import { all } from '@/lib/db';
+import NotesPanel from '@/components/NotesPanel';
 import { StageStepper, PriceAdjust } from '@/components/Forms';
 import { Link, h1, h2, Pay, Mockup, studioUrl, Chev, day, daysFrom } from '@/components/ui';
 import Builder from './Builder';
@@ -9,7 +11,9 @@ const SHOW = 5;
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { mode } = await getCtx(); const { id } = await params; const o = await order(mode, id); if (!o) notFound();
   if (o.stage === 'Draft') return <Builder id={id} />;
-  const ls = await lines(mode, o.id), ps = await payments(mode, o.id);
+  const ls = await lines(mode, o.id), ps = await payments(mode, o.id); const c = await customer(mode, o.customer_id);
+  const noteRows = await all<any>(mode, 'SELECT * FROM notes WHERE order_id=? ORDER BY created_at DESC', [o.id]);
+  const orderNotes = await Promise.all(noteRows.map(async n => ({ ...n, attachments: await all<any>(mode, 'SELECT * FROM note_attachments WHERE note_id=? ORDER BY created_at', [n.id]), events: await all<any>(mode, 'SELECT id,action,body,detail,at,by FROM note_events WHERE note_id=? ORDER BY id', [n.id]) })));
   const pct = o.total > 0 ? Math.min(100, Math.round(o.paid / o.total * 100)) : 0;
   const n = o.due ? daysFrom(o.due) : null;
   const meta = [o.customer, o.placed ? `Placed ${fmtDate(o.placed)}` : null, `${o.line_count} ${o.line_count === 1 ? 'line' : 'lines'}`, o.due ? `Due ${day(o.due)}${n !== null && o.stage !== 'Collected' ? (n < 0 ? ` (${-n} ${-n === 1 ? 'day' : 'days'} late)` : ` (${n} ${n === 1 ? 'day' : 'days'} to go)`) : ''}` : null].filter(Boolean).join(' · ');
@@ -69,6 +73,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         </div>
 
         <div style={{ flex: '1 1 340px', maxWidth: 400, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ ...tile, padding: '14px 20px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h2 style={h2}>Contact</h2><Link href={`/customers/${o.customer_id}`} style={{ fontWeight: 600, textDecoration: 'none' }}>{c?.name || o.customer}</Link>
+            {c?.contact && <span style={{ fontSize: 14 }}>{c.contact}</span>}{c?.phone && <a href={`tel:${c.phone}`} style={{ fontSize: 14 }}>{c.phone}</a>}{c?.email && <a href={`mailto:${c.email}`} style={{ fontSize: 14, overflowWrap: 'anywhere' }}>{c.email}</a>}
+          </div>
+          <div style={{ ...tile, padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <h2 style={h2}>Order notes <span style={{ fontWeight: 400 }}>({orderNotes.filter(n => !n.removed_at).length})</span></h2>
+            <NotesPanel scope="order" owner={o.id} notes={orderNotes} demo={mode === 'demo'} />
+          </div>
           <div style={{ ...tile, padding: '16px 20px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}><h2 style={h2}>Payment</h2><Pay o={o} /></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
