@@ -55,10 +55,7 @@ export function NewCustomerForm({ existing }: { existing: { id: string; name: st
           <label style={{ ...LBL, flex: '1.4 1 260px' }}>Address<input name="address" style={INP} /></label>
         </div>
         {kind !== 'individual' && (
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-            <label style={{ ...LBL, flex: '1 1 220px' }}>Payment terms<input name="payment_terms" placeholder="Pay on collection" style={INP} /></label>
-            <label style={{ ...LBL, flex: '1 1 220px' }}>Deposit before cutting (%)<input name="deposit_pct" type="number" min="0" max="100" style={INP} /></label>
-          </div>
+          <label style={LBL}>Payment terms<input name="payment_terms" placeholder="Pay on collection" style={INP} /></label>
         )}
         <label style={LBL}>Notes for the team<textarea name="notes" style={{ ...INP, minHeight: 78, padding: '10px 12px', resize: 'none' }} /></label>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', paddingTop: 4, flexWrap: 'wrap' }}>
