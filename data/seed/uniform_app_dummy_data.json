@@ -1,0 +1,670 @@
+{
+  "customers": [
+    {
+      "id": "c1",
+      "name": "Greenfield Primary School",
+      "kind": "school",
+      "contact": "Mrs Adebayo (Bursar)",
+      "phone": "0803 555 0147",
+      "email": "bursar@greenfield.example",
+      "address": "14 School Road, Ikeja",
+      "payment_terms": "Pay on collection",
+      "deposit_pct": 50
+    },
+    {
+      "id": "c2",
+      "name": "Harbour Grammar School",
+      "kind": "school",
+      "last_order": "Sep 2025"
+    },
+    {
+      "id": "c3",
+      "name": "St. Mary's Secondary School",
+      "kind": "school"
+    },
+    {
+      "id": "c4",
+      "name": "Royal Heights Academy",
+      "kind": "school"
+    },
+    {
+      "id": "c5",
+      "name": "Mrs. Adeyemi",
+      "kind": "individual"
+    }
+  ],
+  "orders": [
+    {
+      "id": "o1",
+      "customer_id": "c1",
+      "name": "First term 2026 intake",
+      "invoice_no": "INV-2026-0147",
+      "placed": "2026-09-07",
+      "due": "2026-10-23",
+      "stage": "In production",
+      "subtotal": 510000,
+      "discount": 30000,
+      "total": 480000,
+      "paid": 200000,
+      "balance": 280000,
+      "pieces": 188
+    },
+    {
+      "id": "o2",
+      "customer_id": "c1",
+      "name": "Sports day kit",
+      "balance": 20000,
+      "note": "Only the balance is known from the screens; lines not drawn"
+    },
+    {
+      "id": "o3",
+      "customer_id": "c1",
+      "name": "Prefect blazers",
+      "note": "Lines and balance not drawn"
+    },
+    {
+      "id": "o4",
+      "customer_id": "c1",
+      "name": "Staff polos",
+      "note": "Lines and balance not drawn"
+    },
+    {
+      "id": "o5",
+      "customer_id": "c3",
+      "name": "(St. Mary's open order)",
+      "due": "2026-10-09",
+      "balance": 210000
+    },
+    {
+      "id": "o6",
+      "customer_id": "c4",
+      "name": "(Royal Heights open order)",
+      "balance": 35000
+    },
+    {
+      "id": "o7",
+      "customer_id": "c5",
+      "name": "Ankara set",
+      "stage": "Draft",
+      "due": "2026-10-19",
+      "total": 68000,
+      "balance": 28000,
+      "note": "Draft total 68,000 on the order screen; money-owed report shows 28,000 owed"
+    }
+  ],
+  "order_lines": [
+    {
+      "order_id": "o1",
+      "line_no": 1,
+      "item": "Boys' sports tee",
+      "detail": "Red house · crest, left chest",
+      "qty": 16,
+      "unit_price": 6500,
+      "line_total": 104000
+    },
+    {
+      "order_id": "o1",
+      "line_no": 2,
+      "item": "Girls' sports tee",
+      "detail": "Blue house · crest, left chest",
+      "qty": 12,
+      "unit_price": 7200,
+      "line_total": 86400
+    },
+    {
+      "order_id": "o1",
+      "line_no": 3,
+      "item": "Pinafore",
+      "detail": "Navy · school crest, bib",
+      "qty": 10,
+      "unit_price": 12500,
+      "line_total": 125000
+    },
+    {
+      "order_id": "o1",
+      "line_no": 4,
+      "item": "Boys' shorts",
+      "detail": "Navy",
+      "qty": 14,
+      "unit_price": 3000,
+      "line_total": 42000
+    },
+    {
+      "order_id": "o1",
+      "line_no": 5,
+      "item": "Girls' skirt",
+      "detail": "Grey pleat",
+      "qty": 12,
+      "unit_price": 4500,
+      "line_total": 54000
+    },
+    {
+      "order_id": "o1",
+      "line_no": 6,
+      "item": "Boys' sports tee, small",
+      "detail": "Red house · crest",
+      "qty": 10,
+      "unit_price": 2800,
+      "line_total": 28000
+    },
+    {
+      "order_id": "o1",
+      "line_no": 7,
+      "item": "Girls' sports tee, small",
+      "detail": "Blue house · crest",
+      "qty": 8,
+      "unit_price": 2800,
+      "line_total": 22400
+    },
+    {
+      "order_id": "o1",
+      "line_no": 8,
+      "item": "Prefect tie",
+      "detail": "Maroon · stripe",
+      "qty": 12,
+      "unit_price": 1200,
+      "line_total": 14400
+    },
+    {
+      "order_id": "o1",
+      "line_no": 9,
+      "item": "Girls' socks",
+      "detail": "White · school name",
+      "qty": 20,
+      "unit_price": 700,
+      "line_total": 14000
+    },
+    {
+      "order_id": "o1",
+      "line_no": 10,
+      "item": "Boys' socks",
+      "detail": "Grey · school name",
+      "qty": 20,
+      "unit_price": 700,
+      "line_total": 14000
+    },
+    {
+      "order_id": "o1",
+      "line_no": 11,
+      "item": "Cap badge",
+      "detail": "Crest",
+      "qty": 12,
+      "unit_price": 150,
+      "line_total": 1800
+    },
+    {
+      "order_id": "o1",
+      "line_no": 12,
+      "item": "Name tag",
+      "detail": "Woven · child's name",
+      "qty": 12,
+      "unit_price": 100,
+      "line_total": 1200
+    },
+    {
+      "order_id": "o1",
+      "line_no": 13,
+      "item": "Locker label",
+      "detail": "Woven",
+      "qty": 8,
+      "unit_price": 100,
+      "line_total": 800
+    },
+    {
+      "order_id": "o1",
+      "line_no": 14,
+      "item": "Hem alteration",
+      "detail": "Pinafores brought back",
+      "qty": 4,
+      "unit_price": 200,
+      "line_total": 800
+    },
+    {
+      "order_id": "o1",
+      "line_no": 15,
+      "item": "Badge, sewn on",
+      "detail": "Customer's own garment",
+      "qty": 12,
+      "unit_price": 50,
+      "line_total": 600
+    },
+    {
+      "order_id": "o1",
+      "line_no": 16,
+      "item": "Spare crest",
+      "detail": "No garment",
+      "qty": 6,
+      "unit_price": 100,
+      "line_total": 600
+    }
+  ],
+  "order_changes_after_confirming": [
+    {
+      "order_id": "o1",
+      "date": "2026-10-10",
+      "by": "Bisi",
+      "change": "Boys' shorts 12 -> 14",
+      "amount": 6000,
+      "reason": "Parent asked for two more"
+    },
+    {
+      "order_id": "o1",
+      "date": "2026-10-08",
+      "by": "Amaka",
+      "change": "Girls' skirt price 4800 -> 4500",
+      "amount": -3600,
+      "reason": "Agreed by phone"
+    }
+  ],
+  "payments": [
+    {
+      "order_id": "o1",
+      "date": "2026-09-12",
+      "method": "Transfer",
+      "amount": 150000
+    },
+    {
+      "order_id": "o1",
+      "date": "2026-09-30",
+      "method": "Cash",
+      "amount": 50000
+    }
+  ],
+  "stock_items": [
+    {
+      "id": "s1",
+      "name": "Grey pleat fabric",
+      "type": "Fabric",
+      "unit": "metres",
+      "on_hand": 40,
+      "reserved": 54,
+      "supplier": "Lagos Textile Mart",
+      "cost": 3800,
+      "warn_below": 20
+    },
+    {
+      "id": "s2",
+      "name": "Blue house badge",
+      "type": "Badges",
+      "unit": "pieces",
+      "on_hand": 15,
+      "reserved": 24
+    },
+    {
+      "id": "s3",
+      "name": "Navy thread",
+      "type": "Thread",
+      "unit": "cones",
+      "on_hand": 6,
+      "reserved": 5
+    },
+    {
+      "id": "s4",
+      "name": "Greenfield crest badge",
+      "type": "Badges",
+      "unit": "pieces",
+      "on_hand": 120,
+      "reserved": 96
+    },
+    {
+      "id": "s5",
+      "name": "Navy twill",
+      "type": "Fabric",
+      "unit": "metres",
+      "on_hand": 120,
+      "reserved": 85
+    },
+    {
+      "id": "s6",
+      "name": "Red house badge",
+      "type": "Badges",
+      "unit": "pieces",
+      "on_hand": 200,
+      "reserved": 40
+    },
+    {
+      "id": "s7",
+      "name": "Red house jersey",
+      "type": "Fabric",
+      "unit": "metres",
+      "on_hand": 90,
+      "reserved": 30
+    },
+    {
+      "id": "s8",
+      "name": "Blue house jersey",
+      "type": "Fabric",
+      "unit": "metres",
+      "on_hand": 60,
+      "note": "invented"
+    },
+    {
+      "id": "s9",
+      "name": "Green house jersey",
+      "type": "Fabric",
+      "unit": "metres",
+      "on_hand": 70,
+      "note": "invented"
+    },
+    {
+      "id": "s10",
+      "name": "Yellow house jersey",
+      "type": "Fabric",
+      "unit": "metres",
+      "on_hand": 40,
+      "note": "invented"
+    },
+    {
+      "id": "s11",
+      "name": "Green house badge",
+      "type": "Badges",
+      "unit": "pieces",
+      "on_hand": 150,
+      "note": "invented"
+    },
+    {
+      "id": "s12",
+      "name": "Yellow house badge",
+      "type": "Badges",
+      "unit": "pieces",
+      "on_hand": 80,
+      "note": "invented"
+    },
+    {
+      "id": "s13",
+      "name": "Sports crest badge",
+      "type": "Badges",
+      "unit": "pieces",
+      "on_hand": 90,
+      "note": "invented"
+    }
+  ],
+  "stock_movements_grey_pleat": [
+    {
+      "item_id": "s1",
+      "date": "2026-08-14",
+      "kind": "Delivered",
+      "reference": "Lagos Textile Mart inv 87102",
+      "change": 30,
+      "on_hand_after": 46
+    },
+    {
+      "item_id": "s1",
+      "date": "2026-08-28",
+      "kind": "Used",
+      "reference": "Pinafores, St Anne's",
+      "change": -20,
+      "on_hand_after": 26
+    },
+    {
+      "item_id": "s1",
+      "date": "2026-09-01",
+      "kind": "Delivered",
+      "reference": "Lagos Textile Mart inv 87710",
+      "change": 40,
+      "on_hand_after": 66
+    },
+    {
+      "item_id": "s1",
+      "date": "2026-09-09",
+      "kind": "Counted",
+      "reference": "Stock take",
+      "change": -2,
+      "on_hand_after": 64
+    },
+    {
+      "item_id": "s1",
+      "date": "2026-09-22",
+      "kind": "Used",
+      "reference": "Sports day kit, Greenfield",
+      "change": -6,
+      "on_hand_after": 58
+    },
+    {
+      "item_id": "s1",
+      "date": "2026-10-03",
+      "kind": "Used",
+      "reference": "Prefect blazers, Mt Carmel",
+      "change": -18,
+      "on_hand_after": 40
+    }
+  ],
+  "stock_delivery_example_not_yet_saved": {
+    "supplier": "Lagos Textile Mart",
+    "date": "2026-10-14",
+    "invoice": "88391",
+    "lines": [
+      {
+        "item": "Grey pleat fabric",
+        "qty": 30,
+        "unit_cost": 3800
+      },
+      {
+        "item": "Blue house badge",
+        "qty": 50,
+        "unit_cost": 260
+      },
+      {
+        "item": "Navy thread, large cone",
+        "qty": 4,
+        "unit_cost": 1900
+      }
+    ],
+    "total": 134600
+  },
+  "prices": [
+    {
+      "item": "Boys' sports tee",
+      "standard": 6500,
+      "greenfield": 6500
+    },
+    {
+      "item": "Girls' sports tee",
+      "standard": 7200,
+      "greenfield": 7200
+    },
+    {
+      "item": "Pinafore",
+      "standard": 12500,
+      "greenfield": 12500
+    },
+    {
+      "item": "Boys' shorts",
+      "standard": 3000,
+      "greenfield": 3000
+    },
+    {
+      "item": "Girls' skirt",
+      "standard": 4800,
+      "greenfield": 4500
+    },
+    {
+      "item": "Boys' sports tee, small",
+      "standard": 3000,
+      "greenfield": 2800
+    },
+    {
+      "item": "Girls' sports tee, small",
+      "standard": 3000,
+      "greenfield": 2800
+    },
+    {
+      "item": "Prefect tie",
+      "standard": 1200,
+      "greenfield": 1200
+    },
+    {
+      "item": "Socks, pair",
+      "standard": 750,
+      "greenfield": 700
+    },
+    {
+      "item": "Cap badge",
+      "standard": 150,
+      "greenfield": 150
+    },
+    {
+      "item": "Embroidered name",
+      "standard": 500,
+      "greenfield": 500
+    }
+  ],
+  "garments": [
+    {
+      "name": "Pinafore",
+      "kind": "Dress / skirt",
+      "cloth": "Navy twill",
+      "sizes": [
+        6,
+        8,
+        10,
+        12,
+        14,
+        16
+      ],
+      "standard_price": 12500,
+      "placements": [
+        {
+          "no": 1,
+          "place": "Bib",
+          "what": "School crest",
+          "method": "Sew-on badge"
+        },
+        {
+          "no": 2,
+          "place": "Left strap",
+          "what": "Name",
+          "method": "Embroidered"
+        },
+        {
+          "no": 3,
+          "place": "Hem, front",
+          "what": "House colour band",
+          "method": "Sew-on tape"
+        }
+      ],
+      "stock_per_piece": [
+        {
+          "item": "Navy twill",
+          "qty": 1.6
+        },
+        {
+          "item": "Greenfield crest badge",
+          "qty": 1
+        },
+        {
+          "item": "Navy thread",
+          "qty": 0.02
+        }
+      ]
+    },
+    {
+      "name": "Girls' skirt",
+      "cloth": "Grey pleat fabric",
+      "stock_per_piece": [
+        {
+          "item": "Grey pleat fabric",
+          "qty": 4.5
+        }
+      ],
+      "note": "4.5 m each so 12 = 54 m"
+    },
+    {
+      "name": "Boys' sports tee",
+      "placements": [
+        {
+          "no": 1,
+          "place": "Left chest",
+          "what": "House crest",
+          "method": "Sew-on badge"
+        },
+        {
+          "no": 2,
+          "place": "Right sleeve",
+          "what": "Sports crest",
+          "method": "Sew-on badge"
+        }
+      ]
+    },
+    {
+      "name": "Boys' shorts",
+      "cloth": "Navy twill",
+      "placements": [
+        {
+          "no": 1,
+          "place": "Right leg, top",
+          "what": "Sports crest",
+          "method": "Embroidered, white thread"
+        }
+      ]
+    },
+    {
+      "name": "Ankara shirt",
+      "note": "Customer brings fabric; chest pocket and side pockets; measurements in inches"
+    }
+  ],
+  "houses_greenfield": [
+    {
+      "house": "Red house",
+      "colour": "#C0392B",
+      "jersey": "Red house jersey",
+      "badge": "Red house badge"
+    },
+    {
+      "house": "Blue house",
+      "colour": "#2563A8",
+      "jersey": "Blue house jersey",
+      "badge": "Blue house badge"
+    },
+    {
+      "house": "Green house",
+      "colour": "#2E7D4F",
+      "jersey": "Green house jersey",
+      "badge": "Green house badge"
+    },
+    {
+      "house": "Yellow house",
+      "colour": "#D9A404",
+      "jersey": "Yellow house jersey",
+      "badge": "Yellow house badge"
+    }
+  ],
+  "crests_greenfield": [
+    {
+      "name": "School crest",
+      "used_on": "pinafores, blazers, skirts",
+      "badge": "Greenfield crest badge"
+    },
+    {
+      "name": "Sports crest",
+      "used_on": "sports tees right sleeve",
+      "badge": "Sports crest badge"
+    }
+  ],
+  "ankara_order_example": {
+    "customer_id": "c5",
+    "lines": [
+      {
+        "garment": "Ankara shirt",
+        "price": 38000,
+        "fabric": "Customer brings own",
+        "yards_received": 4,
+        "chest_in": 42,
+        "shoulder_in": 18,
+        "sleeve_in": 24,
+        "length_in": 29,
+        "pockets": [
+          "Chest pocket 5x6 in, 9 in below shoulder, left",
+          "Side pockets x2, 7 in deep"
+        ]
+      },
+      {
+        "garment": "Ankara trousers",
+        "price": 30000,
+        "pockets": [
+          "Side pockets"
+        ]
+      }
+    ]
+  }
+}

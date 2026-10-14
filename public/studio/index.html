@@ -1,0 +1,1335 @@
+<title>Uniform Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bebas+Neue&family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&family=Pacifico&family=Playfair+Display:wght@700&display=swap">
+<style>
+/* Layout: full-screen split. Left half is a lit photo-studio stage with a turnable 3D garment, right half holds the editing controls. */
+:root{
+  color-scheme: dark;
+  --bg:#0E1013; --panel:#14171B; --raise:#1B1F24; --line:#2A3036;
+  --text:#ECE8E1; --muted:#98A0A9; --accent:#4CC5BD; --accent-ink:#06211F; --danger:#F08A7E;
+  --display:'Bricolage Grotesque','Figtree',system-ui,sans-serif; --body:'Figtree',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;overflow:hidden}
+button{font-family:inherit;color:inherit;cursor:pointer}
+input,select{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#app{height:100%;display:grid;grid-template-rows:56px minmax(0,1fr)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+.top .crumb{display:flex;align-items:center;gap:14px;min-width:0}
+.top .back{min-height:40px;padding:0 12px 0 8px;display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;border-radius:8px;color:var(--text);font-weight:500}
+.top .back:hover{background:var(--raise)}
+.top h1{margin:0;font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.top .ctx{color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--raise);font-size:15px;font-weight:600}
+.btn:hover{border-color:#3a424a}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--danger)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:0}
+.stage{position:relative;min-height:0;overflow:hidden;background:radial-gradient(ellipse 70% 62% at 50% 42%,#555B63 0%,#34383F 42%,#1A1D21 78%,#121417 100%)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.stage.armed #gl{cursor:crosshair}
+.stage-top{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.stage-top>*{pointer-events:auto}
+.chip{min-height:40px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;border-radius:999px;background:rgba(14,16,19,.62);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);font-size:14px;color:var(--text)}
+button.chip:hover{background:rgba(14,16,19,.82)}
+.views{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:4px;padding:4px;border-radius:14px;background:rgba(14,16,19,.7);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px)}
+.views button,.gsel button{min-height:40px;padding:0 14px;border:0;border-radius:10px;background:transparent;font-size:14px;font-weight:500;color:var(--muted)}
+.gsel button[aria-pressed="true"],.views button[aria-pressed="true"]{background:var(--text);color:#14171B;font-weight:600}
+.gsel{display:flex;gap:4px;padding:4px;border-radius:14px;background:rgba(14,16,19,.7);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);flex-wrap:wrap}
+.gsel button{padding:0 12px;border:0;border-radius:10px;background:transparent}
+.top h1 small{font-size:14px;font-weight:500;color:var(--muted);font-family:var(--body)}
+.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.seg button{min-height:48px;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--raise);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
+.seg button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.range.wide{grid-template-columns:104px minmax(0,1fr) 56px}
+.hint{position:absolute;left:18px;bottom:26px;font-size:13px;color:rgba(255,255,255,.55);pointer-events:none}
+#banner{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:6px 6px 6px 16px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:3;max-width:calc(100% - 28px)}
+#banner button{min-height:36px;padding:0 14px;border-radius:999px;border:0;background:rgba(6,33,31,.14);color:var(--accent-ink);font-weight:600}
+#ring{position:absolute;pointer-events:none;border:2px dashed var(--accent);border-radius:8px;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+#info{position:absolute;width:224px;pointer-events:none;padding:12px 14px;border-radius:12px;background:rgba(14,16,19,.82);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--muted);z-index:2}
+#info b{font-family:var(--display);font-size:16px;color:var(--text);line-height:1.2}
+#info .r{display:flex;justify-content:space-between;gap:10px}
+#info .r span:last-child{color:var(--text);text-align:right}
+#info .dots{display:inline-flex;gap:5px;align-items:center}
+#info .dots i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.4);display:block}
+#info .tag{align-self:flex-start;font-size:12px;font-weight:600;color:var(--accent-ink);background:var(--accent);padding:2px 8px;border-radius:999px}
+.stage.holding #gl{cursor:grabbing}
+.stage.holding #ring{border-style:solid;box-shadow:0 0 0 5px rgba(76,197,189,.28)}
+#ghost{position:absolute;pointer-events:none;opacity:.72;transform:translate(-50%,-50%);filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
+.panel{min-height:0;overflow-y:auto;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column}
+.tabs{display:flex;gap:4px;padding:12px 20px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.tabs button{min-height:46px;padding:0 16px;background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);font-weight:500;font-size:15px}
+.tabs button[aria-selected="true"]{color:var(--text);font-weight:600;border-bottom-color:var(--accent)}
+.sec{padding:18px 20px;display:flex;flex-direction:column;gap:14px;border-bottom:1px solid var(--line)}
+.sec h2{margin:0;font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.card{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:10px;border-radius:12px;background:var(--raise);border:1px solid var(--line);text-align:left}
+.card:hover{border-color:var(--accent)}
+.card .thumb{height:96px;border-radius:8px;background:#0F1215;display:flex;align-items:center;justify-content:center}
+.card .nm{font-weight:600;font-size:15px}
+.card .meta{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted);flex:1 1 200px}
+.field input[type=text]{min-height:48px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:17px}
+.fonts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.fonts button{min-height:52px;border-radius:10px;border:1px solid var(--line);background:var(--raise);font-size:20px}
+.fonts button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,.2);padding:0;position:relative}
+.sw button[aria-pressed="true"]{border-color:var(--text);box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--accent)}
+.sw.big button{width:auto;height:auto;border-radius:12px;padding:8px 12px 8px 8px;display:flex;align-items:center;gap:10px;background:var(--raise);border:1px solid var(--line);font-size:14px}
+.sw.big button i{width:28px;height:28px;border-radius:50%;display:block;border:2px solid rgba(255,255,255,.25)}
+.sw.big button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.range{display:grid;grid-template-columns:76px minmax(0,1fr) 52px;align-items:center;gap:12px;font-size:14px;color:var(--muted)}
+.range input{width:100%;accent-color:var(--accent);min-height:32px}
+.range output{text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+.insp-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.insp-head strong{font-family:var(--display);font-size:18px}
+.insp-head .where{font-size:13px;color:var(--muted)}
+.nudge{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:4px}
+.nudge button{border-radius:10px;border:1px solid var(--line);background:var(--raise);display:flex;align-items:center;justify-content:center;padding:0}
+.nudge .up{grid-column:2;grid-row:1}.nudge .lf{grid-column:1;grid-row:2}.nudge .dn{grid-column:2;grid-row:2}.nudge .rt{grid-column:3;grid-row:2}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;align-items:center;gap:12px;padding:6px 8px;border-radius:10px;border:1px solid transparent;background:transparent;text-align:left;min-height:52px}
+.layer:hover{background:var(--raise)}
+.layer[aria-current="true"]{background:var(--raise);border-color:var(--accent)}
+.layer .t{width:40px;height:40px;border-radius:8px;background:#0F1215;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.layer .l{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
+.layer .l b{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.layer .l span{font-size:13px;color:var(--muted)}
+.foot{margin-top:auto;position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.foot .sum{display:flex;flex-direction:column;font-size:13px;color:var(--muted)}
+.foot .sum b{color:var(--text);font-size:15px}
+.ok{color:#7FD8A4}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:#14171B;padding:12px 18px;border-radius:12px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:20}
+#nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:32px;text-align:center;color:var(--muted)}
+@media (max-width:860px){
+  body{overflow:auto}
+  #app{height:auto;min-height:100%;grid-template-rows:56px auto}
+  .split{grid-template-columns:minmax(0,1fr);grid-template-rows:62vh auto}
+  .panel{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .top .ctx{display:none}
+  .hint{display:none}
+  .views{bottom:12px}
+  .views button{padding:0 8px;font-size:13px;white-space:nowrap}
+  .views{max-width:calc(100% - 16px)}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div id="app">
+  <header class="top">
+    <div class="crumb">
+      <button class="back" type="button" id="backBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Back to line</button>
+      <h1><span id="gName">Boys' sports tee</span> <small id="shirtName">· Red house</small></h1>
+      <span class="ctx" id="gCtx">Greenfield Primary School · First term 2026 intake · 16 pieces</span>
+    </div>
+    <button class="btn primary" type="button" id="saveBtn">Save to order</button>
+  </header>
+
+  <main class="split">
+    <section class="stage" id="stage" aria-label="3D garment preview">
+      <canvas id="gl" aria-label="Boys' sports tee in 3D. Drag to turn, scroll to zoom."></canvas>
+      <div class="stage-top">
+        <div class="gsel" id="gSel" role="group" aria-label="Garment"></div>
+        <button class="chip" type="button" id="fsBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fsLabel">Full screen</span></button>
+      </div>
+      <div id="banner" hidden><span id="bannerText"></span><button type="button" id="cancelArm">Cancel</button></div>
+      <div id="ring" hidden></div>
+      <div id="info" hidden></div>
+      <canvas id="ghost" hidden></canvas>
+      <div class="hint">Drag to turn · Scroll to zoom · Hold a badge to move it</div>
+      <div class="views" role="group" aria-label="Camera view">
+        <button type="button" data-view="front" aria-pressed="true">Front</button>
+        <button type="button" data-view="back" aria-pressed="false">Back</button>
+        <button type="button" data-view="left" aria-pressed="false">Left sleeve</button>
+        <button type="button" data-view="right" aria-pressed="false">Right sleeve</button>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Customise">
+      <div class="tabs" role="tablist" aria-label="What to add">
+ <button type="button" role="tab" id="tab-panel" data-tab="panel" aria-selected="false" hidden>Centre panel</button>
+        <button type="button" role="tab" id="tab-badges" data-tab="badges" aria-selected="true">Badges</button>
+        <button type="button" role="tab" id="tab-text" data-tab="text" aria-selected="false">Text</button>
+        <button type="button" role="tab" id="tab-designs" data-tab="designs" aria-selected="false">Designs</button>
+        <button type="button" role="tab" id="tab-garment" data-tab="garment" aria-selected="false">Garment</button>
+      </div>
+
+      <div class="sec" id="pane-panel" role="tabpanel" aria-labelledby="tab-panel" hidden>
+        <h2>Centre panel print</h2>
+        <div class="cards" id="patCards"></div>
+        <div class="field" style="flex:none">Colourway<div class="sw big" id="cwSw"></div></div>
+        <div class="field" style="flex:none">Panel shape<div class="seg" id="shapeBtns"></div></div>
+        <div class="range wide"><label for="pW">Panel width</label><input type="range" id="pW" min="30" max="150" value="56"><output id="pWO"></output></div>
+        <div class="range wide"><label for="pS">Print size</label><input type="range" id="pS" min="35" max="130" value="60"><output id="pSO"></output></div>
+        <div class="range wide"><label for="pA">Print angle</label><input type="range" id="pA" min="-45" max="45" value="0"><output id="pAO"></output></div>
+        <div class="field" style="flex:none">Same print on<div class="seg" id="trimBtns"></div></div>
+      </div>
+
+      <div class="sec" id="pane-badges" role="tabpanel" aria-labelledby="tab-badges">
+        <h2>Pick a badge, then tap the garment</h2>
+        <div class="cards" id="badgeCards"></div>
+      </div>
+
+      <div class="sec" id="pane-text" role="tabpanel" aria-labelledby="tab-text" hidden>
+        <h2>Lettering</h2>
+        <label class="field" for="newText">Wording<input type="text" id="newText" value="GREENFIELD" maxlength="24" autocomplete="off"></label>
+        <div class="field" style="flex:none">Style<div class="fonts" id="fontBtns"></div></div>
+        <div class="field" style="flex:none">Thread colour<div class="sw" id="newTextSw"></div></div>
+        <div class="row"><button class="btn primary" type="button" id="placeText">Place on garment</button></div>
+      </div>
+
+      <div class="sec" id="pane-designs" role="tabpanel" aria-labelledby="tab-designs" hidden>
+        <h2>Pick a design, then tap the garment</h2>
+        <div class="cards" id="designCards"></div>
+      </div>
+
+      <div class="sec" id="pane-garment" role="tabpanel" aria-labelledby="tab-garment" hidden>
+        <h2>Garment colour</h2>
+        <div class="sw big" id="shirtSw"></div>
+      </div>
+
+      <div class="sec" id="inspector" hidden></div>
+
+      <div class="sec">
+        <h2 id="layersH">On this garment</h2>
+        <div class="layers" id="layers"></div>
+      </div>
+
+      <div class="foot">
+        <div class="sum"><b id="sumCount">4 decorations</b><span class="ok" id="sumStock">All badges in stock</span></div>
+        <button class="btn primary" type="button" id="saveBtn2">Save to order</button>
+      </div>
+    </aside>
+  </main>
+</div>
+<div id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var TEX=1024, G=512, SEG=220, SAFE=.05;
+var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
+var smooth=function(a,b,x){var t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+
+/* ---------- data ---------- */
+var SHIRTS=[
+  {n:'Red house',c:'#C0392B'},{n:'Blue house',c:'#2563A8'},{n:'Green house',c:'#2E7D4F'},
+  {n:'Yellow house',c:'#E0B01F'},{n:'Navy',c:'#1F2A4D'},{n:'White',c:'#ECEBE6'}];
+var THREADS=['#FFFFFF','#F3E9D2','#E3B23C','#1F2A4D','#15181C','#C0392B','#2563A8','#2E7D4F','#BFC5CC'];
+var FONTS={
+  block:{n:'Block',css:'"Alfa Slab One", Georgia, serif',w:400},
+  script:{n:'Script',css:'Pacifico, cursive',w:400},
+  serif:{n:'Serif',css:'"Playfair Display", Georgia, serif',w:700},
+  varsity:{n:'Varsity',css:'"Bebas Neue", Impact, sans-serif',w:400}};
+var BADGES=[
+  {shape:'shield',name:'House crest',stock:200},{shape:'round',name:'Round house badge',stock:120},
+  {shape:'star',name:'Star badge',stock:64},{shape:'laurel',name:'Sports crest',stock:38}];
+var DESIGNS=[
+  {shape:'chevrons',name:'Chevron band',size:300},{shape:'stripes',name:'Sleeve stripes',size:240},
+  {shape:'ankara',name:'Ankara flower',size:210},{shape:'diamonds',name:'Diamond row',size:280}];
+
+var COLORS={
+  tee:SHIRTS,
+  shorts:[{n:'Navy',c:'#1F2A4D'},{n:'Grey',c:'#6C737C'},{n:'Black',c:'#1A1C20'},{n:'Khaki',c:'#B7A582'},{n:'Red house',c:'#C0392B'},{n:'Blue house',c:'#2563A8'}],
+  trousers:[{n:'Grey',c:'#5E656E'},{n:'Navy',c:'#1F2A4D'},{n:'Black',c:'#1A1C20'},{n:'Khaki',c:'#B7A582'},{n:'Brown',c:'#5B4330'},{n:'Charcoal',c:'#33383F'}],
+  ankara:[{n:'Linen beige',c:'#D9C9A8'},{n:'White',c:'#ECEBE6'},{n:'Black',c:'#1A1C20'},{n:'Navy',c:'#1F2A4D'},{n:'Olive',c:'#6B7040'},{n:'Soft grey',c:'#A5A9AE'}]};
+/* centre-panel pattern ideas: bold diagonals, shell fans, blooms, zigzag bands, kente blocks and bullseye rings are the looks that recur on Ankara shirts */
+var PATS=[
+  {k:'diag',n:'Diagonal',m:'Bold diagonal bands'},{k:'fans',n:'Shell fans',m:'Scalloped fans'},{k:'blooms',n:'Blooms',m:'Flowers and rosettes'},
+  {k:'zig',n:'Zigzag',m:'Zigzag bands'},{k:'kente',n:'Kente blocks',m:'Woven-look blocks'},{k:'rings',n:'Bullseye',m:'Rings and dots'}];
+var CWAYS=[
+  {n:'Royal',a:'#17398A',b:'#F2B31E',c:'#F1E8D2'},{n:'Sunset',a:'#C8321E',b:'#F6A21E',c:'#2A1658'},{n:'Forest',a:'#1D6A43',b:'#F0C23A',c:'#16241C'},
+  {n:'Earth',a:'#7E441A',b:'#E8B65A',c:'#1E1A16'},{n:'Ocean',a:'#0B6E7A',b:'#F2E3B5',c:'#E2552F'},{n:'Plum',a:'#5B1F6B',b:'#F4C542',c:'#EE6A8D'}];
+var SHAPES=[{k:'strip',n:'Full strip',i:'<rect x="9" y="2" width="10" height="26" rx="1"/>'},{k:'bib',n:'Chest bib',i:'<path d="M5 2h18v13q0 6-9 13q-9-7-9-13z"/>'},
+  {k:'yoke',n:'V yoke',i:'<path d="M2 2h24l-7 10-5 16-5-16z"/>'},{k:'side',n:'Off-centre',i:'<rect x="13" y="2" width="10" height="26" rx="1"/><path d="M8 2v26" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2" fill="none"/>'}];
+
+var state={guide:false,g:'tee',shirt:SHIRTS[0],gcol:{tee:SHIRTS[0],shorts:COLORS.shorts[0],trousers:COLORS.trousers[0],ankara:COLORS.ankara[0]},items:[],byG:{},sel:null,armed:null,nextId:1,tab:'badges',textFont:'varsity',textColor:'#FFFFFF',
+  ank:{pat:'fans',cw:0,shape:'strip',w:56,scale:.6,angle:0,collar:true,cuffs:true,pocket:false}};
+function mkItem(o){return Object.assign({id:state.nextId++,rot:0,c1:'#FFFFFF',c2:'#1F2A4D',label:'G'},o)}
+state.byG.tee=[
+  mkItem({kind:'badge',shape:'shield',name:'House crest',side:'front',x:624,y:392,size:96}),
+  mkItem({kind:'badge',shape:'laurel',name:'Sports crest',side:'front',x:176,y:408,size:72,rot:-36}),
+  mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:300,size:120,text:'OKAFOR',font:'varsity'}),
+  mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:560,size:300,text:'10',font:'block'})];
+state.byG.shorts=[
+  mkItem({kind:'badge',shape:'laurel',name:'Sports crest',side:'front',x:700,y:420,size:64}),
+  mkItem({kind:'text',name:'Lettering',side:'back',x:318,y:440,size:80,text:'GPS',font:'varsity'})];
+state.byG.trousers=[
+  mkItem({kind:'badge',shape:'shield',name:'House crest',side:'front',x:606,y:262,size:60}),
+  mkItem({kind:'text',name:'Lettering',side:'back',x:410,y:360,size:70,text:'GPS',font:'varsity'})];
+state.byG.ankara=[
+  mkItem({kind:'text',name:'Lettering',side:'back',x:512,y:300,size:64,text:'ADEYEMI',font:'varsity',c1:'#E3B23C',c2:'#1F2A4D'})];
+state.items=state.byG.tee;
+
+/* ---------- garment silhouettes (512 px design space; the plane is 2 x 2 world units) ---------- */
+function teePath(c,s,neckY){
+  c.beginPath();c.moveTo(212*s,92*s);
+  c.lineTo(118*s,126*s);c.lineTo(52*s,212*s);c.lineTo(104*s,262*s);c.lineTo(150*s,230*s);
+  c.lineTo(150*s,468*s);c.quadraticCurveTo(256*s,480*s,362*s,468*s);
+  c.lineTo(362*s,230*s);c.lineTo(408*s,262*s);c.lineTo(460*s,212*s);c.lineTo(394*s,126*s);c.lineTo(300*s,92*s);
+  c.quadraticCurveTo(256*s,(2*neckY-92)*s,212*s,92*s);c.closePath();
+}
+function shortsPath(c,s){
+  c.beginPath();c.moveTo(92*s,122*s);c.lineTo(420*s,122*s);c.lineTo(432*s,388*s);c.lineTo(276*s,396*s);
+  c.lineTo(265*s,262*s);c.quadraticCurveTo(256*s,230*s,247*s,262*s);c.lineTo(236*s,396*s);c.lineTo(80*s,388*s);c.closePath();
+}
+function trousersPath(c,s){
+  c.beginPath();c.moveTo(168*s,36*s);c.lineTo(344*s,36*s);c.lineTo(357*s,90*s);c.lineTo(353*s,260*s);c.lineTo(349*s,488*s);
+  c.lineTo(270*s,488*s);c.lineTo(263*s,236*s);c.quadraticCurveTo(256*s,208*s,249*s,236*s);c.lineTo(242*s,488*s);
+  c.lineTo(163*s,488*s);c.lineTo(159*s,260*s);c.lineTo(155*s,90*s);c.closePath();
+}
+function ankaraPath(c,s,neckY){
+  c.beginPath();c.moveTo(210*s,84*s);c.lineTo(118*s,108*s);c.lineTo(46*s,330*s);c.lineTo(94*s,352*s);c.lineTo(150*s,226*s);
+  c.lineTo(150*s,470*s);c.quadraticCurveTo(256*s,486*s,362*s,470*s);c.lineTo(362*s,226*s);c.lineTo(418*s,352*s);c.lineTo(466*s,330*s);
+  c.lineTo(394*s,108*s);c.lineTo(302*s,84*s);c.quadraticCurveTo(256*s,(2*neckY-84)*s,210*s,84*s);c.closePath();
+}
+function boxBlur(src,n,r){
+  var tmp=new Float32Array(n*n),out=new Float32Array(n*n),w=2*r+1,x,y,k,s;
+  for(y=0;y<n;y++){s=0;for(k=-r;k<=r;k++)s+=(k>=0&&k<n)?src[y*n+k]:0;
+    for(x=0;x<n;x++){tmp[y*n+x]=s/w;var ad=x+r+1,rm=x-r;s+=(ad<n?src[y*n+ad]:0)-(rm>=0?src[y*n+rm]:0);}}
+  for(x=0;x<n;x++){s=0;for(k=-r;k<=r;k++)s+=(k>=0&&k<n)?tmp[k*n+x]:0;
+    for(y=0;y<n;y++){out[y*n+x]=s/w;var a2=y+r+1,r2=y-r;s+=(a2<n?tmp[a2*n+x]:0)-(r2>=0?tmp[r2*n+x]:0);}}
+  return out;
+}
+function buildField(gd,neckY){
+  var c=document.createElement('canvas');c.width=c.height=G;var x=c.getContext('2d');
+  x.fillStyle='#000';x.fillRect(0,0,G,G);x.fillStyle='#fff';gd.path(x,G/512,neckY);x.fill();
+  var d=x.getImageData(0,0,G,G).data,n=G*G,i,xx,yy,INF=1e9,m=new Uint8Array(n),dist=new Float32Array(n);
+  for(i=0;i<n;i++){m[i]=d[i*4]>127?1:0;dist[i]=m[i]?INF:0;}
+  if(gd.rows){
+    /* tube legs: each row is cut into runs and every run gets a rounded cross-section, so waist and hem stay open ends rather than inflating */
+    var zr=new Float32Array(n),top=-1,bot=-1,run0,run1,half,b,t2;
+    for(yy=0;yy<G;yy++){var any=0;for(xx=0;xx<G;xx++)if(m[yy*G+xx]){any=1;break}if(any){if(top<0)top=yy;bot=yy}}
+    for(yy=top;yy<=bot;yy++){
+      xx=0;
+      while(xx<G){
+        if(!m[yy*G+xx]){xx++;continue}
+        run0=xx;while(xx+1<G&&m[yy*G+xx+1])xx++;run1=xx;xx++;
+        half=(run1-run0+1)/2;b=gd.depth(yy);
+        for(i=run0;i<=run1;i++){t2=Math.min(i-run0+.5,run1-i+.5)/gd.rpx;
+          zr[yy*G+i]=b*(1-Math.pow(1-Math.min(t2,1),gd.p))*smooth(0,5,Math.min(yy-top+.5,bot-yy+.5));}
+      }
+    }
+    zr=boxBlur(zr,G,2);zr=boxBlur(zr,G,1);
+    return zr;
+  }
+  /* chamfer distance from every garment pixel to the nearest edge */
+  for(yy=0;yy<G;yy++)for(xx=0;xx<G;xx++){i=yy*G+xx;if(!dist[i])continue;var v=dist[i];
+    if(xx>0)v=Math.min(v,dist[i-1]+1);if(yy>0){v=Math.min(v,dist[i-G]+1);if(xx>0)v=Math.min(v,dist[i-G-1]+1.414);if(xx<G-1)v=Math.min(v,dist[i-G+1]+1.414);}dist[i]=v;}
+  for(yy=G-1;yy>=0;yy--)for(xx=G-1;xx>=0;xx--){i=yy*G+xx;if(!dist[i])continue;var w=dist[i];
+    if(xx<G-1)w=Math.min(w,dist[i+1]+1);if(yy<G-1){w=Math.min(w,dist[i+G]+1);if(xx<G-1)w=Math.min(w,dist[i+G+1]+1.414);if(xx>0)w=Math.min(w,dist[i+G-1]+1.414);}dist[i]=w;}
+  /* circular cross-section: round tubes for sleeves and legs, a fuller radius for the torso */
+  var z=new Float32Array(n),pxw=2/G;
+  for(yy=0;yy<G;yy++)for(xx=0;xx<G;xx++){i=yy*G+xx;if(!m[i])continue;
+    var dd=Math.max(0,dist[i]-.5)*pxw,u=(xx+.5)/G,R=gd.R(u);
+    z[i]=R*(1-Math.pow(1-Math.min(dd/R,1),2));}
+  z=boxBlur(z,G,2);z=boxBlur(z,G,2);
+  return z;
+}
+function sampleH(h,u,v){
+  var fx=clamp(u,0,1)*(G-1),fy=clamp(1-v,0,1)*(G-1),x0=Math.floor(fx),y0=Math.floor(fy),
+      x1=Math.min(G-1,x0+1),y1=Math.min(G-1,y0+1),tx=fx-x0,ty=fy-y0;
+  return (h[y0*G+x0]*(1-tx)+h[y0*G+x1]*tx)*(1-ty)+(h[y1*G+x0]*(1-tx)+h[y1*G+x1]*tx)*ty;
+}
+function zFor(gd,side,u,v,hh){
+  var ch=gd.chest,chest=ch?Math.exp(-(Math.pow((u-ch.u)/ch.su,2)+Math.pow((v-ch.v)/ch.sv,2))):0;
+  var wr=(gd.wr==null?1:gd.wr)*(.004*Math.sin(u*38+v*7)*Math.sin(v*23+u*5)+.006*Math.sin(v*14+Math.sin(u*9)*2));
+  /* sleeves swing slightly forward; the back panel is mirrored so both move the same way in the world */
+  var shift=(side==='front'?1:-1)*(gd.shift||0)*Math.pow(smooth(.18,.5,Math.abs(u-.5)),1.3);
+  var ex=gd.extra?gd.extra(u,v)*smooth(0,.08,hh):0;
+  return hh*(1+(ch?(side==='front'?ch.a:ch.b):0)*chest)+wr*smooth(0,.08,hh)+ex+shift-.014*(1-smooth(0,.06,hh));
+}
+
+/* ---------- canvases / textures per side ---------- */
+function mk(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c}
+var knit=mk(8,8),kx=knit.getContext('2d');
+kx.strokeStyle='rgba(0,0,0,.55)';kx.lineWidth=1.6;kx.lineJoin='round';kx.beginPath();kx.moveTo(0,0);kx.lineTo(4,6);kx.lineTo(8,0);kx.stroke();
+var knitB=mk(8,8),kb=knitB.getContext('2d');
+kb.strokeStyle='rgba(255,255,255,.9)';kb.lineWidth=2;kb.lineJoin='round';kb.beginPath();kb.moveTo(0,0);kb.lineTo(4,6);kb.lineTo(8,0);kb.stroke();
+/* twill (trousers, shorts) and linen (shirt) weaves, kept faint so they never moire */
+function weaveTile(n,col,fn){var c=mk(n,n),x=c.getContext('2d');x.fillStyle=col;x.strokeStyle=col;fn(x,n);return c}
+var twill=weaveTile(6,'rgba(0,0,0,.6)',function(x,n){x.lineWidth=1.5;x.beginPath();x.moveTo(-1,n+1);x.lineTo(n+1,-1);x.stroke()});
+var twillB=weaveTile(6,'rgba(255,255,255,.9)',function(x,n){x.lineWidth=2;x.beginPath();x.moveTo(-1,n+1);x.lineTo(n+1,-1);x.stroke()});
+var linen=weaveTile(8,'rgba(0,0,0,.5)',function(x,n){x.fillRect(0,1,n,1);x.fillRect(3,0,1,n);x.globalAlpha=.5;x.fillRect(0,5,n,1);x.fillRect(6,0,1,n)});
+var linenB=weaveTile(8,'rgba(255,255,255,.9)',function(x,n){x.fillRect(0,1,n,2);x.fillRect(3,0,2,n);x.globalAlpha=.5;x.fillRect(0,5,n,1);x.fillRect(6,0,1,n)});
+var WEAVES={knit:{c:knit,b:knitB,ca:.03,ba:.2},twill:{c:twill,b:twillB,ca:.03,ba:0},linen:{c:linen,b:linenB,ca:.02,ba:0}};
+
+var sides={front:{},back:{}};
+Object.keys(sides).forEach(function(k){
+  var s=sides[k];
+  s.col=mk(TEX,TEX);s.cx=s.col.getContext('2d');
+  s.bmp=mk(TEX,TEX);s.bx=s.bmp.getContext('2d');
+});
+/* height field and cut-out mask for each garment, built on first use */
+var GCACHE={};
+function fieldData(key){
+  if(GCACHE[key])return GCACHE[key];
+  var gd=GARMENTS[key],out={},made={};
+  ['front','back'].forEach(function(name){
+    var nk=gd.neck[name];
+    if(made[nk]){out[name]={h:made[nk].h,alpha:made[nk].alpha};return;}
+    var h=buildField(gd,nk),alpha=mk(TEX,TEX),ax=alpha.getContext('2d'),img=ax.createImageData(TEX,TEX),px,py;
+    for(py=0;py<TEX;py++)for(px=0;px<TEX;px++){
+      var val=sampleH(h,px/(TEX-1),1-py/(TEX-1)),on=val>.004?255:0,o=(py*TEX+px)*4;
+      img.data[o]=img.data[o+1]=img.data[o+2]=on;img.data[o+3]=255;}
+    ax.putImageData(img,0,0);
+    made[nk]=out[name]={h:h,alpha:alpha};
+  });
+  return GCACHE[key]=out;
+}
+
+function shade(hex,amt){
+  var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255,t=amt<0?0:255,p=Math.abs(amt);
+  r=Math.round((t-r)*p+r);g=Math.round((t-g)*p+g);b=Math.round((t-b)*p+b);
+  return 'rgb('+r+','+g+','+b+')';
+}
+
+/* ---------- embroidery art ---------- */
+function starPath(c,cx,cy,R,r,n){c.beginPath();for(var i=0;i<n*2;i++){var a=-Math.PI/2+i*Math.PI/n,rad=i%2?r:R;c[i?'lineTo':'moveTo'](cx+Math.cos(a)*rad,cy+Math.sin(a)*rad)}c.closePath()}
+var ART={
+  shield:function(c,d){
+    c.beginPath();c.moveTo(-38,-46);c.lineTo(38,-46);c.lineTo(38,6);c.quadraticCurveTo(38,36,0,50);c.quadraticCurveTo(-38,36,-38,6);c.closePath();
+    c.fillStyle=d.c1;c.fill();c.save();c.clip();c.fillStyle=d.c2;c.fillRect(-4,-46,8,100);c.fillRect(-40,-12,80,8);c.restore();
+    c.lineWidth=7;c.lineJoin='round';c.strokeStyle=d.c2;c.beginPath();c.moveTo(-38,-46);c.lineTo(38,-46);c.lineTo(38,6);c.quadraticCurveTo(38,36,0,50);c.quadraticCurveTo(-38,36,-38,6);c.closePath();c.stroke();
+    c.fillStyle=d.c2;starPath(c,-19,-30,10,4.2,5);c.fill();starPath(c,19,-30,10,4.2,5);c.fill();
+  },
+  round:function(c,d){
+    c.beginPath();c.arc(0,0,42,0,7);c.fillStyle=d.c1;c.fill();
+    c.lineWidth=8;c.strokeStyle=d.c2;c.stroke();
+    c.beginPath();c.arc(0,0,29,0,7);c.lineWidth=2.4;c.stroke();
+    c.fillStyle=d.c2;c.font='700 40px "Bricolage Grotesque", Arial, sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(d.label||'G',0,3);
+  },
+  star:function(c,d){
+    starPath(c,0,2,50,22,5);c.fillStyle=d.c1;c.fill();c.lineWidth=6;c.lineJoin='round';c.strokeStyle=d.c2;c.stroke();
+    c.beginPath();c.arc(0,3,7,0,7);c.fillStyle=d.c2;c.fill();
+  },
+  laurel:function(c,d){
+    for(var i=0;i<16;i++){var a=i*Math.PI*2/16;c.save();c.rotate(a);c.translate(0,-36);c.beginPath();c.ellipse(0,0,6,13,0,0,7);c.fillStyle=i%2?d.c1:d.c2;c.fill();c.restore();}
+    c.beginPath();c.arc(0,0,24,0,7);c.fillStyle=d.c1;c.fill();c.lineWidth=5;c.strokeStyle=d.c2;c.stroke();
+    c.beginPath();c.arc(0,0,10,0,7);c.fillStyle=d.c2;c.fill();
+  },
+  chevrons:function(c,d){
+    c.lineWidth=11;c.lineJoin='miter';c.lineCap='butt';
+    [[-24,d.c1],[0,d.c2],[24,d.c1]].forEach(function(p){c.strokeStyle=p[1];c.beginPath();c.moveTo(-52,p[0]-10);c.lineTo(0,p[0]+10);c.lineTo(52,p[0]-10);c.stroke();});
+  },
+  stripes:function(c,d){
+    c.fillStyle=d.c1;c.fillRect(-52,-22,104,12);c.fillStyle=d.c2;c.fillRect(-52,-6,104,10);c.fillStyle=d.c1;c.fillRect(-52,8,104,12);
+  },
+  ankara:function(c,d){
+    var i;c.strokeStyle=d.c1;c.lineWidth=3;c.beginPath();c.arc(0,0,44,0,7);c.stroke();
+    for(i=0;i<8;i++){c.save();c.rotate(i*Math.PI/4);c.translate(0,-22);c.beginPath();c.ellipse(0,0,10,20,0,0,7);c.fillStyle=i%2?d.c1:d.c2;c.fill();c.restore();}
+    c.beginPath();c.arc(0,0,13,0,7);c.fillStyle=d.c1;c.fill();c.beginPath();c.arc(0,0,6,0,7);c.fillStyle=d.c2;c.fill();
+    c.fillStyle=d.c2;for(i=0;i<8;i++){var a=i*Math.PI/4+Math.PI/8;c.beginPath();c.arc(Math.cos(a)*47,Math.sin(a)*47,3.2,0,7);c.fill();}
+  },
+  diamonds:function(c,d){
+    [[-34,d.c1],[0,d.c2],[34,d.c1]].forEach(function(p){c.beginPath();c.moveTo(p[0],-24);c.lineTo(p[0]+17,0);c.lineTo(p[0],24);c.lineTo(p[0]-17,0);c.closePath();c.fillStyle=p[1];c.fill();});
+  }
+};
+function fontStr(f,px){return f.w+' '+px+'px '+f.css}
+function makeSprite(d){
+  var cv,c;
+  if(d.kind==='text'){
+    var f=FONTS[d.font],px=Math.round(d.size*.9),m=mk(4,4).getContext('2d');m.font=fontStr(f,px);
+    var w=Math.ceil(m.measureText(d.text||' ').width+px*.45+8),h=Math.ceil(px*1.5);
+    cv=mk(w,h);c=cv.getContext('2d');c.font=fontStr(f,px);c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
+    c.lineWidth=Math.max(2,px*.07);c.strokeStyle=d.c2;c.strokeText(d.text||'',w/2,h/2+px*.04);
+    c.fillStyle=d.c1;c.fillText(d.text||'',w/2,h/2+px*.04);
+  }else{
+    var S=Math.max(32,Math.round(d.size));cv=mk(S,S);c=cv.getContext('2d');
+    c.translate(S/2,S/2);var k=S/108;c.scale(k,k);ART[d.shape](c,d);
+  }
+  c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-atop';c.lineWidth=1;
+  var t;
+  c.strokeStyle='rgba(255,255,255,.17)';c.beginPath();for(t=-cv.height;t<cv.width;t+=3.4){c.moveTo(t,0);c.lineTo(t+cv.height,cv.height)}c.stroke();
+  c.strokeStyle='rgba(0,0,0,.16)';c.beginPath();for(t=-cv.height+1.7;t<cv.width;t+=3.4){c.moveTo(t,0);c.lineTo(t+cv.height,cv.height)}c.stroke();
+  return cv;
+}
+function invalidate(d){d._sp=null;d._dirty=true}
+function sprite(d){if(!d._sp)d._sp=makeSprite(d);return d._sp}
+function bumpSprite(sp){
+  var b=mk(sp.width,sp.height),c=b.getContext('2d');c.drawImage(sp,0,0);
+  c.globalCompositeOperation='source-in';c.fillStyle='#fff';c.fillRect(0,0,b.width,b.height);
+  c.globalCompositeOperation='source-atop';c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=1;c.beginPath();
+  for(var t=-b.height;t<b.width;t+=3.4){c.moveTo(t,0);c.lineTo(t+b.height,b.height)}c.stroke();
+  return b;
+}
+
+/* ---------- painting ---------- */
+function lines(c,pts,dash){if(dash)c.setLineDash(dash);c.beginPath();pts.forEach(function(p,i){c[i?'lineTo':'moveTo'](p[0]*2,p[1]*2)});c.stroke();c.setLineDash([])}
+function curve(c,a,b,e,dash){if(dash)c.setLineDash(dash);c.beginPath();c.moveTo(a[0]*2,a[1]*2);c.quadraticCurveTo(b[0]*2,b[1]*2,e[0]*2,e[1]*2);c.stroke();c.setLineDash([])}
+function dot(c,x,y,r,fill,line){c.beginPath();c.arc(x*2,y*2,r*2,0,7);if(fill){c.fillStyle=fill;c.fill()}if(line){c.strokeStyle=line;c.lineWidth=2;c.stroke()}}
+
+function paintTee(name,cx,bx,base){
+  var neck=CG.neck[name],trim=shade(base,-.2);
+  cx.lineCap='round';cx.strokeStyle=trim;cx.lineWidth=22;cx.beginPath();cx.moveTo(214*2,100*2);cx.quadraticCurveTo(256*2,(2*neck-92+14)*2,298*2,100*2);cx.stroke();
+  cx.lineWidth=2.5;cx.strokeStyle=shade(base,-.35);cx.setLineDash([8,6]);
+  cx.beginPath();cx.moveTo(150*2,452*2);cx.quadraticCurveTo(256*2,464*2,362*2,452*2);cx.stroke();
+  cx.beginPath();cx.moveTo(64*2,200*2);cx.lineTo(116*2,250*2);cx.moveTo(448*2,200*2);cx.lineTo(396*2,250*2);cx.stroke();
+  cx.setLineDash([]);
+  bx.strokeStyle='#fff';bx.lineWidth=22;bx.lineCap='round';bx.globalAlpha=.4;bx.beginPath();bx.moveTo(214*2,100*2);bx.quadraticCurveTo(256*2,(2*neck-92+14)*2,298*2,100*2);bx.stroke();bx.globalAlpha=1;
+}
+function paintShorts(name,cx,bx,base){
+  var dk=shade(base,-.34),lt=shade(base,.2),x;
+  cx.fillStyle=shade(base,-.1);cx.fillRect(84*2,122*2,348*2,46*2);
+  cx.strokeStyle='rgba(0,0,0,.08)';cx.lineWidth=2;cx.beginPath();for(x=90;x<430;x+=7){cx.moveTo(x*2,122*2);cx.lineTo(x*2,168*2)}cx.stroke();
+  bx.strokeStyle='rgba(255,255,255,.18)';bx.lineWidth=2.5;bx.beginPath();for(x=90;x<430;x+=7){bx.moveTo(x*2,122*2);bx.lineTo(x*2,168*2)}bx.stroke();
+  cx.lineCap='round';cx.lineJoin='round';cx.strokeStyle=dk;cx.lineWidth=2.4;
+  lines(cx,[[84,129],[432,129]],[8,6]);lines(cx,[[84,161],[432,161]],[8,6]);
+  lines(cx,[[81,372],[236,380]],[8,6]);lines(cx,[[276,380],[431,372]],[8,6]);
+  bx.strokeStyle='#2e2e2e';bx.lineWidth=3;bx.setLineDash([]);lines(bx,[[84,168],[432,168]]);
+  if(name==='front'){
+    cx.lineWidth=3;curve(cx,[398,168],[390,232],[430,272]);curve(cx,[114,168],[122,232],[82,272]);
+    bx.lineWidth=3;curve(bx,[398,168],[390,232],[430,272]);curve(bx,[114,168],[122,232],[82,272]);
+    cx.lineWidth=2.2;lines(cx,[[256,170],[256,246]],[7,6]);
+    /* drawstring */
+    cx.lineWidth=5;cx.strokeStyle='#E9E4D6';curve(cx,[256,148],[238,190],[234,236]);curve(cx,[256,148],[274,198],[280,242]);
+    cx.lineWidth=2;cx.strokeStyle='rgba(0,0,0,.35)';curve(cx,[256,148],[238,190],[234,236]);
+    dot(cx,256,147,7,'#E9E4D6','rgba(0,0,0,.4)');dot(cx,233,238,4,dk);dot(cx,281,244,4,dk);
+    dot(cx,239,146,3,dk);dot(cx,273,146,3,dk);
+    bx.lineWidth=5;bx.strokeStyle='#fff';bx.globalAlpha=.5;curve(bx,[256,148],[238,190],[234,236]);curve(bx,[256,148],[274,198],[280,242]);bx.globalAlpha=1;
+  }else{
+    cx.lineWidth=3;cx.strokeStyle=dk;lines(cx,[[320,192],[386,192]]);cx.lineWidth=1.6;lines(cx,[[322,200],[384,200]],[5,4]);
+    bx.strokeStyle='#2e2e2e';bx.lineWidth=3;lines(bx,[[320,192],[386,192]]);
+    cx.lineWidth=2.2;cx.strokeStyle=dk;lines(cx,[[256,170],[256,256]],[7,6]);
+  }
+}
+function paintTrousers(name,cx,bx,base){
+  var dk=shade(base,-.36),lt=shade(base,.18),i;
+  cx.fillStyle=shade(base,-.09);cx.fillRect(150*2,36*2,212*2,36*2);
+  cx.strokeStyle=dk;cx.lineCap='round';cx.lineJoin='round';cx.lineWidth=2.4;
+  lines(cx,[[150,42],[362,42]],[8,6]);lines(cx,[[150,66],[362,66]],[8,6]);
+  bx.strokeStyle='#2e2e2e';bx.lineWidth=3;lines(bx,[[150,72],[362,72]]);
+  [184,222,290,328].forEach(function(x){
+    cx.fillStyle=shade(base,-.16);cx.fillRect((x-4)*2,32*2,8*2,44*2);cx.strokeStyle=dk;cx.lineWidth=1.6;cx.strokeRect((x-4)*2,32*2,8*2,44*2);
+    bx.fillStyle='#a8a8a8';bx.fillRect((x-4)*2,32*2,8*2,44*2);
+  });
+  /* pressed creases down each leg */
+  [206,306].forEach(function(x){
+    cx.lineWidth=3;cx.strokeStyle='rgba(255,255,255,.1)';lines(cx,[[x,96],[x,486]]);
+    cx.lineWidth=2;cx.strokeStyle='rgba(0,0,0,.14)';lines(cx,[[x+2,96],[x+2,486]]);
+    bx.lineWidth=4;bx.strokeStyle='#fff';bx.globalAlpha=.35;lines(bx,[[x,96],[x,486]]);bx.globalAlpha=1;
+  });
+  cx.strokeStyle=dk;cx.lineWidth=2.4;
+  lines(cx,[[164,471],[242,471]],[8,6]);lines(cx,[[270,471],[348,471]],[8,6]);
+  if(name==='front'){
+    cx.lineWidth=3;curve(cx,[312,72],[348,98],[354,152]);curve(cx,[200,72],[164,98],[158,152]);
+    bx.lineWidth=3;bx.strokeStyle='#2e2e2e';curve(bx,[312,72],[348,98],[354,152]);curve(bx,[200,72],[164,98],[158,152]);
+    cx.strokeStyle=dk;cx.lineWidth=2.2;lines(cx,[[256,72],[256,158]]);
+    cx.setLineDash([6,5]);cx.beginPath();cx.moveTo(264*2,72*2);cx.lineTo(264*2,160*2);cx.quadraticCurveTo(264*2,184*2,242*2,186*2);cx.stroke();cx.setLineDash([]);
+    bx.beginPath();bx.moveTo(264*2,72*2);bx.lineTo(264*2,160*2);bx.quadraticCurveTo(264*2,184*2,242*2,186*2);bx.stroke();
+    dot(cx,270,54,5.5,lt,dk);dot(bx,270,54,5.5,'#fff',null);
+  }else{
+    cx.lineWidth=3;[[184,226],[286,328]].forEach(function(p){lines(cx,[[p[0],112],[p[1],112]]);lines(cx,[[p[0],119],[p[1],119]]);
+      bx.strokeStyle='#2e2e2e';bx.lineWidth=3;lines(bx,[[p[0],112],[p[1],112]]);cx.strokeStyle=dk;});
+    dot(cx,205,126,3.2,lt,dk);dot(cx,307,126,3.2,lt,dk);
+    cx.lineWidth=2.2;cx.strokeStyle=dk;lines(cx,[[256,72],[256,230]],[7,6]);
+  }
+}
+
+/* centre-panel prints */
+var TILES={};
+var PATFN={
+  diag:function(x,p){
+    function band(o,w,col){x.fillStyle=col;x.beginPath();x.moveTo(o,0);x.lineTo(o+w,0);x.lineTo(o+w+256,256);x.lineTo(o+256,256);x.closePath();x.fill()}
+    var i,y;for(i=-5;i<5;i++){band(i*64,26,p.b);band(i*64+34,6,p.c)}
+    for(i=-5;i<5;i++)for(y=8;y<256;y+=32){x.beginPath();x.arc(i*64+50+y,y,4,0,7);x.fillStyle=p.c;x.fill()}
+  },
+  fans:function(x,p){
+    var r,c,i,rad=[30,23,16,9],col=[p.b,p.a,p.c,p.b];
+    for(r=-1;r<9;r++)for(c=-1;c<5;c++){
+      var X=c*64+(((r%2)+2)%2)*32,Y=r*32+16;
+      for(i=0;i<4;i++){x.beginPath();x.arc(X,Y,rad[i],0,7);x.fillStyle=col[i];x.fill();x.lineWidth=2;x.strokeStyle=p.c;x.stroke()}
+    }
+  },
+  blooms:function(x,p){
+    function flower(cx0,cy0){
+      var i;x.save();x.translate(cx0,cy0);
+      for(i=0;i<8;i++){x.save();x.rotate(i*Math.PI/4);x.translate(0,-30);x.beginPath();x.ellipse(0,0,11,22,0,0,7);x.fillStyle=i%2?p.b:p.c;x.fill();x.restore()}
+      x.beginPath();x.arc(0,0,16,0,7);x.fillStyle=p.b;x.fill();x.lineWidth=3;x.strokeStyle=p.a;x.stroke();
+      x.beginPath();x.arc(0,0,7,0,7);x.fillStyle=p.c;x.fill();x.restore();
+    }
+    function rosette(cx0,cy0){
+      var i;x.beginPath();x.arc(cx0,cy0,26,0,7);x.fillStyle=p.c;x.fill();x.lineWidth=4;x.strokeStyle=p.b;x.stroke();
+      for(i=0;i<8;i++){x.beginPath();x.arc(cx0+Math.cos(i*Math.PI/4)*15,cy0+Math.sin(i*Math.PI/4)*15,3.4,0,7);x.fillStyle=p.a;x.fill()}
+      x.beginPath();x.arc(cx0,cy0,6,0,7);x.fillStyle=p.b;x.fill();
+    }
+    [-256,0,256].forEach(function(dx){[-256,0,256].forEach(function(dy){flower(64+dx,64+dy);flower(192+dx,192+dy);rosette(192+dx,64+dy);rosette(64+dx,192+dy)})});
+  },
+  zig:function(x,p){
+    var r,i;
+    function zz(y,w,col){x.strokeStyle=col;x.lineWidth=w;x.lineJoin='miter';x.beginPath();for(i=-2;i<12;i++)x.lineTo(i*32,y+(i%2?0:22));x.stroke()}
+    for(r=-1;r<5;r++){var y0=r*64;zz(y0+8,16,p.b);zz(y0+34,5,p.c);for(i=0;i<9;i++){x.beginPath();x.arc(i*32+16,y0+62,3,0,7);x.fillStyle=p.c;x.fill()}}
+  },
+  kente:function(x,p){
+    var i,j,k;
+    for(i=0;i<4;i++)for(j=0;j<4;j++){
+      var X=i*64,Y=j*64,t=(i+j)%3;
+      if(t===0){x.fillStyle=p.b;x.fillRect(X+4,Y+4,56,56);x.fillStyle=p.c;x.fillRect(X+20,Y+20,24,24);x.fillStyle=p.a;x.fillRect(X+28,Y+28,8,8)}
+      else if(t===1){for(k=0;k<4;k++){x.fillStyle=k%2?p.c:p.b;x.fillRect(X+4+k*14,Y+4,10,56)}}
+      else{for(k=0;k<4;k++){x.fillStyle=k%2?p.c:p.b;x.fillRect(X+4,Y+4+k*14,56,10)}}
+    }
+  },
+  rings:function(x,p){
+    function ring(cx0,cy0,R,cols){cols.forEach(function(c,i){x.beginPath();x.arc(cx0,cy0,R*(1-i/cols.length),0,7);x.fillStyle=c;x.fill()})}
+    ring(64,64,56,[p.b,p.a,p.c,p.a,p.b]);ring(192,192,56,[p.b,p.a,p.c,p.a,p.b]);
+    ring(192,64,28,[p.c,p.b,p.a]);ring(64,192,28,[p.c,p.b,p.a]);
+    [[0,0],[256,0],[0,256],[256,256],[128,128]].forEach(function(q){x.beginPath();x.arc(q[0],q[1],6,0,7);x.fillStyle=p.c;x.fill()});
+  }
+};
+function tileFor(pk,cw){
+  var key=pk+cw;if(TILES[key])return TILES[key];
+  var p=CWAYS[cw],c=mk(256,256),x=c.getContext('2d');x.fillStyle=p.a;x.fillRect(0,0,256,256);PATFN[pk](x,p);
+  return TILES[key]=c;
+}
+function patStyle(cx){
+  var A=state.ank,pat=cx.createPattern(tileFor(A.pat,A.cw),'repeat'),a=A.angle*Math.PI/180,co=Math.cos(a)*A.scale,si=Math.sin(a)*A.scale;
+  try{pat.setTransform(new DOMMatrix([co,si,-si,co,512-(co*64-si*64),440-(si*64+co*64)]))}catch(e){}
+  return pat;
+}
+function panelPath(c,A){
+  var m=2,h=A.w/2;c.beginPath();
+  if(A.shape==='strip'){c.rect(m*(256-h),m*90,m*A.w,m*420)}
+  else if(A.shape==='side'){c.rect(m*(256+12),m*90,m*A.w*1.25,m*420)}
+  else if(A.shape==='bib'){var wb=h*1.7;c.moveTo(m*(256-wb),m*90);c.lineTo(m*(256+wb),m*90);c.lineTo(m*(256+wb),m*260);c.quadraticCurveTo(m*(256+wb),m*300,m*256,m*344);c.quadraticCurveTo(m*(256-wb),m*300,m*(256-wb),m*260);c.closePath()}
+  else{var wy=h*2.6;c.moveTo(m*(256-wy),m*92);c.lineTo(m*(256+wy),m*92);c.lineTo(m*(256+wy*.62),m*200);c.lineTo(m*256,m*312);c.lineTo(m*(256-wy*.62),m*200);c.closePath()}
+}
+function polyPath(c,pts){c.beginPath();pts.forEach(function(p,i){c[i?'lineTo':'moveTo'](p[0]*2,p[1]*2)});c.closePath()}
+var WING=[[210,84],[256,112],[256,132],[223,180],[203,132]];
+var CUFF=[[46,330],[94,352],[107.8,314.4],[59.8,292.4]];
+var POCKET=[[300,196],[352,196],[352,244],[326,258],[300,244]];
+function mirror(pts){return pts.map(function(p){return [512-p[0],p[1]]})}
+function paintAnkara(name,cx,bx,base){
+  var A=state.ank,dk=shade(base,-.4),soft=shade(base,-.1),i;
+  function piece(pts,usePat){
+    polyPath(cx,pts);cx.fillStyle=usePat?patStyle(cx):soft;cx.fill();
+    cx.lineWidth=3;cx.strokeStyle='rgba(0,0,0,.4)';cx.setLineDash([]);cx.stroke();
+    polyPath(bx,pts);bx.fillStyle='#6a6a6a';bx.fill();bx.lineWidth=3;bx.strokeStyle='#2c2c2c';bx.stroke();
+  }
+  cx.lineCap='round';cx.lineJoin='round';
+  /* hem stitching */
+  cx.lineWidth=2.4;cx.strokeStyle=dk;curve(cx,[150,456],[256,470],[362,456],[8,6]);
+  if(name==='front'){
+    /* placket under everything */
+    cx.fillStyle=soft;cx.fillRect(245*2,100*2,22*2,400*2);
+    cx.lineWidth=1.8;cx.strokeStyle=dk;lines(cx,[[245,150],[245,490]],[6,5]);lines(cx,[[267,150],[267,490]],[6,5]);
+    /* the centre panel, the part that changes order to order */
+    panelPath(cx,A);cx.fillStyle=patStyle(cx);cx.fill();
+    cx.lineWidth=3;cx.strokeStyle='rgba(0,0,0,.42)';cx.setLineDash([]);cx.stroke();
+    panelPath(bx,A);bx.fillStyle='#6a6a6a';bx.fill();bx.lineWidth=3.5;bx.strokeStyle='#2c2c2c';bx.stroke();
+    if(A.collar){piece(WING,true);piece(mirror(WING),true)}else{piece(WING,false);piece(mirror(WING),false)}
+    if(A.pocket)piece(POCKET,true);
+    for(i=0;i<6;i++){var by=198+i*52;
+      dot(cx,256,by,7.5,'#EFE7D3','rgba(0,0,0,.5)');dot(cx,254,by-2,1.1,'rgba(0,0,0,.6)');dot(cx,258,by-2,1.1,'rgba(0,0,0,.6)');dot(cx,254,by+2,1.1,'rgba(0,0,0,.6)');dot(cx,258,by+2,1.1,'rgba(0,0,0,.6)');
+      dot(bx,256,by,7.5,'#d8d8d8','#fff');}
+  }else{
+    cx.lineWidth=2.4;cx.strokeStyle=dk;curve(cx,[150,150],[256,162],[362,150],[8,6]);
+    bx.lineWidth=3;bx.strokeStyle='#2c2c2c';curve(bx,[150,150],[256,162],[362,150]);
+    cx.strokeStyle=A.collar?patStyle(cx):soft;cx.lineWidth=26;cx.beginPath();cx.moveTo(212*2,92*2);cx.quadraticCurveTo(256*2,(2*CG.neck.back-84+12)*2,300*2,92*2);cx.stroke();
+    bx.strokeStyle='#fff';bx.globalAlpha=.4;bx.lineWidth=26;bx.beginPath();bx.moveTo(212*2,92*2);bx.quadraticCurveTo(256*2,(2*CG.neck.back-84+12)*2,300*2,92*2);bx.stroke();bx.globalAlpha=1;
+  }
+  [CUFF,mirror(CUFF)].forEach(function(c){piece(c,A.cuffs);var mx=(c[0][0]+c[1][0])/2+(c[3][0]-c[0][0])*.5,my=(c[0][1]+c[1][1])/2+(c[3][1]-c[0][1])*.5;dot(cx,mx,my,3.6,'#EFE7D3','rgba(0,0,0,.5)')});
+}
+
+
+/* fabric folds, in 512 px design space: gathers at the waist, breaks at the hem and knee, whiskers fanning from the crotch */
+function fan(X,Y,cy,amp,k,len){var dx=X-256,dy=Y-cy;if(dy<0)return 0;return amp*Math.sin(Math.atan2(dy,dx)*k+Math.sin(X*.05)*.6)*Math.exp(-Math.hypot(dx,dy)/len)}
+function trouserFolds(u,v){
+  var X=u*512,Y=(1-v)*512,z=0;
+  z+=.012*smooth(33,38,Y)*(1-smooth(70,76,Y));
+  [184,222,290,328].forEach(function(x){if(Math.abs(X-x)<5&&Y>32&&Y<78)z+=.007});
+  z+=.0055*Math.sin(Y*.5+Math.sin(X*.06)*2)*smooth(436,470,Y);
+  z+=.0045*Math.exp(-Math.pow((Y-322)/24,2))*Math.sin(Y*.42+X*.045);
+  z+=fan(X,Y,236,.0075,15,70);
+  z-=.1*Math.exp(-Math.pow((X-256)/26,2))*smooth(186,232,Y);
+  z+=.003*Math.sin(Y*.09+X*.03)*smooth(80,200,Y);
+  return z;
+}
+function shortsFolds(u,v){
+  var X=u*512,Y=(1-v)*512,z=0;
+  z+=.011*smooth(119,124,Y)*(1-smooth(166,172,Y));
+  z+=.0035*Math.sin(X*.85)*smooth(124,134,Y)*(1-smooth(160,170,Y));
+  z+=.0045*Math.sin(Y*.55+Math.sin(X*.07)*2)*smooth(360,386,Y);
+  z+=fan(X,Y,250,.007,13,60);
+  z-=.1*Math.exp(-Math.pow((X-256)/26,2))*smooth(200,246,Y);
+  return z;
+}
+
+var GARMENTS={
+  tee:{n:"Boys' sports tee",short:'Sports tee',ctx:'Greenfield Primary School · First term 2026 intake · 16 pieces',pieces:16,weave:'knit',
+    path:teePath,neck:{front:150,back:106},R:function(u){return .2-.08*smooth(.205,.25,Math.abs(u-.5))},
+    chest:{u:.5,v:.62,su:.17,sv:.2,a:.12,b:.05},shift:.2,fw:2.3,fh:2.1,shY:-1.08,views:['Front','Back','Left sleeve','Right sleeve'],sleeveX:[280,744],paint:paintTee,place:placeTee},
+  shorts:{n:"Boys' school shorts",short:'Shorts',ctx:'Greenfield Primary School · First term 2026 intake · 16 pieces',pieces:16,weave:'twill',
+    path:shortsPath,neck:{front:0,back:0},rows:true,rpx:62,p:2.3,depth:function(y){return .2-.04*smooth(300,396,y)},R:function(){return .15},wr:.4,extra:shortsFolds,fw:1.95,fh:1.4,shY:-.78,views:['Front','Back','Left side','Right side'],sleeveX:null,paint:paintShorts,place:placeShorts},
+  trousers:{n:"Senior trousers",short:'Trousers',ctx:"St. Mary's Secondary · Senior boys · 12 pieces",pieces:12,weave:'twill',
+    path:trousersPath,neck:{front:0,back:0},rows:true,rpx:46,p:2.3,depth:function(y){return .2-.06*smooth(200,488,y)},R:function(){return .11},wr:.25,extra:trouserFolds,
+    fw:1.3,fh:2.5,shY:-1.1,views:['Front','Back','Left side','Right side'],sleeveX:null,paint:paintTrousers,place:placeTrousers},
+  ankara:{n:'Ankara combination shirt',short:'Ankara shirt',ctx:'Mrs. Adeyemi · Ankara line · 1 piece',pieces:1,weave:'linen',panel:true,
+    path:ankaraPath,neck:{front:112,back:96},R:function(u){return .2-.08*smooth(.205,.25,Math.abs(u-.5))},
+    chest:{u:.5,v:.62,su:.17,sv:.2,a:.08,b:.04},shift:.2,fw:2.35,fh:2.1,shY:-1.08,views:['Front','Back','Left sleeve','Right sleeve'],sleeveX:[300,724],paint:paintAnkara,place:placeAnkara}
+};
+var CG=GARMENTS.tee;
+
+function paintSide(name){
+  var s=sides[name],cx=s.cx,bx=s.bx,base=state.shirt.c,W=WEAVES[CG.weave];
+  cx.setTransform(1,0,0,1,0,0);cx.setLineDash([]);cx.globalAlpha=1;cx.fillStyle=base;cx.fillRect(0,0,TEX,TEX);
+  cx.globalAlpha=W.ca;cx.fillStyle=cx.createPattern(W.c,'repeat');cx.fillRect(0,0,TEX,TEX);cx.globalAlpha=1;
+  bx.setTransform(1,0,0,1,0,0);bx.setLineDash([]);bx.globalAlpha=1;bx.fillStyle='#6a6a6a';bx.fillRect(0,0,TEX,TEX);
+  if(W.ba){bx.globalAlpha=W.ba;bx.fillStyle=bx.createPattern(W.b,'repeat');bx.fillRect(0,0,TEX,TEX);bx.globalAlpha=1;}
+  CG.paint(name,cx,bx,base);
+  cx.setLineDash([]);bx.setLineDash([]);
+  if(s.tex){s.tex.needsUpdate=true;s.btex.needsUpdate=true;}
+}
+var painting=false;
+function repaint(){if(painting)return;painting=true;requestAnimationFrame(function(){painting=false;paintSide('front');paintSide('back');if(window.__syncDecals)window.__syncDecals();})}
+
+/* where a decoration sits, in the words the workshop uses */
+function placeTee(d){
+  var x=d.x,y=d.y;
+  if(d.side==='front'){
+    if(x<280)return 'Right sleeve';if(x>744)return 'Left sleeve';
+    if(y>600)return 'Lower front';
+    if(Math.abs(x-512)<90)return y<330?'Collar front':'Centre chest';
+    return x>512?'Left chest':'Right chest';
+  }
+  if(x<280)return 'Left sleeve (back)';if(x>744)return 'Right sleeve (back)';
+  if(y<400)return 'Back, upper';if(y>640)return 'Back, lower';return 'Back, centre';
+}
+function placeShorts(d){
+  var sd=d.side==='back'?' (back)':'',leg=(d.x<512)===(d.side==='front')?'Right':'Left';
+  if(d.y<340)return 'Waistband'+sd;
+  if(d.side==='front'&&Math.abs(d.x-512)>250&&d.y<500)return leg+' pocket';
+  return leg+(d.y>700?' hem':d.y>520?' leg, lower':' leg, upper')+sd;
+}
+function placeTrousers(d){
+  var sd=d.side==='back'?' (back)':'',leg=(d.x<512)===(d.side==='front')?'Right':'Left';
+  if(d.y<150)return 'Waistband'+sd;
+  if(d.y<340)return leg+(d.side==='front'?' hip pocket':' back pocket');
+  return leg+(d.y<560?' thigh':d.y<760?' knee':d.y<900?' lower leg':' hem')+sd;
+}
+function placeAnkara(d){
+  var x=d.x,y=d.y,A=state.ank,half=A.w*(A.shape==='bib'?1.7:A.shape==='yoke'?1.6:1),sd=d.side==='back'?' (back)':'';
+  var lf=d.side==='back'?'Left':'Right',rt=d.side==='back'?'Right':'Left';
+  if(x<300)return (y>580?lf+' cuff':lf+' sleeve')+sd;
+  if(x>724)return (y>580?rt+' cuff':rt+' sleeve')+sd;
+  if(d.side==='back')return y<300?'Back yoke':y>800?'Back, lower':'Back, centre';
+  if(y<190)return 'Collar';
+  if(A.shape==='side'?(x>524&&x<524+A.w*2.5):Math.abs(x-512)<half)return 'Centre panel';
+  if(y>780)return 'Lower front';
+  return (x<512?'Right ':'Left ')+(y<560?'chest':'front');
+}
+
+/* ---------- three.js scene ---------- */
+var stage=$('#stage'),glc=$('#gl'),renderer,scene,camera,group,rect={w:800,h:800};
+try{
+  renderer=new THREE.WebGLRenderer({canvas:glc,antialias:true,alpha:true});
+}catch(e){renderer=null}
+if(!renderer||!window.THREE){
+  var m=document.createElement('div');m.id='nogl';m.textContent='The 3D view needs WebGL, which this browser has turned off.';stage.appendChild(m);
+  return;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
+scene=new THREE.Scene();
+camera=new THREE.PerspectiveCamera(30,1,.1,50);
+group=new THREE.Group();scene.add(group);
+scene.add(new THREE.HemisphereLight(0xdfe6f0,0x1a1d22,.45));
+var fit=3.9;
+var key=new THREE.DirectionalLight(0xfff1dc,1.9);key.position.set(2.5,3,4);scene.add(key);
+var fill=new THREE.DirectionalLight(0xbcd2ff,.55);fill.position.set(-3,1,2.5);scene.add(fill);
+var rim=new THREE.DirectionalLight(0xffffff,.3);rim.position.set(0,2.5,-4);scene.add(rim);
+/* soft contact shadow under the floating garment */
+var sh=mk(256,128),shx=sh.getContext('2d'),gr=shx.createRadialGradient(128,64,4,128,64,120);
+gr.addColorStop(0,'rgba(0,0,0,.55)');gr.addColorStop(1,'rgba(0,0,0,0)');shx.fillStyle=gr;shx.fillRect(0,0,256,128);
+var shadow=new THREE.Mesh(new THREE.PlaneGeometry(2.6,1.1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sh),transparent:true,depthWrite:false}));
+shadow.rotation.x=-Math.PI/2;shadow.position.y=-1.08;scene.add(shadow);
+
+function geoFor(key,name){
+  var D=fieldData(key)[name];if(D.geo)return D;
+  var gd=GARMENTS[key],g=new THREE.PlaneGeometry(2,2,SEG,SEG),pos=g.attributes.position,uv=g.attributes.uv,i;
+  for(i=0;i<pos.count;i++){var u=uv.getX(i),v=uv.getY(i);pos.setZ(i,zFor(gd,name,u,v,sampleH(D.h,u,v)));}
+  g.computeVertexNormals();g.computeBoundingSphere();g.computeBoundingBox();
+  var M=new THREE.Matrix4();if(name==='back')M.makeRotationY(Math.PI);
+  var n=pos.count,gp=new Float32Array(n*3),gn=new Float32Array(n*3),ins=new Uint8Array(n),nm=g.attributes.normal,v3=new THREE.Vector3();
+  for(i=0;i<n;i++){
+    v3.set(pos.getX(i),pos.getY(i),pos.getZ(i)).applyMatrix4(M);gp[i*3]=v3.x;gp[i*3+1]=v3.y;gp[i*3+2]=v3.z;
+    v3.set(nm.getX(i),nm.getY(i),nm.getZ(i)).transformDirection(M);gn[i*3]=v3.x;gn[i*3+1]=v3.y;gn[i*3+2]=v3.z;
+    ins[i]=sampleH(D.h,uv.getX(i),uv.getY(i))>.004?1:0;
+  }
+  /* smoothed normals for unwrapping, so fabric wrinkles do not ripple the artwork */
+  var W=SEG+1,gs=new Float32Array(n*3),c,q;
+  for(c=0;c<3;c++){var ch=new Float32Array(n);for(q=0;q<n;q++)ch[q]=gn[q*3+c];ch=boxBlur(ch,W,4);ch=boxBlur(ch,W,4);for(q=0;q<n;q++)gs[q*3+c]=ch[q];}
+  for(q=0;q<n;q++){var l=Math.hypot(gs[q*3],gs[q*3+1],gs[q*3+2])||1;gs[q*3]/=l;gs[q*3+1]/=l;gs[q*3+2]/=l;}
+  D.geo=g;D.gp=gp;D.gn=gs;D.ins=ins;D.index=g.index.array;D.atex=new THREE.CanvasTexture(D.alpha);
+  return D;
+}
+['front','back'].forEach(function(name){
+  var s=sides[name];
+  s.tex=new THREE.CanvasTexture(s.col);s.tex.encoding=THREE.sRGBEncoding;s.tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
+  s.btex=new THREE.CanvasTexture(s.bmp);s.btex.anisotropy=8;
+  var mat=new THREE.MeshStandardMaterial({map:s.tex,bumpMap:s.btex,bumpScale:.25,alphaTest:.5,roughness:.94,metalness:0,side:THREE.FrontSide});
+  s.mesh=new THREE.Mesh(new THREE.BufferGeometry(),mat);if(name==='back')s.mesh.rotation.y=Math.PI;
+  s.mesh.updateMatrix();group.add(s.mesh);
+  /* plain inner liner so the inside of the garment shows fabric, not the print */
+  s.liner=new THREE.Mesh(s.mesh.geometry,new THREE.MeshStandardMaterial({color:0x000000,alphaTest:.5,roughness:1,side:THREE.BackSide}));
+  s.liner.rotation.y=s.mesh.rotation.y;group.add(s.liner);
+});
+function applyGarment(key){
+  CG=GARMENTS[key];
+  ['front','back'].forEach(function(name){
+    var s=sides[name],D=geoFor(key,name);
+    s.h=D.h;s.gp=D.gp;s.gn=D.gn;s.ins=D.ins;s.index=D.index;
+    s.mesh.geometry=D.geo;s.liner.geometry=D.geo;
+    s.mesh.material.alphaMap=D.atex;s.liner.material.alphaMap=D.atex;
+    s.mesh.material.needsUpdate=true;s.liner.material.needsUpdate=true;
+  });
+}
+applyGarment('tee');
+
+/* ---------- camera rig ---------- */
+var VIEWS={front:{yaw:0,dist:3.9},back:{yaw:Math.PI,dist:3.9},left:{yaw:-.95,dist:3.5},right:{yaw:.95,dist:3.5}};
+var T={yaw:0,pitch:0,dist:3.9},C={yaw:0,pitch:0,dist:3.9},curView='front';
+function setView(name){
+  var v=VIEWS[name];curView=name;
+  T.yaw=v.yaw+Math.PI*2*Math.round((T.yaw-v.yaw)/(Math.PI*2));T.dist=v.dist;T.pitch=0;
+  document.querySelectorAll('.views button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===name))});
+}
+document.querySelectorAll('.views button').forEach(function(b){b.addEventListener('click',function(){setView(b.dataset.view)})});
+
+function resize(){
+  var r=stage.getBoundingClientRect();rect.w=Math.max(200,r.width);rect.h=Math.max(200,r.height);
+  renderer.setSize(rect.w,rect.h,false);camera.aspect=rect.w/rect.h;
+  /* keep the full garment in view on narrow stages */
+  var asp=rect.w/rect.h;camera.fov=asp<.9?44:30;camera.updateProjectionMatrix();
+  /* distance at which the whole garment, sleeves included, fits this stage */
+  fit=1.22*Math.max(CG.fw/asp,CG.fh)/(2*Math.tan(camera.fov*Math.PI/360));
+}
+new ResizeObserver(resize).observe(stage);resize();
+
+/* ---------- pointer: turn, place, select ---------- */
+var ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),drag=null,hover=false;
+function pick(e){
+  var r=glc.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);
+  var hits=ray.intersectObjects([sides.front.mesh,sides.back.mesh],false);
+  for(var i=0;i<hits.length;i++){
+    var h=hits[i],side=h.object===sides.front.mesh?'front':'back',uv=h.uv;
+    if(sampleH(sides[side].h,uv.x,uv.y)>.01){
+      var m=h.object,g=m.geometry,P=g.attributes.position,N=g.attributes.normal,lp=m.worldToLocal(h.point.clone()),
+          A=new THREE.Vector3().fromBufferAttribute(P,h.face.a),B=new THREE.Vector3().fromBufferAttribute(P,h.face.b),C=new THREE.Vector3().fromBufferAttribute(P,h.face.c),bc=new THREE.Vector3();
+      THREE.Triangle.getBarycoord(lp,A,B,C,bc);
+      var n=new THREE.Vector3().fromBufferAttribute(N,h.face.a).multiplyScalar(bc.x)
+        .addScaledVector(new THREE.Vector3().fromBufferAttribute(N,h.face.b),bc.y).addScaledVector(new THREE.Vector3().fromBufferAttribute(N,h.face.c),bc.z).normalize().transformDirection(m.matrix);
+      return {side:side,x:uv.x*TEX,y:(1-uv.y)*TEX,point:group.worldToLocal(h.point.clone()),normal:n};
+    }
+  }
+  return null;
+}
+function decalAt(e){
+  var r=glc.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);
+  var list=Object.keys(decals).map(function(k){return decals[k]}).filter(function(m){return m.visible}),hits=ray.intersectObjects(list,false);
+  if(!hits.length)return null;
+  var g=ray.intersectObjects([sides.front.mesh,sides.back.mesh],false);
+  if(g.length&&g[0].distance<hits[0].distance-.02)return null;
+  return byId(hits[0].object.userData.id);
+}
+glc.addEventListener('pointerdown',function(e){
+  glc.setPointerCapture(e.pointerId);
+  var hit=pick(e),cand=hit&&!state.armed?decalAt(e):null;
+  drag={x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false,mode:'orbit',item:cand,timer:null};
+  if(cand){
+    var dg=drag;
+    dg.timer=setTimeout(function(){
+      dg.mode='item';state.sel=cand.id;stage.classList.add('holding');setGuide(true);renderAll();
+      try{if(navigator.vibrate)navigator.vibrate(15)}catch(err){}
+    },420);
+  }
+});
+glc.addEventListener('pointermove',function(e){
+  if(drag){
+    if(drag.mode==='item'){
+      var it=drag.item,h=pick(e);
+      if(h){it.x=h.x;it.y=h.y;it.side=h.side;it.pos=h.point;it.nrm=h.normal;it._dirty=true;repaint();renderInfo();renderLayers();var w=$('#inspWhere');if(w)w.textContent=placeName(it);}
+      return;
+    }
+    var dx=e.clientX-drag.px,dy=e.clientY-drag.py;drag.px=e.clientX;drag.py=e.clientY;
+    if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){drag.moved=true;clearTimeout(drag.timer);}
+    if(drag.moved){T.yaw+=dx*.009;T.pitch=clamp(T.pitch+dy*.004,-.3,.3);}
+  }
+  moveGhost(e);
+});
+glc.addEventListener('pointerleave',function(){hover=false;$('#ghost').hidden=true});
+function endDrag(e,cancel){
+  var d=drag;drag=null;if(!d)return;clearTimeout(d.timer);
+  if(d.mode==='item'){stage.classList.remove('holding');setGuide(false);renderAll();toast(d.item.name+' now on '+placeName(d.item).toLowerCase());return;}
+  if(!cancel&&!d.moved)tap(e);
+}
+glc.addEventListener('pointerup',function(e){endDrag(e,false)});
+glc.addEventListener('pointercancel',function(e){endDrag(e,true)});
+glc.addEventListener('wheel',function(e){e.preventDefault();T.dist=clamp(T.dist+e.deltaY*.003,2.4,6)},{passive:false});
+
+/* ---------- surface decals ---------- */
+function change(d,fn){var keep={x:d.x,y:d.y,size:d.size,rot:d.rot,text:d.text,font:d.font,pos:d.pos&&d.pos.clone()};fn();invalidate(d);
+  if(buildDecal(d)){d._dirty=false;return true;}
+  d.x=keep.x;d.y=keep.y;d.size=keep.size;d.rot=keep.rot;d.text=keep.text;d.font=keep.font;d.pos=keep.pos;invalidate(d);buildDecal(d);d._dirty=false;toast('No surface there');return false;}
+function setGuide(){}
+function anchorFrom(d){
+  var S=sides[d.side],u=d.x/TEX,v=1-d.y/TEX,e=.004,V=THREE.Vector3;
+  function L(a,b){return new V(a*2-1,b*2-1,zFor(CG,d.side,a,b,sampleH(S.h,a,b)))}
+  var p=L(u,v),du=L(u+e,v).sub(L(u-e,v)),dv=L(u,v+e).sub(L(u,v-e)),n=new V().crossVectors(du,dv).normalize();
+  d.pos=p.applyMatrix4(S.mesh.matrix);d.nrm=n.transformDirection(S.mesh.matrix);
+}
+var decals={};
+var KW=2/TEX,DEPTH=.25;
+function frameOf(d){
+  var V=THREE.Vector3,N=d.nrm.clone().normalize(),Y=new V(0,1,0);Y.addScaledVector(N,-Y.dot(N));
+  if(Y.lengthSq()<.04){Y.set(1,0,0);Y.addScaledVector(N,-N.x);}
+  Y.normalize();var X=new V().crossVectors(Y,N),a=d.rot*Math.PI/180,c=Math.cos(a),sn=Math.sin(a);
+  return {N:N,X:X.clone().multiplyScalar(c).addScaledVector(Y,-sn),Y:X.clone().multiplyScalar(sn).addScaledVector(Y,c)};
+}
+function clipPoly(poly,axis,lim,less){
+  var out=[],i,k;
+  for(i=0;i<poly.length;i++){
+    var a=poly[i],b=poly[(i+1)%poly.length],da=less?lim-a[axis]:a[axis]-lim,db=less?lim-b[axis]:b[axis]-lim;
+    if(da>=0)out.push(a);
+    if((da>=0)!==(db>=0)){var t=da/(da-db),v=[];for(k=0;k<6;k++)v.push(a[k]+(b[k]-a[k])*t);out.push(v);}
+  }
+  return out;
+}
+/* Lay the decoration onto the garment: take every garment triangle under its footprint, clip it to the footprint,
+   and unwrap it so the artwork keeps its true size as the cloth curves away. */
+function unwrap(x,y,nx,ny,nz){
+  /* stretch the offset along the direction the cloth tilts away, so it matches the distance measured on the surface (tilted sleeves included) */
+  var t=Math.hypot(nx,ny);if(t<.02)return [x,y];
+  var sinP=t/Math.hypot(t,nz),k=Math.min(4,Math.atan2(t,nz)/sinP),tx=nx/t,ty=ny/t,c=x*tx+y*ty;
+  return [x+(k-1)*c*tx,y+(k-1)*c*ty];
+}
+function decalGeometry(d){
+  var sp=sprite(d),w=sp.width*KW,h=sp.height*KW,sx=w/2,sy=h/2,f=frameOf(d),P=d.pos,R2=Math.pow(Math.hypot(sx,sy)+DEPTH,2);
+  var pos=[],uvs=[],nor=[],X=f.X,Y=f.Y,N=f.N,ti;
+  ['front','back'].forEach(function(name){
+    var S=sides[name],gp=S.gp,gn=S.gn,ins=S.ins,idx=S.index;
+    for(ti=0;ti<idx.length;ti+=3){
+      var ia=idx[ti],ib=idx[ti+1],ic=idx[ti+2];
+      if(ins[ia]+ins[ib]+ins[ic]<2)continue;
+      var dx=gp[ia*3]-P.x,dy=gp[ia*3+1]-P.y,dz=gp[ia*3+2]-P.z;
+      if(dx*dx+dy*dy+dz*dz>R2)continue;
+      var poly=[],ok=0,ids=[ia,ib,ic],q;
+      for(q=0;q<3;q++){
+        var id=ids[q],rx=gp[id*3]-P.x,ry=gp[id*3+1]-P.y,rz=gp[id*3+2]-P.z,nx=gn[id*3],ny=gn[id*3+1],nz=gn[id*3+2];
+        var vnz=nx*N.x+ny*N.y+nz*N.z;ok+=vnz;
+        poly.push([rx*X.x+ry*X.y+rz*X.z,rx*Y.x+ry*Y.y+rz*Y.z,rx*N.x+ry*N.y+rz*N.z,nx*X.x+ny*X.y+nz*X.z,nx*Y.x+ny*Y.y+nz*Y.z,vnz]);
+      }
+      if(ok/3<-.65)continue;
+      poly=clipPoly(poly,0,sx,true);if(poly.length<3)continue;poly=clipPoly(poly,0,-sx,false);if(poly.length<3)continue;
+      poly=clipPoly(poly,1,sy,true);if(poly.length<3)continue;poly=clipPoly(poly,1,-sy,false);if(poly.length<3)continue;
+      poly=clipPoly(poly,2,DEPTH,true);if(poly.length<3)continue;poly=clipPoly(poly,2,-DEPTH,false);if(poly.length<3)continue;
+      for(q=1;q<poly.length-1;q++){
+        [poly[0],poly[q],poly[q+1]].forEach(function(v){
+          var uw=unwrap(v[0],v[1],v[3],v[4],v[5]);
+          uvs.push(.5+uw[0]/w,.5+uw[1]/h);
+          var wnx=v[3]*X.x+v[4]*Y.x+v[5]*N.x,wny=v[3]*X.y+v[4]*Y.y+v[5]*N.y,wnz=v[3]*X.z+v[4]*Y.z+v[5]*N.z;
+          pos.push(P.x+v[0]*X.x+v[1]*Y.x+v[2]*N.x+wnx*.003,P.y+v[0]*X.y+v[1]*Y.y+v[2]*N.y+wny*.003,P.z+v[0]*X.z+v[1]*Y.z+v[2]*N.z+wnz*.003);
+          nor.push(wnx,wny,wnz);
+        });
+      }
+    }
+  });
+  if(!pos.length)return null;
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.computeBoundingSphere();return g;
+}
+function buildDecal(d){
+  if(!d.pos)anchorFrom(d);
+  var g=decalGeometry(d),m=decals[d.id],sp=sprite(d);
+  if(!g){if(m)m.visible=false;return false;}
+  if(!m){
+    m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({transparent:true,alphaTest:.25,roughness:.5,metalness:0,polygonOffset:true,polygonOffsetFactor:-6,polygonOffsetUnits:-6}));
+    m.userData.id=d.id;m.renderOrder=2;group.add(m);decals[d.id]=m;
+  }else{m.geometry.dispose();m.geometry=g;}
+  m.visible=true;
+  if(m.userData.sp!==sp){
+    ['map','bumpMap'].forEach(function(k){if(m.material[k])m.material[k].dispose()});
+    var t=new THREE.CanvasTexture(sp);t.encoding=THREE.sRGBEncoding;t.anisotropy=renderer.capabilities.getMaxAnisotropy();
+    var bt=new THREE.CanvasTexture(bumpSprite(sp));
+    m.material.map=t;m.material.bumpMap=bt;m.material.bumpScale=1.1;m.material.needsUpdate=true;m.userData.sp=sp;
+  }
+  return true;
+}
+window.__syncDecals=function(){
+  var alive={};
+  state.items.forEach(function(d){alive[d.id]=1;if(decals[d.id]&&d._dirty===false)return;buildDecal(d);d._dirty=false;});
+  Object.keys(decals).forEach(function(k){if(!alive[k]){var m=decals[k];group.remove(m);m.geometry.dispose();delete decals[k];}});
+};
+
+function tap(e){
+  var hit=pick(e);
+  if(state.armed){
+    if(!hit)return;
+    if(state.armed.mode==='new'){
+      var d=Object.assign({id:state.nextId++,x:hit.x,y:hit.y,side:hit.side,rot:0,pos:hit.point,nrm:hit.normal},state.armed.proto);
+      state.items.push(d);
+      if(!buildDecal(d)){state.items.pop();toast('No room at that spot. Tap a flatter area, away from the collar or hem.');return;}
+      d._dirty=false;state.sel=d.id;toast(d.name+' placed on '+placeName(d).toLowerCase());
+    }else{
+      var it=byId(state.armed.id);
+      if(it){it.x=hit.x;it.y=hit.y;it.side=hit.side;it.pos=hit.point;it.nrm=hit.normal;it._dirty=true;}
+    }
+    disarm();repaint();renderAll();return;
+  }
+  var d2=decalAt(e);
+  state.sel=d2?d2.id:null;renderAll();
+}
+function byId(id){for(var i=0;i<state.items.length;i++)if(state.items[i].id===id)return state.items[i];return null}
+function arm(a,label){state.armed=a;stage.classList.add('armed');$('#bannerText').textContent='Tap the garment to '+(a.mode==='new'?'place ':'move ')+label;$('#banner').hidden=false;drawGhost();setGuide(true);}
+function disarm(){state.armed=null;stage.classList.remove('armed');$('#banner').hidden=true;$('#ghost').hidden=true;setGuide(false)}
+$('#cancelArm').addEventListener('click',disarm);
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&state.armed)disarm()});
+
+var ppc0=.5;
+function drawGhost(){
+  var a=state.armed;if(!a)return;var d=a.mode==='new'?a.proto:byId(a.id);if(!d)return;
+  var sp=makeSprite(d),g=$('#ghost');g.width=sp.width;g.height=sp.height;g.getContext('2d').clearRect(0,0,g.width,g.height);g.getContext('2d').drawImage(sp,0,0);
+  g._w=sp.width;g._h=sp.height;g._rot=d.rot||0;
+}
+function moveGhost(e){
+  var g=$('#ghost');
+  if(!state.armed){g.hidden=true;return;}
+  var r=stage.getBoundingClientRect();g.hidden=false;
+  g.style.width=(g._w*ppc0)+'px';g.style.height=(g._h*ppc0)+'px';
+  g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px';
+}
+
+/* ---------- render loop ---------- */
+var ring=$('#ring'),tmp=new THREE.Vector3(),tmp2=new THREE.Vector3(),clock=new THREE.Clock();
+function updateOverlay(){
+  var a=tmp.set(0,0,0).project(camera),right=new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld,0),
+      b=tmp2.set(0,0,0).addScaledVector(right,.1).project(camera);
+  ppc0=Math.hypot((b.x-a.x)*rect.w/2,(b.y-a.y)*rect.h/2)/.1*2/TEX;
+  var d=byId(state.sel);if(!d||!d.pos||!decals[d.id]||!decals[d.id].visible){ring.hidden=true;$('#info').hidden=true;return;}
+  var wp=group.localToWorld(d.pos.clone().addScaledVector(d.nrm,.004));
+  var n=d.nrm.clone().applyQuaternion(group.quaternion),toCam=camera.position.clone().sub(wp).normalize();
+  if(n.dot(toCam)<.2){ring.hidden=true;$('#info').style.visibility='hidden';return;}
+  $('#info').style.visibility='visible';
+  var p=wp.clone().project(camera),q=wp.clone().addScaledVector(right,.1).project(camera);
+  var ppc=Math.hypot((q.x-p.x)*rect.w/2,(q.y-p.y)*rect.h/2)/.1*2/TEX,sp=sprite(d),w=sp.width*ppc+14,h=sp.height*ppc+14;
+  ring.hidden=false;ring.style.width=w+'px';ring.style.height=h+'px';
+  ring.style.left=((p.x*.5+.5)*rect.w-w/2)+'px';ring.style.top=((-p.y*.5+.5)*rect.h-h/2)+'px';
+  ring.style.transform='rotate('+d.rot+'deg)';
+  var inf=$('#info');if(!inf.hidden){
+    var cxp=(p.x*.5+.5)*rect.w,cyp=(-p.y*.5+.5)*rect.h,iw=224,ih=inf.offsetHeight||150,rr=Math.max(w,h)/2+14;
+    var left=cxp+rr+iw+12<rect.w?cxp+rr:cxp-rr-iw;
+    inf.style.left=clamp(left,8,rect.w-iw-8)+'px';inf.style.top=clamp(cyp-ih/2,60,rect.h-ih-70)+'px';
+  }
+}
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(){
+  requestAnimationFrame(frame);
+  var t=clock.getElapsedTime(),k=.14;
+  C.yaw+=(T.yaw-C.yaw)*k;C.pitch+=(T.pitch-C.pitch)*k;C.dist+=(T.dist-C.dist)*k;
+  var idle=(!drag&&!state.armed&&!reduce)?Math.sin(t*.7)*.05:0;
+  group.rotation.y=C.yaw+idle;group.rotation.x=C.pitch;group.position.y=reduce?0:Math.sin(t*1.1)*.012;
+  camera.position.set(0,.05,C.dist/3.9*fit);camera.lookAt(0,0,0);
+  group.updateMatrixWorld(true);camera.updateMatrixWorld(true);
+  renderer.render(scene,camera);updateOverlay();
+}
+
+/* ---------- panel UI ---------- */
+function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){t.hidden=true},2400)}
+function placeName(d){return CG.place(d)}
+function thumb(d,box){
+  var sp=makeSprite(d),c=mk(box,box),x=c.getContext('2d'),k=Math.min((box-8)/sp.width,(box-8)/sp.height);
+  x.drawImage(sp,(box-sp.width*k)/2,(box-sp.height*k)/2,sp.width*k,sp.height*k);return c;
+}
+var ICON={
+  up:'<path d="M12 19V6M6 11l6-6 6 6"/>',dn:'<path d="M12 5v13M6 13l6 6 6-6"/>',lf:'<path d="M19 12H6M11 6l-6 6 6 6"/>',rt:'<path d="M5 12h13M13 6l6 6-6 6"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'};
+function svg(p,s){return '<svg width="'+(s||20)+'" height="'+(s||20)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'}
+
+function buildCards(){
+  var bc=$('#badgeCards'),dc=$('#designCards');
+  BADGES.forEach(function(b){
+    var proto={kind:'badge',shape:b.shape,name:b.name,size:96,c1:'#FFFFFF',c2:'#1F2A4D',label:'G'};
+    var btn=document.createElement('button');btn.type='button';btn.className='card';
+    btn.innerHTML='<span class="thumb"></span><span class="nm">'+b.name+'</span><span class="meta">'+b.stock+' in stock</span>';
+    btn.querySelector('.thumb').appendChild(thumb(proto,84));
+    btn.addEventListener('click',function(){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase())});
+    bc.appendChild(btn);
+  });
+  DESIGNS.forEach(function(b){
+    var proto={kind:'design',shape:b.shape,name:b.name,size:b.size,c1:'#FFFFFF',c2:'#E3B23C'};
+    var btn=document.createElement('button');btn.type='button';btn.className='card';
+    btn.innerHTML='<span class="thumb"></span><span class="nm">'+b.name+'</span><span class="meta">Thread only</span>';
+    btn.querySelector('.thumb').appendChild(thumb(proto,84));
+    btn.addEventListener('click',function(){state.sel=null;renderAll();arm({mode:'new',proto:proto},b.name.toLowerCase())});
+    dc.appendChild(btn);
+  });
+  var fb=$('#fontBtns');
+  Object.keys(FONTS).forEach(function(k){
+    var b=document.createElement('button');b.type='button';b.textContent='Aa';b.style.fontFamily=FONTS[k].css;b.style.fontWeight=FONTS[k].w;b.title=FONTS[k].n;b.setAttribute('aria-label',FONTS[k].n);b.dataset.font=k;
+    b.addEventListener('click',function(){state.textFont=k;renderFontBtns()});fb.appendChild(b);
+  });
+  renderFontBtns();
+  (function drawTs(){swatches($('#newTextSw'),THREADS,function(){return state.textColor},function(c){state.textColor=c;drawTs()})})();
+}
+function shade2(h){var c=new THREE.Color(h);return c.multiplyScalar(.3)}
+function buildColours(){
+  var ss=$('#shirtSw');ss.innerHTML='';
+  COLORS[state.g].forEach(function(s){
+    var b=document.createElement('button');b.type='button';b.innerHTML='<i style="background:'+s.c+'"></i>'+s.n;
+    b.addEventListener('click',function(){state.gcol[state.g]=s;state.shirt=s;$('#shirtName').textContent='· '+s.n;syncLiner();repaint();renderShirt()});ss.appendChild(b);
+  });
+  renderShirt();
+}
+function syncLiner(){var c=shade2(state.shirt.c);sides.front.liner.material.color.set(c);sides.back.liner.material.color.set(c)}
+function renderShirt(){var L=COLORS[state.g];document.querySelectorAll('#shirtSw button').forEach(function(b,i){b.setAttribute('aria-pressed',String(L[i]===state.shirt))})}
+
+/* ---------- Ankara centre panel controls ---------- */
+function buildPanelUI(){
+  var A=state.ank,pc=$('#patCards'),cw=$('#cwSw'),sh=$('#shapeBtns'),tg=$('#trimBtns');
+  PATS.forEach(function(p){
+    var b=document.createElement('button');b.type='button';b.className='card';b.dataset.pat=p.k;
+    b.innerHTML='<span class="thumb"><canvas width="84" height="84"></canvas></span><span class="nm">'+p.n+'</span><span class="meta">'+p.m+'</span>';
+    b.addEventListener('click',function(){A.pat=p.k;afterPanel()});pc.appendChild(b);
+  });
+  CWAYS.forEach(function(c,i){
+    var b=document.createElement('button');b.type='button';
+    b.innerHTML='<i style="background:linear-gradient(135deg,'+c.a+' 0 38%,'+c.b+' 38% 70%,'+c.c+' 70%)"></i>'+c.n;
+    b.addEventListener('click',function(){A.cw=i;afterPanel()});cw.appendChild(b);
+  });
+  SHAPES.forEach(function(s){
+    var b=document.createElement('button');b.type='button';b.dataset.shape=s.k;
+    b.innerHTML='<svg width="22" height="26" viewBox="0 0 28 30" fill="currentColor" aria-hidden="true">'+s.i+'</svg>'+s.n;
+    b.addEventListener('click',function(){A.shape=s.k;afterPanel()});sh.appendChild(b);
+  });
+  [['collar','Collar'],['cuffs','Cuffs'],['pocket','Chest pocket']].forEach(function(t){
+    var b=document.createElement('button');b.type='button';b.dataset.trim=t[0];b.textContent=t[1];
+    b.addEventListener('click',function(){A[t[0]]=!A[t[0]];afterPanel()});tg.appendChild(b);
+  });
+  $('#pW').addEventListener('input',function(e){A.w=+e.target.value;afterPanel()});
+  $('#pS').addEventListener('input',function(e){A.scale=+e.target.value/100;afterPanel()});
+  $('#pA').addEventListener('input',function(e){A.angle=+e.target.value;afterPanel()});
+  renderPanelUI();
+}
+function renderPanelUI(){
+  var A=state.ank;
+  document.querySelectorAll('#patCards .card').forEach(function(b){
+    b.setAttribute('aria-pressed',String(b.dataset.pat===A.pat));
+    var cv=b.querySelector('canvas'),x=cv.getContext('2d');x.clearRect(0,0,84,84);x.drawImage(tileFor(b.dataset.pat,A.cw),32,32,192,192,0,0,84,84);
+  });
+  document.querySelectorAll('#cwSw button').forEach(function(b,i){b.setAttribute('aria-pressed',String(i===A.cw))});
+  document.querySelectorAll('#shapeBtns button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.shape===A.shape))});
+  document.querySelectorAll('#trimBtns button').forEach(function(b){b.setAttribute('aria-pressed',String(!!A[b.dataset.trim]))});
+  $('#pW').value=A.w;$('#pWO').textContent=Math.round(A.w*.236)+' cm';
+  $('#pS').value=Math.round(A.scale*100);$('#pSO').textContent=Math.round(A.scale*100)+'%';
+  $('#pA').value=A.angle;$('#pAO').textContent=A.angle+'°';
+}
+function afterPanel(){renderPanelUI();repaint();renderLayers();renderInfo()}
+
+/* ---------- garment switcher ---------- */
+function buildGarmentSel(){
+  var host=$('#gSel');
+  Object.keys(GARMENTS).forEach(function(k){
+    var b=document.createElement('button');b.type='button';b.textContent=GARMENTS[k].short;b.dataset.g=k;
+    b.addEventListener('click',function(){setGarment(k)});host.appendChild(b);
+  });
+}
+function garmentChrome(){
+  var i,vb=document.querySelectorAll('.views button');
+  $('#gName').textContent=CG.n;$('#gCtx').textContent=(window.__ctx||CG.ctx);$('#shirtName').textContent='· '+state.shirt.n;
+  $('#gl').setAttribute('aria-label',CG.n+' in 3D. Drag to turn, scroll to zoom.');
+  document.querySelectorAll('#gSel button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.g===state.g))});
+  $('#tab-panel').hidden=!CG.panel;
+  for(i=0;i<4;i++)vb[i].textContent=CG.views[i];
+  buildColours();syncLiner();
+  showTab(CG.panel?'panel':(state.tab==='panel'?'badges':state.tab));
+}
+function setGarment(key){
+  if(key===state.g)return;
+  disarm();
+  Object.keys(decals).forEach(function(k){var m=decals[k];group.remove(m);m.geometry.dispose();delete decals[k];});
+  state.g=key;state.items=state.byG[key];state.sel=null;state.shirt=state.gcol[key];
+  applyGarment(key);
+  state.items.forEach(function(d){buildDecal(d);d._dirty=false});
+  shadow.position.y=CG.shY;
+  garmentChrome();resize();setView('front');repaint();renderAll();
+}
+
+function renderFontBtns(){document.querySelectorAll('#fontBtns button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.font===state.textFont))})}
+function swatches(host,list,get,set){
+  host.innerHTML='';
+  list.forEach(function(c){
+    var b=document.createElement('button');b.type='button';b.style.background=c;b.setAttribute('aria-label','Thread '+c);b.setAttribute('aria-pressed',String(get()===c));
+    b.addEventListener('click',function(){set(c);swatches(host,list,get,set)});host.appendChild(b);
+  });
+}
+$('#placeText').addEventListener('click',function(){
+  var t=$('#newText').value.trim();if(!t){toast('Type the wording first');return;}
+  state.sel=null;renderAll();
+  arm({mode:'new',proto:{kind:'text',name:'Lettering',text:t,font:state.textFont,size:120,c1:state.textColor,c2:'#1F2A4D'}},'“'+t+'”');
+});
+
+function showTab(t){
+  if(t==='panel'&&!CG.panel)t='badges';
+  state.tab=t;
+  document.querySelectorAll('.tabs button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.tab===t))});
+  ['panel','badges','text','designs','garment'].forEach(function(k){$('#pane-'+k).hidden=k!==t});
+}
+document.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab)})});
+
+function renderInspector(){
+  var d=byId(state.sel),el=$('#inspector');
+  if(!d){el.hidden=true;el.innerHTML='';return;}
+  el.hidden=false;
+  var html='<div class="insp-head"><div><strong>'+(d.kind==='text'?'“'+(d.text||'')+'”':d.name)+'</strong><div class="where" id="inspWhere">'+placeName(d)+'</div></div>'
+   +'<div class="row"><button class="btn" type="button" id="iMove">Move</button><button class="btn danger" type="button" id="iDel" aria-label="Delete">'+svg(ICON.trash,18)+'</button></div></div>';
+  if(d.kind==='text'){
+    html+='<label class="field" for="iText">Wording<input type="text" id="iText" maxlength="24" autocomplete="off"></label><div class="fonts" id="iFonts"></div>';
+  }
+  html+='<div class="range"><label for="iSize">Size</label><input type="range" id="iSize" min="'+(d.kind==='text'?40:30)+'" max="'+(d.kind==='text'?360:360)+'" value="'+d.size+'"><output id="iSizeO">'+d.size+'</output></div>'
+   +'<div class="range"><label for="iRot">Rotate</label><input type="range" id="iRot" min="-180" max="180" value="'+d.rot+'"><output id="iRotO">'+d.rot+'°</output></div>'
+   +'<div class="field" style="flex:none">'+(d.kind==='text'?'Thread colour':'Main colour')+'<div class="sw" id="iC1"></div></div>'
+   +'<div class="field" style="flex:none">'+(d.kind==='text'?'Outline colour':'Edge colour')+'<div class="sw" id="iC2"></div></div>'
+   +'<div class="row" style="justify-content:space-between"><span style="font-size:14px;color:var(--muted)">Nudge</span><div class="nudge">'
+   +'<button type="button" class="up" data-n="0,-8" aria-label="Nudge up">'+svg(ICON.up)+'</button><button type="button" class="lf" data-n="-8,0" aria-label="Nudge left">'+svg(ICON.lf)+'</button>'
+   +'<button type="button" class="dn" data-n="0,8" aria-label="Nudge down">'+svg(ICON.dn)+'</button><button type="button" class="rt" data-n="8,0" aria-label="Nudge right">'+svg(ICON.rt)+'</button></div></div>';
+  el.innerHTML=html;
+  function touch(){invalidate(d);repaint();renderLayers();renderInfo();if($('#inspWhere'))$('#inspWhere').textContent=placeName(d)}
+  $('#iSize').addEventListener('input',function(e){var v=+e.target.value;if(change(d,function(){d.size=v})){$('#iSizeO').textContent=d.size;touch()}else{e.target.value=d.size}});
+  $('#iRot').addEventListener('input',function(e){var v=+e.target.value;if(change(d,function(){d.rot=v})){$('#iRotO').textContent=d.rot+'°';touch()}else{e.target.value=d.rot}});
+  function sw(id,key){var h=$(id);(function draw(){swatches(h,THREADS,function(){return d[key]},function(c){d[key]=c;touch();draw()})})()}
+  sw('#iC1','c1');sw('#iC2','c2');
+  el.querySelectorAll('.nudge button').forEach(function(b){b.addEventListener('click',function(){var n=b.dataset.n.split(',');if(change(d,function(){d.x=clamp(d.x+ +n[0],0,TEX);d.y=clamp(d.y+ +n[1],0,TEX)}))touch()})});
+  $('#iDel').addEventListener('click',function(){state.items=state.items.filter(function(i){return i.id!==d.id});state.sel=null;repaint();renderAll();toast('Removed '+d.name.toLowerCase())});
+  $('#iMove').addEventListener('click',function(){arm({mode:'move',id:d.id},d.kind==='text'?'“'+d.text+'”':d.name.toLowerCase())});
+  if(d.kind==='text'){
+    $('#iText').value=d.text;
+    $('#iText').addEventListener('input',function(e){var old=d.text;if(change(d,function(){d.text=e.target.value})){touch()}else{d.text=old;e.target.value=old}});
+    var f=$('#iFonts');Object.keys(FONTS).forEach(function(k){
+      var b=document.createElement('button');b.type='button';b.textContent='Aa';b.style.fontFamily=FONTS[k].css;b.style.fontWeight=FONTS[k].w;b.setAttribute('aria-label',FONTS[k].n);b.setAttribute('aria-pressed',String(d.font===k));
+      b.addEventListener('click',function(){var old=d.font;if(!change(d,function(){d.font=k}))return;touch();f.querySelectorAll('button').forEach(function(x,i){x.setAttribute('aria-pressed',String(Object.keys(FONTS)[i]===k))})});f.appendChild(b);
+    });
+  }
+}
+function renderLayers(){
+  var host=$('#layers');host.innerHTML='';
+  if(CG.panel){
+    var A=state.ank,pn=PATS.filter(function(p){return p.k===A.pat})[0].n,sn=SHAPES.filter(function(p){return p.k===A.shape})[0].n,pb=document.createElement('button');
+    pb.type='button';pb.className='layer';
+    pb.innerHTML='<span class="t"></span><span class="l"><b>Centre panel</b><span>'+pn+' · '+CWAYS[A.cw].n+' · '+sn.toLowerCase()+', '+Math.round(A.w*.236)+' cm</span></span>';
+    var tc=mk(36,36);tc.getContext('2d').drawImage(tileFor(A.pat,A.cw),40,40,176,176,0,0,36,36);pb.querySelector('.t').appendChild(tc);
+    pb.addEventListener('click',function(){showTab('panel');setView('front')});host.appendChild(pb);
+  }
+  if(!state.items.length&&!CG.panel){host.innerHTML='<p style="margin:0;color:var(--muted)">Nothing added yet. Pick a badge, text or design above.</p>';}
+  state.items.forEach(function(d){
+    var b=document.createElement('button');b.type='button';b.className='layer';if(d.id===state.sel)b.setAttribute('aria-current','true');
+    b.innerHTML='<span class="t"></span><span class="l"><b>'+(d.kind==='text'?'“'+esc(d.text||'')+'”':d.name)+'</b><span>'+placeName(d)+'</span></span>';
+    b.querySelector('.t').appendChild(thumb(d,36));
+    b.addEventListener('click',function(){
+      state.sel=d.id;renderAll();
+      var sx=CG.sleeveX,nm=d.side==='back'?'back':(sx?(d.x<sx[0]?'right':(d.x>sx[1]?'left':'front')):'front');setView(nm);
+    });
+    host.appendChild(b);
+  });
+  var n=state.items.length;$('#sumCount').textContent=n+' decoration'+(n===1?'':'s');
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function renderInfo(){
+  var d=byId(state.sel),el=$('#info');
+  if(!d){el.hidden=true;return;}
+  var sp=sprite(d),cm=Math.round(sp.width*.118*10)/10,rows='';
+  function r(a,b){rows+='<div class="r"><span>'+a+'</span><span>'+b+'</span></div>'}
+  r('Placed',placeName(d));r('Side',d.side==='front'?'Front':'Back');r('Width','≈ '+cm+' cm');
+  if(d.kind==='badge'){var st=0;BADGES.forEach(function(b){if(b.shape===d.shape)st=b.stock});r('Stock',st+' · needs '+CG.pieces);r('Method','Embroidered patch')}
+  else if(d.kind==='text'){r('Lettering',FONTS[d.font].n);r('Method','Embroidered')}
+  else r('Method','Embroidered, thread only');
+  r('Colours','<span class="dots"><i style="background:'+d.c1+'"></i><i style="background:'+d.c2+'"></i></span>');
+  el.innerHTML='<b>'+(d.kind==='text'?'“'+esc(d.text||'')+'”':esc(d.name))+'</b>'+(drag&&drag.mode==='item'?'<span class="tag">Moving</span>':'')+rows;
+  el.hidden=false;
+}
+function renderAll(){renderInspector();renderLayers();renderInfo()}
+
+var LINK={order:null,line:null};
+function snapshot(){return JSON.parse(JSON.stringify({g:state.g,gcol:state.gcol,byG:state.byG,ank:state.ank,nextId:state.nextId},function(k,v){return k.charAt(0)==='_'?undefined:v}))}
+function restoreDesign(d){
+  disarm();
+  Object.keys(decals).forEach(function(k){var m=decals[k];group.remove(m);m.geometry.dispose();delete decals[k];});
+  if(d.byG)Object.keys(d.byG).forEach(function(k){state.byG[k]=d.byG[k]});
+  if(d.gcol)Object.assign(state.gcol,d.gcol);
+  if(d.ank)Object.assign(state.ank,d.ank);
+  if(d.nextId)state.nextId=Math.max(state.nextId,d.nextId);
+  state.g=d.g||state.g;state.items=state.byG[state.g];state.sel=null;state.shirt=state.gcol[state.g];
+  applyGarment(state.g);
+  state.items.forEach(function(x){buildDecal(x);x._dirty=false});
+  shadow.position.y=CG.shY;garmentChrome();resize();setView('front');repaint();renderAll();
+}
+function pickGarment(item){
+  var t=(item||'').toLowerCase();
+  if(/ankara/.test(t))return 'ankara';
+  if(/short/.test(t))return 'shorts';
+  if(/trouser|pant/.test(t))return 'trousers';
+  if(/tee|shirt|polo|jersey|top/.test(t))return 'tee';
+  return null;
+}
+function save(){
+  if(!LINK.line){toast('Open this from an order line to save it to the order');return;}
+  fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({design:snapshot()})})
+   .then(function(r){return r.json().then(function(j){return{r:r,j:j}})})
+   .then(function(x){
+     if(x.r.status===403&&x.j.demo)toast("This is the demo. Changes aren't saved. Sign in to save.");
+     else if(!x.r.ok)toast(x.j.error||'Could not save');
+     else toast('Saved to the order line · '+state.items.length+' decorations on '+CG.n.toLowerCase());
+   }).catch(function(){toast('Could not reach the server')});
+}
+$('#saveBtn').addEventListener('click',save);$('#saveBtn2').addEventListener('click',save);
+$('#backBtn').addEventListener('click',function(){if(LINK.order)location.href='/orders/'+LINK.order;else toast('Open this from an order line')});
+$('#fsBtn').addEventListener('click',function(){
+  try{
+    if(document.fullscreenElement){document.exitFullscreen()}
+    else{var p=document.documentElement.requestFullscreen();if(p&&p.catch)p.catch(function(){toast('Full screen is not available here')})}
+  }catch(e){toast('Full screen is not available here')}
+});
+document.addEventListener('fullscreenchange',function(){$('#fsLabel').textContent=document.fullscreenElement?'Exit full screen':'Full screen'});
+
+state.items.forEach(function(d){buildDecal(d);d._dirty=false});
+buildCards();buildPanelUI();buildGarmentSel();garmentChrome();renderAll();
+paintSide('front');paintSide('back');
+if(document.fonts&&document.fonts.load){
+  Promise.all(['400 40px "Alfa Slab One"','400 40px Pacifico','700 40px "Playfair Display"','400 40px "Bebas Neue"','700 40px "Bricolage Grotesque"'].map(function(f){return document.fonts.load(f)}))
+   .then(function(){state.items.forEach(function(d){invalidate(d)});repaint();renderAll()}).catch(function(){});
+}
+frame();
+window.__studio={state:state,setView:setView,T:T};
+(function(){
+  var q=new URLSearchParams(location.search);LINK.order=q.get('order');LINK.line=q.get('line');
+  if(!LINK.order||!LINK.line)return;
+  fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line).then(function(r){return r.ok?r.json():null}).then(function(j){
+    if(!j)return;
+    window.__ctx=[j.customer,j.order_name,j.qty+' pieces'].join(' · ');
+    var key=pickGarment(j.item),fallback=false;
+    if(!key){key='tee';fallback=true;}
+    if(j.design){restoreDesign(j.design);}
+    else{
+      if(key!==state.g)setGarment(key);
+      var m=COLORS[state.g].filter(function(c){return (j.detail||'').toLowerCase().indexOf(c.n.toLowerCase())>-1})[0];
+      if(m){state.gcol[state.g]=m;state.shirt=m;syncLiner();repaint();renderShirt();}
+    }
+    garmentChrome();
+    if(fallback)toast('No 3D model for '+j.item+' yet. Showing the sports tee.');
+    else if(j.design)toast('Opened the saved mockup');
+  }).catch(function(){});
+})();
+})();
+</script>

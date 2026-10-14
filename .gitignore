@@ -1,0 +1,9 @@
+node_modules
+.next
+data/live.db*
+.env
+.dev.vars
+.wrangler
+.open-next
+worker-configuration.d.ts
+tsconfig.tsbuildinfo

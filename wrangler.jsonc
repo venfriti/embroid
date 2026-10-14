@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "embroid",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "routes": [{ "pattern": "embroid.venfriti.com", "custom_domain": true }],
+  "d1_databases": [
+    { "binding": "DEMO_DB", "database_name": "uniform-demo", "database_id": "c7d7bb14-e1af-4b7b-bde0-487fc87f95fd", "migrations_dir": "migrations" },
+    { "binding": "LIVE_DB", "database_name": "uniform-live", "database_id": "fa3add87-f3ea-46f0-98bb-4aaab1f23d12", "migrations_dir": "migrations" }
+  ]
+}

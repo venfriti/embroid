@@ -1,0 +1,4 @@
+AUTH_SECRET=change-me-to-a-long-random-string
+ADMIN_EMAIL=owner@example.com
+ADMIN_PASSWORD=change-this-password
+ADMIN_NAME=Owner
