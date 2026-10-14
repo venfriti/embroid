@@ -2,23 +2,23 @@ import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 
 export const H: CSSProperties = { fontFamily: "'Poppins', system-ui, sans-serif" };
-export const h1: CSSProperties = { margin: 0, ...H, fontWeight: 700, fontSize: 40, lineHeight: 1.1, letterSpacing: '-0.02em' };
-export const h2: CSSProperties = { margin: 0, ...H, fontWeight: 600, fontSize: 20 };
+export const h1: CSSProperties = { margin: 0, ...H, fontWeight: 700, fontSize: 24, lineHeight: 1.2, letterSpacing: '-0.01em' };
+export const h2: CSSProperties = { margin: 0, ...H, fontWeight: 600, fontSize: 15, color: '#3F4A58' };
 export const eyebrow: CSSProperties = { fontSize: 13, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0E5C63' };
-export const lede: CSSProperties = { margin: 0, fontSize: 17, lineHeight: 1.5, color: '#3F4A58', maxWidth: 620 };
-export const card: CSSProperties = { background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14 };
-export const btnPri: CSSProperties = { minHeight: 48, padding: '0 22px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 16, fontWeight: 600, color: '#fff', background: '#0E5C63', border: 0, borderRadius: 12, textDecoration: 'none', cursor: 'pointer' };
+export const lede: CSSProperties = { margin: 0, fontSize: 15, lineHeight: 1.5, color: '#3F4A58', maxWidth: 620 };
+export const card: CSSProperties = { background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10 };
+export const btnPri: CSSProperties = { minHeight: 48, padding: '0 22px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: '#fff', background: '#0E5C63', border: 0, borderRadius: 8, textDecoration: 'none', cursor: 'pointer' };
 export const btnOut: CSSProperties = { ...btnPri, color: '#0E5C63', background: '#fff', border: '2px solid #0E5C63' };
-export const btnSm: CSSProperties = { flex: '0 0 auto', minHeight: 44, padding: '0 18px', fontSize: 15, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 10, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', cursor: 'pointer' };
+export const btnSm: CSSProperties = { flex: '0 0 auto', minHeight: 44, padding: '0 18px', fontSize: 14, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 8, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', cursor: 'pointer' };
 
 export const Eyebrow = ({ children }: { children: ReactNode }) => <span style={eyebrow}>{children}</span>;
 export const Pill = ({ children, bg = '#FDE9B0', color = '#5A3A00' }: { children: ReactNode; bg?: string; color?: string }) =>
-  <span style={{ fontSize: 12, fontWeight: 600, color, background: bg, padding: '2px 8px', borderRadius: 999 }}>{children}</span>;
+  <span style={{ fontSize: 12, fontWeight: 500, color, background: bg, padding: '2px 8px', borderRadius: 6 }}>{children}</span>;
 export const Chev = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3F4A58" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>;
 export const Overdue = ({ children }: { children: ReactNode }) =>
-  <span style={{ flex: '0 0 auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#8A1C13', background: '#FDECEA', border: '1px solid #E8A29B', padding: '4px 10px', borderRadius: 999 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l9 16H3z" /><path d="M12 10v4M12 17.4v.1" /></svg>{children}</span>;
+  <span style={{ flex: '0 0 auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, color: '#8A1C13', background: '#FDECEA', border: '1px solid #E8A29B', padding: '3px 9px', borderRadius: 6 }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l9 16H3z" /><path d="M12 10v4M12 17.4v.1" /></svg>{children}</span>;
 export const DueSoon = ({ children }: { children: ReactNode }) =>
-  <span style={{ flex: '0 0 auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#FFFFFF', background: '#1B2430', padding: '4px 10px', borderRadius: 999 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>{children}</span>;
+  <span style={{ flex: '0 0 auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, color: '#FFFFFF', background: '#1B2430', padding: '3px 9px', borderRadius: 6 }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>{children}</span>;
 const AV = [['#E3EEF0', '#0E5C63'], ['#F3E6D8', '#7A3E0C']];
 export const Initial = ({ name, kind }: { name: string; kind?: string }) => {
   const [bg, fg] = AV[kind === 'individual' ? 1 : 0];
@@ -40,12 +40,12 @@ export const DueBadge = ({ due }: { due?: string | null }) => {
   if (n <= 3) return <DueSoon>{n === 0 ? 'Due today' : `Due in ${n} day${n === 1 ? '' : 's'}`}</DueSoon>;
   return <span style={{ flex: '0 0 auto', fontSize: 14, color: '#4B5563' }}>Due {day(due)}</span>;
 };
-const badge = (bg: string, color: string, icon: React.ReactNode, text: string) => <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color, background: bg, padding: '3px 10px', borderRadius: 999 }}>{icon}{text}</span>;
+const badge = (bg: string, color: string, icon: React.ReactNode, text: string) => <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500, color, background: bg, padding: '2px 8px', borderRadius: 6 }}>{icon}{text}</span>;
 export const Pay = ({ o }: { o: any }) => o.paid <= 0 && o.total > 0
-  ? badge('#FBE0DC', '#8A1C13', <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.6" /></svg>, 'Unpaid')
+  ? badge('#FBE0DC', '#8A1C13', <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.6" /></svg>, 'Unpaid')
   : o.balance > 0
-    ? badge('#FDE9B0', '#5A3A00', <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.6" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" /></svg>, 'Partial')
-    : badge('#DDF2E3', '#14532D', <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>, 'Paid');
+    ? badge('#FDE9B0', '#5A3A00', <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.6" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" /></svg>, 'Partial')
+    : badge('#DDF2E3', '#14532D', <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>, 'Paid');
 
 export const stripe = (o: any) => o.paid <= 0 && o.total > 0 ? '#C0392B' : o.balance > 0 ? '#B77900' : '#2F855A';
 const COLOURS: [RegExp, string][] = [[/red/i, '#B3261E'], [/blue/i, '#2F5DA8'], [/green/i, '#2E7D4F'], [/yellow|gold/i, '#E8A317'], [/navy/i, '#1F2A44'], [/grey|gray/i, '#6B7684'], [/white/i, '#E5E7EB'], [/black/i, '#1B2430'], [/maroon|burgundy/i, '#7A1F2B']];

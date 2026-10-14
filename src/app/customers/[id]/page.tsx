@@ -19,8 +19,8 @@ export default async function Profile({ params, searchParams }: { params: Promis
   const designs = await Promise.all(past.map(async d => ({ ...d, price: (await priceFor(mode, c.id, d.item)) ?? d.price })));
   const contact = [['Contact person', c.contact], ['Phone', c.phone], ['Email', c.email], ['Delivery address', c.address]];
   const notes = String(c.notes || '').split(/\n+/).map((x: string) => x.trim()).filter(Boolean);
-  const row = { width: '100%', minHeight: 60, boxSizing: 'border-box' as const, padding: '8px 16px 8px 14px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' as const, textDecoration: 'none', background: '#FFFFFF', color: '#1B2430' };
-  const tile = { background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, padding: '16px 20px 20px', display: 'flex', flexDirection: 'column' as const, gap: 10 };
+  const row = { width: '100%', minHeight: 56, boxSizing: 'border-box' as const, padding: '8px 16px 8px 12px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' as const, textDecoration: 'none', background: '#FFFFFF', color: '#1B2430' };
+  const tile = { background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, padding: '14px 18px 18px', display: 'flex', flexDirection: 'column' as const, gap: 10 };
   return (
     <main className="page" style={{ padding: '24px 32px 48px', gap: 20 }}>
       <section style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
@@ -28,54 +28,54 @@ export default async function Profile({ params, searchParams }: { params: Promis
           <Link href="/" aria-label="Back to all customers" style={{ flex: '0 0 auto', width: 44, height: 44, boxSizing: 'border-box', border: '1px solid #C5CCD5', borderRadius: 12, background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1B2430' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
           </Link>
-          <div style={{ flex: '0 0 auto', width: 56, height: 56, borderRadius: 14, background: '#E3EEF0', color: '#0E5C63', display: 'flex', alignItems: 'center', justifyContent: 'center', ...H, fontWeight: 700, fontSize: 26 }}>{(c.name.replace(/^(mrs?\.?|ms\.?|dr\.?|st\.?)\s+/i, '')[0] || '?').toUpperCase()}</div>
+          <div style={{ flex: '0 0 auto', width: 48, height: 48, borderRadius: 10, background: '#E3EEF0', color: '#0E5C63', display: 'flex', alignItems: 'center', justifyContent: 'center', ...H, fontWeight: 700, fontSize: 20 }}>{(c.name.replace(/^(mrs?\.?|ms\.?|dr\.?|st\.?)\s+/i, '')[0] || '?').toUpperCase()}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <h1 style={{ ...h1, fontSize: 30 }}>{c.name}</h1>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#0A4449', background: '#DCEBED', padding: '3px 10px', borderRadius: 999 }}>{kindName(c.kind)}</span>
+              <h1 style={h1}>{c.name}</h1>
+              <span style={{ fontSize: 12, fontWeight: 500, color: '#0A4449', background: '#DCEBED', padding: '2px 8px', borderRadius: 6 }}>{kindName(c.kind)}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', fontSize: 15, color: '#4B5563' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', fontSize: 14, color: '#4B5563' }}>
               {(c.contact || c.phone) && <span>{[c.contact, c.phone].filter(Boolean).join(' · ')}</span>}
-              {owed > 0 && <span style={{ fontSize: 13, fontWeight: 600, color: '#5A3A00', background: '#FDE9B0', padding: '3px 10px', borderRadius: 999 }}>{naira(owed)} outstanding across {owedOrders.length} {owedOrders.length === 1 ? 'order' : 'orders'}</span>}
+              {owed > 0 && <span style={{ fontWeight: 500 }}>{naira(owed)} outstanding across {owedOrders.length} {owedOrders.length === 1 ? 'order' : 'orders'}</span>}
             </div>
           </div>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-          {os.length > 0 && <Link href={`/customers/${c.id}/reorder`} style={{ textDecoration: 'none', minHeight: 48, padding: '0 20px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 16, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 12 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16" /><path d="M3 21v-5h5" /></svg>Reorder from past order
+          {os.length > 0 && <Link href={`/customers/${c.id}/reorder`} style={{ textDecoration: 'none', minHeight: 48, padding: '0 20px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 8 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16" /><path d="M3 21v-5h5" /></svg>Reorder from past order
           </Link>}
           <NewBlankOrder customerId={c.id} start={start} />
         </div>
       </section>
 
       {draft && (
-        <section style={{ background: '#FEF3CF', border: '1px solid #F1D68A', borderRadius: 14, padding: '8px 16px 8px 20px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px 12px' }}>
+        <section style={{ background: '#FEF3CF', border: '1px solid #F1D68A', borderRadius: 10, padding: '8px 16px 8px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Pill>Draft</Pill>
-            <span style={{ fontSize: 16, fontWeight: 600, color: '#3D2800' }}>{draft.name} · {draft.line_count} {draft.line_count === 1 ? 'line' : 'lines'}</span>
-            {draft.updated && <span style={{ fontSize: 14, color: '#5A3A00' }}>edited {ago(draft.updated)}</span>}
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#3D2800' }}>{draft.name} · {draft.line_count} {draft.line_count === 1 ? 'line' : 'lines'}</span>
+            {draft.updated && <span style={{ fontSize: 13, color: '#5A3A00' }}>edited {ago(draft.updated)}</span>}
           </div>
           <Link href={`/orders/${draft.id}`} style={{ ...btnSm, color: '#3D2800', border: '2px solid #3D2800' }}>Resume draft</Link>
         </section>
       )}
 
-      <section style={{ display: 'flex', flexWrap: 'wrap', gap: 28, alignItems: 'flex-start' }}>
-        <div style={{ flex: '1.8 1 560px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <section style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start' }}>
+        <div style={{ flex: '1.8 1 560px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <h2 style={{ ...h2, fontSize: 22 }}>Order history</h2>
-              {hist.length > 0 && <Link href={`/orders?customer=${c.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minHeight: 44, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>See all {os.length} orders<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></Link>}
+              <h2 style={h2}>Order history</h2>
+              {hist.length > 0 && <Link href={`/orders?customer=${c.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minHeight: 44, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>See all {os.length} orders<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></Link>}
             </div>
-            <div style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               {shown.length === 0 && <div style={{ padding: 18, color: '#4B5563' }}>No orders yet. Start with a new blank order.</div>}
               {shown.map((o, i) => (
-                <Link key={o.id} href={`/orders/${o.id}`} style={{ ...row, borderLeft: `6px solid ${stripe(o)}`, borderBottom: i === shown.length - 1 ? 0 : '1px solid #E8ECF0' }}>
-                  <span style={{ flex: '1 1 150px', minWidth: 0, fontWeight: 600, fontSize: 16 }}>{o.name}</span>
+                <Link key={o.id} href={`/orders/${o.id}`} style={{ ...row, borderLeft: `3px solid ${stripe(o)}`, borderBottom: i === shown.length - 1 ? 0 : '1px solid #E8ECF0' }}>
+                  <span style={{ flex: '1 1 150px', minWidth: 0, fontWeight: 600, fontSize: 15 }}>{o.name}</span>
                   <span style={{ flex: '0 0 auto', display: 'flex', gap: 8, alignItems: 'center' }}>
-                    {o.stage === 'Collected' ? <span style={{ fontSize: 14, color: '#4B5563' }}>Collected</span> : <DueBadge due={o.due} />}
+                    {o.stage === 'Collected' ? <span style={{ fontSize: 13, color: '#4B5563' }}>Collected</span> : <DueBadge due={o.due} />}
                     <Pay o={o} />
                   </span>
-                  <span style={{ flex: '0 0 96px', textAlign: 'right', fontWeight: 600, fontSize: 16 }}>{naira(o.total)}</span>
+                  <span style={{ flex: '0 0 96px', textAlign: 'right', fontWeight: 600, fontSize: 15 }}>{naira(o.total)}</span>
                   {chev}
                 </Link>
               ))}
@@ -83,19 +83,19 @@ export default async function Profile({ params, searchParams }: { params: Promis
           </div>
 
           {designs.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-                <h2 style={{ ...h2, fontSize: 22 }}>Saved designs</h2>
-                <span style={{ fontSize: 14, color: '#4B5563' }}>Reuse a garment spec exactly as it was made</span>
+                <h2 style={h2}>Saved designs</h2>
+                <span style={{ fontSize: 13, color: '#4B5563' }}>Reuse a garment spec exactly as it was made</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12 }}>
                 {designs.map((d, i) => (
-                  <div key={i} style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ height: 88, borderRadius: 10, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Silhouette item={d.item} detail={d.detail} /></div>
+                  <div key={i} style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ height: 64, borderRadius: 8, background: '#EEF1F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Silhouette item={d.item} detail={d.detail} size={44} /></div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <span style={{ fontWeight: 600, fontSize: 15 }}>{d.item}</span>
-                      <span style={{ fontSize: 13, color: '#4B5563' }}>{d.detail}</span>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: '#1B2430', paddingTop: 4 }}>{naira(d.price)}</span>
+                      <span style={{ fontWeight: 500, fontSize: 14 }}>{d.item}</span>
+                      <span style={{ fontSize: 12, color: '#4B5563' }}>{d.detail}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1B2430', paddingTop: 4 }}>{naira(d.price)}</span>
                     </div>
                     <UseDesign customerId={c.id} item={d.item} detail={d.detail} price={d.price} />
                   </div>
@@ -103,21 +103,21 @@ export default async function Profile({ params, searchParams }: { params: Promis
               </div>
             </div>
           )}
-          {owedOrders.length > 0 && <Link href={`/orders/${[...owedOrders].sort((x, y) => (x.due || '').localeCompare(y.due || ''))[0].id}/payment`} style={{ ...btnSm, alignSelf: 'flex-start', minHeight: 48, padding: '0 22px', fontSize: 16, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 12 }}>Record a payment</Link>}
+          {owedOrders.length > 0 && <Link href={`/orders/${[...owedOrders].sort((x, y) => (x.due || '').localeCompare(y.due || ''))[0].id}/payment`} style={{ ...btnSm, alignSelf: 'flex-start', minHeight: 48, padding: '0 22px', fontSize: 14, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 8 }}>Record a payment</Link>}
         </div>
 
-        <div style={{ flex: '1 1 320px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ flex: '1 1 320px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div style={tile}>
-            <h2 style={{ ...h2, fontSize: 18 }}>Contact</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '14px 16px', fontSize: 15 }}>
-              {contact.map(([k, v]) => <div key={k as string} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 13, color: '#4B5563' }}>{k}</span><span style={{ fontWeight: 500, overflowWrap: 'anywhere' }}>{v || '—'}</span></div>)}
-              {c.payment_terms && <div style={{ display: 'flex', flexDirection: 'column', gap: 2, gridColumn: '1 / -1' }}><span style={{ fontSize: 13, color: '#4B5563' }}>Payment terms</span><span style={{ fontWeight: 500 }}>{c.payment_terms}{c.deposit_pct ? ` · ${c.deposit_pct}% deposit before cutting` : ''}</span></div>}
+            <h2 style={h2}>Contact</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '14px 16px', fontSize: 14 }}>
+              {contact.map(([k, v]) => <div key={k as string} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 12, color: '#4B5563' }}>{k}</span><span style={{ fontWeight: 500, overflowWrap: 'anywhere' }}>{v || '—'}</span></div>)}
+              {c.payment_terms && <div style={{ display: 'flex', flexDirection: 'column', gap: 2, gridColumn: '1 / -1' }}><span style={{ fontSize: 12, color: '#4B5563' }}>Payment terms</span><span style={{ fontWeight: 500 }}>{c.payment_terms}{c.deposit_pct ? ` · ${c.deposit_pct}% deposit before cutting` : ''}</span></div>}
             </div>
           </div>
           {notes.length > 0 && (
             <div style={tile}>
-              <h2 style={{ ...h2, fontSize: 18 }}>Notes for next time</h2>
-              <ul style={{ margin: 0, padding: '0 0 0 20px', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 15, lineHeight: 1.45 }}>{notes.map((n: string, i: number) => <li key={i}>{n}</li>)}</ul>
+              <h2 style={h2}>Notes for next time</h2>
+              <ul style={{ margin: 0, padding: '0 0 0 20px', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14, lineHeight: 1.45 }}>{notes.map((n: string, i: number) => <li key={i}>{n}</li>)}</ul>
             </div>
           )}
         </div>

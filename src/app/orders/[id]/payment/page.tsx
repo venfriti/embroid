@@ -17,7 +17,7 @@ export default async function Pay({ params }: { params: Promise<{ id: string }> 
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>{o.name} · {o.customer}
         </Link>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
-          <h1 style={{ ...h1, fontSize: 30 }}>Record a payment</h1>
+          <h1 style={h1}>Record a payment</h1>
           <span style={{ fontSize: 15, color: '#4B5563' }}>{o.customer} owes {naira(owed)} across {os.length} {os.length === 1 ? 'order' : 'orders'}. This order owes {naira(o.balance)}.</span>
         </div>
       </div>

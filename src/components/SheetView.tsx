@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { send } from '@/lib/client';
-import { Silhouette } from './ui';
+import { Silhouette, h2 } from './ui';
 
 export type SLine = { id: number; line_no: number; item: string; detail: string | null; qty: number; unit_price: number; sizes: [string, number][]; placements: { no: number; what: string; place: string; method: string }[]; short: string[] };
 type Mat = { name: string; qty: number; unit: string; short: number };
@@ -23,8 +23,8 @@ export function SheetView({ orderId, name, customer, invoice, due, pieces, lineC
   const mv = async () => { const t = next[stage]; if (!t) return; setBusy(true); const j: any = await send(`/api/orders/${orderId}`, { stage: t[0] }, 'PATCH'); setBusy(false); if (j.ok) r.refresh(); };
   return (
     <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      <div className="noprint" style={{ flex: '0 0 316px', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 20 }}>On the sheet</b>
+      <div className="noprint" style={{ flex: '0 0 316px', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 10, padding: '18px 18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <b style={h2}>On the sheet</b>
         <Toggle on={pic} set={setPic} title="Picture of each line" sub="Garment with numbered placements" />
         <Toggle on={sz} set={setSz} title="Size breakdown" />
         <Toggle on={boxes} set={setBoxes} title="Tick boxes for each step" />

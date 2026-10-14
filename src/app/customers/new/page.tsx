@@ -13,7 +13,7 @@ export default async function New() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>Back to customers
         </Link>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
-          <h1 style={{ ...h1, fontSize: 30 }}>New customer</h1><span style={{ fontSize: 15, color: '#4B5563' }}>Only the name is required.</span>
+          <h1 style={h1}>New customer</h1><span style={{ fontSize: 15, color: '#4B5563' }}>Only the name is required.</span>
         </div>
       </div>
       <NewCustomerForm existing={existing} />

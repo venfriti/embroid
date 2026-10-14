@@ -21,7 +21,7 @@ export default async function Sheet({ params }: { params: Promise<{ id: string }
       <div className="noprint" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Link href={`/orders/${o.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, textDecoration: 'none' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>{o.name} · {o.customer}</Link>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}><h1 style={{ ...h1, fontSize: 34 }}>Production sheet</h1><span style={{ fontSize: 16, color: '#4B5563' }}>What the workshop needs to make this order. No prices on it.</span></div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}><h1 style={h1}>Production sheet</h1><span style={{ fontSize: 15, color: '#4B5563' }}>What the workshop needs to make this order. No prices on it.</span></div>
         </div>
         <div style={{ display: 'flex', gap: 10 }}><PrintBtns /></div>
       </div>

@@ -24,13 +24,13 @@ export default async function Lines({ params, searchParams }: { params: Promise<
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>Back to order
           </Link>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
-            <h1 style={{ ...h1, fontSize: 30 }}>{o.name}</h1>
-            <span style={{ fontSize: 16, color: '#4B5563' }}>{o.customer}{o.placed ? ` · placed ${short(o.placed)}` : ''}{o.due ? ` · due ${short(o.due)}` : ''}</span>
+            <h1 style={h1}>{o.name}</h1>
+            <span style={{ fontSize: 15, color: '#4B5563' }}>{o.customer}{o.placed ? ` · placed ${short(o.placed)}` : ''}{o.due ? ` · due ${short(o.due)}` : ''}</span>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#0A4449', background: '#DCEBED', padding: '3px 10px', borderRadius: 999 }}>{o.stage}</span>
-          <Link href={`/orders/${o.id}/sheet`} style={{ minHeight: 48, padding: '0 20px', display: 'inline-flex', alignItems: 'center', fontSize: 16, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 12, textDecoration: 'none' }}>Print production sheet</Link>
+          <span style={{ fontSize: 12, fontWeight: 500, color: '#0A4449', background: '#DCEBED', padding: '2px 8px', borderRadius: 6 }}>{o.stage}</span>
+          <Link href={`/orders/${o.id}/sheet`} style={{ minHeight: 48, padding: '0 20px', display: 'inline-flex', alignItems: 'center', fontSize: 15, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 8, textDecoration: 'none' }}>Print production sheet</Link>
         </div>
       </div>
       <LinesEditor key={sp.line || 'none'} orderId={o.id} confirmed={confirmed} lines={ls as any} selected={sp.line ? Number(sp.line) : undefined} needs={needs} subtotal={o.subtotal} changed={changed} orderStage={o.stage}

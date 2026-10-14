@@ -17,7 +17,7 @@ export default async function Stock({ searchParams }: { searchParams: Promise<{ 
     <main className="page" style={{ padding: '24px 32px 48px', gap: 20 }}>
       <section style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <h1 style={{ ...h1, fontSize: 30 }}>Stock</h1>
+          <h1 style={h1}>Stock</h1>
           <span style={{ fontSize: 15, color: '#4B5563' }}>{short} {short === 1 ? 'item' : 'items'} short for open orders · {low} running low</span>
         </div>
         <Link href="/stock/add" style={{ minHeight: 48, padding: '0 20px', display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 16, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', borderRadius: 12, textDecoration: 'none' }}>

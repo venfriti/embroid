@@ -20,7 +20,7 @@ export default async function All({ searchParams }: { searchParams: Promise<{ vi
     <main className="page" style={{ padding: '24px 32px 48px', gap: 20 }}>
       <section style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <h1 style={{ ...h1, fontSize: 30 }}>Orders</h1>
+          <h1 style={h1}>Orders</h1>
           <span style={{ fontSize: 15, color: '#4B5563' }}>{sub}</span>
         </div>
         <Link href="/" style={{ minHeight: 48, padding: '0 20px', display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 16, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', borderRadius: 12, textDecoration: 'none' }}>
@@ -45,7 +45,7 @@ export default async function All({ searchParams }: { searchParams: Promise<{ vi
           <span style={{ fontSize: 14, color: '#4B5563', marginRight: 4 }}>Stage</span>
           {['', ...STAGE_CHIPS].map(s => { const on = stage === s; return (
             <Link key={s} href={href({ stage: s })} aria-pressed={on} style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', minHeight: 34, padding: '0 14px', fontSize: 14, fontWeight: on ? 600 : 500, color: on ? '#0A4449' : '#3F4A58', background: on ? '#DCEBED' : '#FFFFFF', border: `1px solid ${on ? '#0E5C63' : '#C5CCD5'}`, borderRadius: 999 }}>{s || 'All stages'}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', minHeight: 34, padding: '0 14px', fontSize: 13, fontWeight: on ? 600 : 500, color: on ? '#0A4449' : '#3F4A58', background: on ? '#DCEBED' : '#FFFFFF', border: `1px solid ${on ? '#0E5C63' : '#C5CCD5'}`, borderRadius: 6 }}>{s || 'All stages'}</span>
             </Link>); })}
         </section>
       )}
@@ -53,16 +53,16 @@ export default async function All({ searchParams }: { searchParams: Promise<{ vi
       <section aria-label="Orders" style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {list.length === 0 && <div style={{ padding: 20, color: '#4B5563' }}>No orders here.</div>}
         {list.map((o, i) => (
-          <Link key={o.id} href={`/orders/${o.id}`} style={{ width: '100%', minHeight: 68, boxSizing: 'border-box', padding: '10px 20px 10px 18px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', textDecoration: 'none', background: '#FFFFFF', borderLeft: `6px solid ${o.stage === 'Draft' ? '#C5CCD5' : stripe(o)}`, borderBottom: i === list.length - 1 ? 0 : '1px solid #E8ECF0', color: '#1B2430' }}>
+          <Link key={o.id} href={`/orders/${o.id}`} style={{ width: '100%', minHeight: 60, boxSizing: 'border-box', padding: '10px 20px 10px 16px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', textDecoration: 'none', background: '#FFFFFF', borderLeft: `3px solid ${o.stage === 'Draft' ? '#C5CCD5' : stripe(o)}`, borderBottom: i === list.length - 1 ? 0 : '1px solid #E8ECF0', color: '#1B2430' }}>
             <span style={{ flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span style={{ fontWeight: 600, fontSize: 16 }}>{o.name}</span>
-              <span style={{ fontSize: 14, color: '#4B5563' }}>{o.customer}{view === 'all' || view === 'delivered' || stage ? ` · ${o.stage}` : ''}{o.invoice_no && view !== 'open' ? ` · ${o.invoice_no}` : ''}</span>
+              <span style={{ fontWeight: 600, fontSize: 15 }}>{o.name}</span>
+              <span style={{ fontSize: 13, color: '#4B5563' }}>{o.customer}{view === 'all' || view === 'delivered' || stage ? ` · ${o.stage}` : ''}{o.invoice_no && view !== 'open' ? ` · ${o.invoice_no}` : ''}</span>
             </span>
             <span style={{ flex: '0 0 auto', display: 'flex', gap: 8, alignItems: 'center' }}>
               {o.stage === 'Collected' || o.stage === 'Draft' ? null : <DueBadge due={o.due} />}
-              {o.stage === 'Draft' ? <span style={{ fontSize: 12, fontWeight: 600, color: '#5A3A00', background: '#FDE9B0', padding: '2px 8px', borderRadius: 999 }}>Draft</span> : <Pay o={o} />}
+              {o.stage === 'Draft' ? <span style={{ fontSize: 12, fontWeight: 500, color: '#5A3A00', background: '#FDE9B0', padding: '2px 8px', borderRadius: 6 }}>Draft</span> : <Pay o={o} />}
             </span>
-            <span style={{ flex: '0 0 110px', textAlign: 'right', fontWeight: 600, fontSize: 16 }}>{naira(o.total)}</span>
+            <span style={{ flex: '0 0 110px', textAlign: 'right', fontWeight: 600, fontSize: 15 }}>{naira(o.total)}</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7684" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: '0 0 auto' }}><path d="M9 6l6 6-6 6" /></svg>
           </Link>
         ))}

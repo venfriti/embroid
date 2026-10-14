@@ -7,3 +7,4 @@ data/live.db*
 .open-next
 worker-configuration.d.ts
 tsconfig.tsbuildinfo
+*.zip

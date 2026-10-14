@@ -13,8 +13,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const pct = o.total > 0 ? Math.min(100, Math.round(o.paid / o.total * 100)) : 0;
   const n = o.due ? daysFrom(o.due) : null;
   const meta = [o.customer, o.placed ? `Placed ${fmtDate(o.placed)}` : null, `${o.line_count} ${o.line_count === 1 ? 'line' : 'lines'}`, o.due ? `Due ${day(o.due)}${n !== null && o.stage !== 'Collected' ? (n < 0 ? ` (${-n} ${-n === 1 ? 'day' : 'days'} late)` : ` (${n} ${n === 1 ? 'day' : 'days'} to go)`) : ''}` : null].filter(Boolean).join(' · ');
-  const tile = { background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14 } as const;
-  const outBtn = { minHeight: 48, padding: '0 18px', display: 'flex', textDecoration: 'none', alignItems: 'center', gap: 10, fontSize: 15, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 12 } as const;
+  const tile = { background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10 } as const;
+  const outBtn = { minHeight: 48, padding: '0 18px', display: 'flex', textDecoration: 'none', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 600, color: '#0E5C63', background: '#FFFFFF', border: '2px solid #0E5C63', borderRadius: 8 } as const;
   const shown = ls.slice(0, SHOW);
   return (
     <main className="page" style={{ padding: '24px 32px 48px', gap: 20 }}>
@@ -24,7 +24,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
           </Link>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}><h1 style={{ ...h1, fontSize: 30 }}>{o.name}</h1><Pay o={o} /></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}><h1 style={h1}>{o.name}</h1><Pay o={o} /></div>
             <span style={{ fontSize: 15, color: '#4B5563' }}>{meta}</span>
           </div>
         </div>
@@ -40,7 +40,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         <div style={{ flex: '1.6 1 520px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ ...tile, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #E8ECF0' }}>
-              <h2 style={{ ...h2, flex: 1, fontSize: 18 }}>Lines <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 400, fontSize: 14, color: '#4B5563' }}>· {shown.length === ls.length ? ls.length : `${shown.length} of ${ls.length}`}</span></h2>
+              <h2 style={{ ...h2, flex: 1 }}>Lines <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 400, fontSize: 13, color: '#4B5563' }}>· {shown.length === ls.length ? ls.length : `${shown.length} of ${ls.length}`}</span></h2>
               <span style={{ flex: '0 0 64px', textAlign: 'right', fontSize: 13, color: '#4B5563' }}>Qty</span>
               <span style={{ flex: '0 0 88px', textAlign: 'right', fontSize: 13, color: '#4B5563' }}>Each</span>
               <span style={{ flex: '0 0 104px', textAlign: 'right', fontSize: 13, color: '#4B5563' }}>Total</span>
@@ -65,16 +65,16 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
         <div style={{ flex: '1 1 340px', maxWidth: 400, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ ...tile, padding: '16px 20px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}><h2 style={{ ...h2, fontSize: 18 }}>Payment</h2><Pay o={o} /></div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}><h2 style={h2}>Payment</h2><Pay o={o} /></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <span style={{ fontSize: 13, color: '#4B5563' }}>Balance left</span>
-              <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 32, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{naira(Math.max(0, o.balance))}</span>
+              <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 24, lineHeight: 1.2, letterSpacing: '-0.01em' }}>{naira(Math.max(0, o.balance))}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ height: 8, borderRadius: 4, background: '#D5DBE2', overflow: 'hidden' }} aria-hidden="true"><div style={{ width: `${pct}%`, height: 8, background: o.balance <= 0 ? '#2F855A' : '#B77900' }} /></div>
-              <span style={{ fontSize: 14, color: '#3F4A58' }}>{naira(o.paid)} paid of {naira(o.total)}</span>
+              <span style={{ fontSize: 13, color: '#3F4A58' }}>{naira(o.paid)} paid of {naira(o.total)}</span>
             </div>
-            {o.balance > 0 && <Link href={`/orders/${o.id}/payment`} style={{ boxSizing: 'border-box', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 48, fontSize: 15, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 12 }}>Record payment</Link>}
+            {o.balance > 0 && <Link href={`/orders/${o.id}/payment`} style={{ boxSizing: 'border-box', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 48, fontSize: 14, fontWeight: 600, color: '#FFFFFF', background: '#0E5C63', border: 0, borderRadius: 8 }}>Record payment</Link>}
             {ps.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingTop: 4, borderTop: '1px solid #E8ECF0' }}>
                 <span style={{ fontSize: 13, color: '#4B5563', paddingTop: 10 }}>Payments received</span>
@@ -84,7 +84,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           </div>
           <div style={{ ...tile, padding: '12px 20px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, minHeight: 44 }}>
-              <h2 style={{ ...h2, fontSize: 18 }}>Price</h2><PriceAdjust id={o.id} discount={o.discount} />
+              <h2 style={h2}>Price</h2><PriceAdjust id={o.id} discount={o.discount} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 32, fontSize: 15 }}><span style={{ color: '#3F4A58' }}>List price</span><span>{naira(o.subtotal)}</span></div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 32, fontSize: 15 }}><span style={{ color: '#3F4A58' }}>Discount</span><span>{o.discount > 0 ? '−' + naira(o.discount) : naira(0)}</span></div>

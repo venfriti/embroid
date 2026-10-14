@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { send } from '@/lib/client';
-import { Silhouette } from './ui';
+import { Silhouette, h1, h2 } from './ui';
 
 const n = (x: number) => '₦' + Math.round(x).toLocaleString('en-NG');
 export type DLine = { id: number; item: string; detail: string | null; qty: number; unit_price: number; sizes: string | null; design: string | null };
@@ -54,39 +54,39 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Link href={`/customers/${customerId}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, textDecoration: 'none' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>{customer}</Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <h1 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 34, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{name}</h1>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#4B5563', background: '#E6EAEE', padding: '3px 10px', borderRadius: 999 }}>Draft</span>
+            <h1 style={h1}>{name}</h1>
+            <span style={{ fontSize: 12, fontWeight: 500, color: '#4B5563', background: '#E6EAEE', padding: '2px 8px', borderRadius: 6 }}>Draft</span>
           </div>
-          <span style={{ fontSize: 15, color: '#4B5563' }}>{saving ? 'Saving…' : 'Draft saved automatically'}{due ? ` · Due ${due}` : ''}</span>
+          <span style={{ fontSize: 14, color: '#4B5563' }}>{saving ? 'Saving…' : 'Draft saved automatically'}{due ? ` · Due ${due}` : ''}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{ textAlign: 'right' }}><div style={{ fontSize: 13, color: '#4B5563' }}>Order total</div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.05 }}>{n(total)}</div></div>
-          <button type="button" disabled={busy || L.length === 0} onClick={confirmOrder} style={{ minHeight: 52, padding: '0 26px', fontSize: 16, fontWeight: 600, color: '#fff', background: L.length ? '#0E5C63' : '#8AA7AA', border: 0, borderRadius: 12, cursor: 'pointer' }}>Review and confirm</button>
+          <div style={{ textAlign: 'right' }}><div style={{ fontSize: 13, color: '#4B5563' }}>Order total</div><div style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 22, lineHeight: 1.05 }}>{n(total)}</div></div>
+          <button type="button" disabled={busy || L.length === 0} onClick={confirmOrder} style={{ minHeight: 52, padding: '0 26px', fontSize: 15, fontWeight: 600, color: '#fff', background: L.length ? '#0E5C63' : '#8AA7AA', border: 0, borderRadius: 8, cursor: 'pointer' }}>Review and confirm</button>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 22, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 360px', maxWidth: 400, minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid #E8ECF0' }}><b style={{ fontSize: 16 }}>Lines</b><span style={{ fontSize: 14, color: '#4B5563' }}>{L.length} {L.length === 1 ? 'line' : 'lines'} · {pieces} pieces</span></div>
+        <div style={{ flex: '1 1 360px', maxWidth: 400, minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid #E8ECF0' }}><b style={{ fontSize: 15 }}>Lines</b><span style={{ fontSize: 13, color: '#4B5563' }}>{L.length} {L.length === 1 ? 'line' : 'lines'} · {pieces} pieces</span></div>
           {L.map(x => { const on = x.id === sel; const sh = shortOf(x); return (
-            <button key={x.id} type="button" onClick={() => setSel(x.id)} style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', background: on ? '#E8EEF1' : '#fff', border: 0, borderBottom: '1px solid #E8ECF0', borderLeft: on ? '5px solid #0E5C63' : '5px solid transparent', cursor: 'pointer', color: '#1B2430' }}>
+            <button key={x.id} type="button" onClick={() => setSel(x.id)} style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', background: on ? '#E8EEF1' : '#fff', border: 0, borderBottom: '1px solid #E8ECF0', borderLeft: on ? '3px solid #0E5C63' : '3px solid transparent', cursor: 'pointer', color: '#1B2430' }}>
               <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontWeight: 600, fontSize: 17 }}>{x.item}</span>
-                <span style={{ fontSize: 14, color: '#3F4A58' }}>{[x.detail, `${x.qty} pcs`].filter(Boolean).join(' · ')}</span>
-                {sh.length > 0 && <span style={{ alignSelf: 'flex-start', marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: '#8A1C13', background: '#FDECEA', border: '1px solid #E8A29B', padding: '2px 10px', borderRadius: 999 }}>Stock short by {Math.max(...sh)}</span>}
+                <span style={{ fontWeight: 600, fontSize: 15 }}>{x.item}</span>
+                <span style={{ fontSize: 13, color: '#3F4A58' }}>{[x.detail, `${x.qty} pcs`].filter(Boolean).join(' · ')}</span>
+                {sh.length > 0 && <span style={{ alignSelf: 'flex-start', marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, color: '#8A1C13', background: '#FDECEA', border: '1px solid #E8A29B', padding: '2px 8px', borderRadius: 6 }}>Stock short by {Math.max(...sh)}</span>}
               </span>
-              <span style={{ fontWeight: 700, fontSize: 16 }}>{n(x.qty * x.unit_price)}</span>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>{n(x.qty * x.unit_price)}</span>
             </button>); })}
-          <button type="button" disabled={busy} onClick={() => add()} style={{ width: '100%', textAlign: 'left', minHeight: 56, padding: '0 18px', fontSize: 16, fontWeight: 600, color: '#0E5C63', background: '#fff', border: 0, cursor: 'pointer' }}>+ &nbsp;Add line</button>
+          <button type="button" disabled={busy} onClick={() => add()} style={{ width: '100%', textAlign: 'left', minHeight: 56, padding: '0 18px', fontSize: 15, fontWeight: 600, color: '#0E5C63', background: '#fff', border: 0, cursor: 'pointer' }}>+ &nbsp;Add line</button>
         </div>
 
         {l ? (
-          <div style={{ flex: '2 1 560px', minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: '20px 22px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '2 1 560px', minWidth: 0, background: '#fff', border: '1px solid #DDE2E8', borderRadius: 10, padding: '20px 22px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 24 }}>{l.item}</h2>
+              <h2 style={{ ...h2, fontSize: 18, color: '#1B2430' }}>{l.item}</h2>
               <span style={{ display: 'flex', gap: 10 }}>
-                <button type="button" disabled={busy} onClick={() => add(l)} style={{ minHeight: 42, padding: '0 16px', fontSize: 14, fontWeight: 600, color: '#0E5C63', background: '#fff', border: '2px solid #0E5C63', borderRadius: 10, cursor: 'pointer' }}>Copy as new line</button>
-                <button type="button" disabled={busy} onClick={remove} style={{ minHeight: 42, padding: '0 16px', fontSize: 14, fontWeight: 600, color: '#8A1C13', background: '#fff', border: '1px solid #E8A29B', borderRadius: 10, cursor: 'pointer' }}>Remove</button>
+                <button type="button" disabled={busy} onClick={() => add(l)} style={{ minHeight: 42, padding: '0 16px', fontSize: 13, fontWeight: 600, color: '#0E5C63', background: '#fff', border: '2px solid #0E5C63', borderRadius: 8, cursor: 'pointer' }}>Copy as new line</button>
+                <button type="button" disabled={busy} onClick={remove} style={{ minHeight: 42, padding: '0 16px', fontSize: 13, fontWeight: 600, color: '#8A1C13', background: '#fff', border: '1px solid #E8A29B', borderRadius: 8, cursor: 'pointer' }}>Remove</button>
               </span>
             </div>
             <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
@@ -128,12 +128,12 @@ export function DraftBuilder({ orderId, customerId, customer, name, due, lines, 
               {(g?.recipe || []).map(rc => { const need = Math.round(l.qty * rc.qty * 100) / 100; const okk = need <= rc.avail; return <span key={rc.item} style={{ fontSize: 15, color: okk ? '#14532D' : '#8A1C13' }}>{okk ? '✓' : '⚠'} {rc.item}: {rc.onHand} {rc.unit} on hand, {need} needed{okk ? '' : `. Short by ${Math.round((need - rc.avail) * 100) / 100}`}</span>; })}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginTop: 8 }}>
                 <span style={{ fontSize: 15, color: '#4B5563' }}>{l.qty} × <input type="number" min="0" value={l.unit_price} onChange={e => push({ ...l, unit_price: Math.max(0, Math.floor(Number(e.target.value) || 0)) })} aria-label="Price each" style={{ width: 100, minHeight: 36, fontSize: 15, padding: '0 8px', border: '1px solid #C5CCD5', borderRadius: 8 }} /> {prices[l.item] === l.unit_price ? 'from price book' : `(price book ${prices[l.item] != null ? n(prices[l.item]) : 'none'})`}</span>
-                <b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 28 }}>{n(l.qty * l.unit_price)}</b>
+                <b style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontSize: 20 }}>{n(l.qty * l.unit_price)}</b>
               </div>
             </div>
           </div>
         ) : (
-          <div style={{ flex: '2 1 560px', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 14, padding: 32, color: '#4B5563' }}>{L.length === 0 ? 'No lines yet. Use “Add line” to start.' : 'Pick a line on the left to edit it.'}</div>
+          <div style={{ flex: '2 1 560px', background: '#fff', border: '1px solid #DDE2E8', borderRadius: 10, padding: 32, color: '#4B5563' }}>{L.length === 0 ? 'No lines yet. Use “Add line” to start.' : 'Pick a line on the left to edit it.'}</div>
         )}
       </div>
     </>

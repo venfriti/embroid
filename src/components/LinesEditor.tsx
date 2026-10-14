@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { send } from '@/lib/client';
+import { h2 } from './ui';
 
 const n = (x: number) => '₦' + Math.round(x).toLocaleString('en-NG');
 type Line = { id: number; line_no: number; item: string; detail: string | null; qty: number; unit_price: number; design: string | null };
@@ -28,7 +29,7 @@ export function LinesEditor({ orderId, confirmed, lines, selected, needs, subtot
   const dQty = l ? q - l.qty : 0, dTotal = l ? q * p - l.qty * l.unit_price : 0;
   return (
     <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      <div style={{ flex: '1 1 560px', minWidth: 0, background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 14, overflow: 'hidden' }}>
+      <div style={{ flex: '1 1 560px', minWidth: 0, background: '#FFFFFF', border: '1px solid #DDE2E8', borderRadius: 10, overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: '#EEF1F4', borderBottom: '1px solid #DDE2E8', fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: '#4B5563' }}>
           <span style={{ flex: '0 0 24px' }}>#</span><span style={{ flex: 1 }}>Item</span><span style={{ flex: '0 0 56px', textAlign: 'right' }}>Qty</span><span style={{ flex: '0 0 90px', textAlign: 'right' }}>Each</span><span style={{ flex: '0 0 100px', textAlign: 'right' }}>Total</span><span style={{ flex: '0 0 110px' }} />
         </div>
@@ -37,7 +38,7 @@ export function LinesEditor({ orderId, confirmed, lines, selected, needs, subtot
           <div key={x.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px', minHeight: 34, borderBottom: '1px solid #E8ECF0', background: on ? '#E3EEF0' : '#fff', borderLeft: on ? '4px solid #0E5C63' : '4px solid transparent', fontSize: 15 }}>
             <span style={{ flex: '0 0 24px', color: '#4B5563' }}>{x.line_no}</span>
             <span style={{ flex: 1, minWidth: 0 }}><b style={{ fontWeight: 600 }}>{x.item}</b>{x.detail && <span style={{ color: '#4B5563', fontSize: 14, marginLeft: 10 }}>{x.detail}</span>}</span>
-            {changed[x.id] != null && <span style={{ fontSize: 13, fontWeight: 600, color: '#5A3A00', background: '#FDE9B0', padding: '2px 10px', borderRadius: 999 }}>Was {changed[x.id]}</span>}
+            {changed[x.id] != null && <span style={{ fontSize: 12, fontWeight: 500, color: '#5A3A00', background: '#FDE9B0', padding: '2px 8px', borderRadius: 6 }}>Was {changed[x.id]}</span>}
             <span style={{ flex: '0 0 56px', textAlign: 'right' }}>{x.qty}</span><span style={{ flex: '0 0 90px', textAlign: 'right' }}>{n(x.unit_price)}</span><span style={{ flex: '0 0 100px', textAlign: 'right', fontWeight: 600 }}>{n(x.qty * x.unit_price)}</span>
             <span style={{ flex: '0 0 110px', display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <a href={`/studio/index.html?order=${orderId}&line=${x.id}&item=${encodeURIComponent(x.item)}`} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 14 }}>{x.design ? 'Mockup ✓' : 'Mockup'}</a>
@@ -45,13 +46,13 @@ export function LinesEditor({ orderId, confirmed, lines, selected, needs, subtot
             </span>
           </div>); })}
         <AddLineRow orderId={orderId} confirmed={confirmed} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 14px 12px', color: '#4B5563' }}><span>{lines.length} {lines.length === 1 ? 'line' : 'lines'} · {pieces} pieces</span><span style={{ color: '#1B2430' }}>Before discount <b style={{ fontSize: 22 }}>{n(subtotal)}</b></span></div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 14px 12px', color: '#4B5563' }}><span>{lines.length} {lines.length === 1 ? 'line' : 'lines'} · {pieces} pieces</span><span style={{ color: '#1B2430' }}>Before discount <b style={{ fontSize: 18 }}>{n(subtotal)}</b></span></div>
       </div>
       <div style={{ flex: '0 1 440px', minWidth: 300, display: 'flex', flexDirection: 'column', gap: 12 }}>
       {l && (
-        <div style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderTop: '4px solid #0E5C63', borderRadius: 14, boxSizing: 'border-box', padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDE2E8', borderTop: '3px solid #0E5C63', borderRadius: 10, boxSizing: 'border-box', padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-            <span style={{ fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700, fontSize: 20 }}>Line {l.line_no} · {l.item}</span><span style={{ fontSize: 14, color: '#4B5563' }}>{l.detail}</span>
+            <span style={h2}>Line {l.line_no} · {l.item}</span><span style={{ fontSize: 13, color: '#4B5563' }}>{l.detail}</span>
           </div>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
             <label style={{ ...LBL, flex: '1 1 100px' }}>Quantity<input type="number" min="0" style={INP} value={qty} onChange={e => setQty(e.target.value)} /></label>
