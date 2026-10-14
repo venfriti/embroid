@@ -1347,7 +1347,7 @@ function renderInfo(){
 }
 function renderAll(){renderInspector();renderLayers();renderInfo()}
 
-var LINK={order:null,line:null,view:false,customer:null};
+var LINK={order:null,line:null,view:false,customer:null,fresh:false};
 var ORDER_STAGE=null,CAN_SAVE=false,AUTOSAVE_READY=false,SAVED_KEY=null,SAVE_TIMER=null,SAVE_BUSY=false;
 function snapshot(){return JSON.parse(JSON.stringify({g:state.g,gcol:state.gcol,byG:state.byG,ank:state.ank,nextId:state.nextId},function(k,v){return k.charAt(0)==='_'?undefined:v}))}
 function snapshotKey(){return JSON.stringify(snapshot())}
@@ -1420,7 +1420,7 @@ $('#saveBtn').addEventListener('click',function(){save()});$('#saveBtn2').addEve
 function goBack(){if(LINK.view&&LINK.customer)location.href='/customers/'+LINK.customer;else if(LINK.order)location.href='/orders/'+LINK.order;else toast('Open this from an order line')}
 $('#backBtn').addEventListener('click',function(){
   if(LINK.view||!hasUnsaved()){goBack();return;}
-  if(ORDER_STAGE==='Draft'&&CAN_SAVE){save('',true).then(function(ok){if(ok)goBack();else toast('The mockup is not saved yet. Stay here and retry.');});return;}
+  if(CAN_SAVE){save('',true).then(function(ok){if(ok)goBack();else if(window.confirm('Could not save your changes. Leave without saving anyway?'))goBack();});return;}
   if(window.confirm('There are unsaved mockup changes. Leave without saving?'))goBack();
 });
 document.addEventListener('visibilitychange',function(){if(document.hidden&&hasUnsaved()&&ORDER_STAGE==='Draft'&&CAN_SAVE)save('',true)});
@@ -1443,8 +1443,9 @@ if(document.fonts&&document.fonts.load){
 frame();
 window.__studio={threadMaps:threadMaps,sprite:sprite,state:state,setView:setView,T:T,snapshot:snapshot,previewPic:previewPic};
 (function(){
-  var q=new URLSearchParams(location.search);LINK.order=q.get('order');LINK.line=q.get('line');LINK.view=q.get('view')==='1';LINK.customer=q.get('customer');
+  var q=new URLSearchParams(location.search);LINK.order=q.get('order');LINK.line=q.get('line');LINK.view=q.get('view')==='1';LINK.customer=q.get('customer');LINK.fresh=q.get('fresh')==='1';
   if(LINK.view){var bb=$('#backBtn');if(bb&&LINK.customer)bb.lastChild.nodeValue='Back to customer';['saveBtn','saveBtn2','saveStatus'].forEach(function(id){var b=$('#'+id);if(b)b.style.display='none'});}
+  else if(LINK.fresh){var bb2=$('#backBtn');if(bb2)bb2.lastChild.nodeValue='Save and continue to order';}
   if(!LINK.order||!LINK.line)return;
   fetch('/api/orders/'+LINK.order+'/lines/'+LINK.line).then(function(r){return r.ok?r.json():null}).then(function(j){
     if(!j)return;

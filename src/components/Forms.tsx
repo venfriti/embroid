@@ -435,7 +435,7 @@ export function NewDesignButton({ customerId, items }: { customerId: string; ite
     const item = found?.item ?? g.fallback, price = found?.price ?? 0;
     const j = await s.run('/api/orders', { customer_id: customerId, name: `New design · ${item}` }); if (!j.ok) return;
     const k = await s.run(`/api/orders/${j.id}/lines`, { item, qty: 1, unit_price: price }); if (!k.ok) return;
-    r.push(studioUrl(j.id, k.id, item));
+    r.push(studioUrl(j.id, k.id, item, { fresh: true }));
   };
   return (
     <>

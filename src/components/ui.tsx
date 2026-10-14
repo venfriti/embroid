@@ -60,8 +60,8 @@ export function Silhouette({ item, detail, size = 68 }: { item: string; detail?:
 
 
 /** Link into the 3D studio for one order line. `view` opens a past line read-only, to copy into a new order. */
-export const studioUrl = (orderId: string, lineId: number | string, item: string, opts: { view?: boolean; customer?: string } = {}) =>
-  `/studio/index.html?order=${orderId}&line=${lineId}&item=${encodeURIComponent(item)}${opts.view ? '&view=1' : ''}${opts.customer ? `&customer=${opts.customer}` : ''}`;
+export const studioUrl = (orderId: string, lineId: number | string, item: string, opts: { view?: boolean; customer?: string; fresh?: boolean } = {}) =>
+  `/studio/index.html?order=${orderId}&line=${lineId}&item=${encodeURIComponent(item)}${opts.view ? '&view=1' : ''}${opts.customer ? `&customer=${opts.customer}` : ''}${opts.fresh ? '&fresh=1' : ''}`;
 
 /** The saved mockup picture if there is one, otherwise the plain silhouette. */
 export function Mockup({ thumb, item, detail, size = 68 }: { thumb?: string | null; item: string; detail?: string | null; size?: number }) {
